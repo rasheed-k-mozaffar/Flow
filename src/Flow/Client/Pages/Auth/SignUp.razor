@@ -1,0 +1,66 @@
+﻿@page "/auth/signup"
+
+<PageTitle>Flow - Sign up</PageTitle>
+
+<div class="flex justify-center items-center min-h-screen">
+    <div class="w-2/12 xs:w-11/12 sm:w-10/12 md:w-4/12 lg:w-3/12 xl:2/12">
+        <div class="mb-5">
+            <h1 class="text-3xl font-semibold">Create your account</h1>
+        </div>
+        <EditForm Model="requestModel" class="mx-auto">
+            <DataAnnotationsValidator />
+            <div class="mb-5 flex items-center gap-1">
+                <div class="w-full">
+                    <label class="field">
+                        First Name</label>
+                    <InputText @bind-Value="requestModel.FirstName" type="text" id="firstname" class="input-field"
+                        placeholder="John" required />
+                    <ValidationMessage For="(() => requestModel.FirstName)" class="validation-message" />
+                </div>
+
+                <div class="w-full">
+                    <label class="label">
+                        Last Name</label>
+                    <InputText @bind-Value="requestModel.LastName" type="text" id="lastname" class="input-field"
+                        placeholder="Doe" required />
+                    <ValidationMessage For="(() => requestModel.LastName)" class="validation-message" />
+                </div>
+            </div>
+            <div class="mb-5">
+                <label class="label">
+                    Email</label>
+                <InputText @bind-Value="requestModel.Email" type="email" id="email" class="input-field"
+                    placeholder="johndoe@mail.com" required />
+                <ValidationMessage For="(() => requestModel.Email)" class="validation-message" />
+            </div>
+
+            <div class="mb-5">
+                <label class="label">
+                    Username</label>
+                <InputText @bind-Value="requestModel.Username" type="text" id="username" class="input-field"
+                    placeholder="johndoe123" required />
+                <ValidationMessage For="(() => requestModel.Username)" class="validation-message" />
+            </div>
+
+            <div class="mb-5">
+                <label class="label">
+                    Password</label>
+                <InputText @bind-Value="requestModel.Password" type="password" id="password" class="input-field"
+                    required />
+                <ValidationMessage For="(() => requestModel.Password)" class="validation-message" />
+            </div>
+            <div class="mb-5">
+                <label class="label">Repeat password</label>
+                <InputText @bind-Value="requestModel.RepeatedPassword" type="password" id="repeat-password"
+                    class="input-field" required />
+                <ValidationMessage For="(() => requestModel.RepeatedPassword)" class="validation-message" />
+            </div>
+
+            <button type="submit" class="primary-btn w-full">Sign up</button>
+
+            <div class="flex justify-center mt-5">
+                <p>Already have an account? <a href="/signin" class="link">Sign in here</a></p>
+            </div>
+        </EditForm>
+    </div>
+</div>

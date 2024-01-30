@@ -1,0 +1,31 @@
+﻿@inherits LayoutComponentBase
+@inject IJSRuntime Js
+
+<main class="h-screen overflow-hidden dark">
+    <SideBar/>
+    <div class=" sm:ml-64 min-h-full dark">
+        @Body
+    </div>
+</main>
+<style type="text/css">
+    ::-webkit-scrollbar {
+        width: 6px;
+        height: 4px;
+        background: #1F2937;
+        border-radius: 30px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background-color: #567298;
+        -webkit-border-radius: 1ex;
+    }
+</style>
+@code {
+    protected override async Task OnAfterRenderAsync(bool isFirstRender)
+    {
+        if (isFirstRender)
+        {
+            await Js.InvokeVoidAsync("window.initializeFlowbite");
+        }
+    }
+}

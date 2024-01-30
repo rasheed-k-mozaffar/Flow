@@ -1,0 +1,28 @@
+﻿@page "/unauthorized"
+@inject NavigationManager NavigationManager
+
+<PageTitle> 401 - Unauthorized</PageTitle>
+
+<div class="min-h-screen flex justify-center items-center">
+    <div class="w-8/12 text-center flex flex-col gap-y-4">
+        <div class="text-4xl font-mono text-blue-600">401</div>
+        <h1 class="text-3xl font-bold">Sorry, but you can't go there!</h1>
+        <p>It seems like you are not authorized to access this resoruce, maybe signing in could solve the
+            problem
+        </p>
+
+        <div class="flex justify-center items-center">
+            <button type="button" class="primary-btn" @onclick="GoToSignIn">Sign in</button>
+
+            <button type="button" @onclick="GoToSignUp"
+                class="text-blue-700 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500 dark:focus:ring-blue-800">Sign
+                up</button>
+        </div>
+    </div>
+</div>
+
+
+@code {
+    private void GoToSignIn() => NavigationManager.NavigateTo("/auth/signin");
+    private void GoToSignUp() => NavigationManager.NavigateTo("/auth/signup");
+}
