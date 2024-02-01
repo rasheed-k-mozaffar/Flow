@@ -1,7 +1,7 @@
-﻿namespace Flow.Repositories;
+﻿namespace Flow.Server.Repositories;
 
 public interface IAuthRepository
 {
-    Task LoginUserAsync(LoginRequest request);
-    Task RegisterUserAsync(RegisterRequest request);
+    Task<UserManagerResponse> LoginUserAsync(LoginRequest request);
+    Task<UserManagerResponse> RegisterUserAsync(RegisterRequest request);
 }

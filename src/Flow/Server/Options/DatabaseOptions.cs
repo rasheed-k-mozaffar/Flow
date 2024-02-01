@@ -1,4 +1,4 @@
-﻿namespace Flow.Options;
+﻿namespace Flow.Server.Options;
 
 public class DatabaseOptions
 {
