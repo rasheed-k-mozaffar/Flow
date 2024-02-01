@@ -1,4 +1,4 @@
-﻿namespace Flow.Exceptions;
+﻿namespace Flow.Server.Exceptions;
 
 public class UserCreationFailedException : Exception
 {
