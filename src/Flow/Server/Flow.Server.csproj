@@ -5,14 +5,19 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.1"/>
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.1"/>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.1"/>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.1"/>
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.1"/>
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="8.0.1" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.1.0" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Client\Flow.Client.csproj"/>
-    <ProjectReference Include="..\Shared\Flow.Shared.csproj"/>
+    <ProjectReference Include="..\Client\Flow.Client.csproj" />
+    <ProjectReference Include="..\Shared\Flow.Shared.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Hubs/" />
   </ItemGroup>
 </Project>

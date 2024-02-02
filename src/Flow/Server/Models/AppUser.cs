@@ -16,5 +16,8 @@ public class AppUser : IdentityUser
 
     public required DateOnly DateOfBirth { get; set; }
 
-    public Image? ProfilePicture { get; set; }
+    public virtual Image? ProfilePicture { get; set; }
+
+    public virtual ICollection<ChatThread> Chats { get; set; } = new List<ChatThread>();
+    public virtual ICollection<ContactRequest> ContactRequests { get; set; } = new List<ContactRequest>();
 }
