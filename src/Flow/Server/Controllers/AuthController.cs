@@ -25,38 +25,92 @@ public class AuthController : ControllerBase
     {
         if (ModelState.IsValid)
         {
-            var loginResult = await _authRepository
-                                    .LoginUserAsync(request);
-
-            if (loginResult.Succeeded)
+            try
             {
-                return Ok(new ApiResponse<string>
+                var loginResult = await _authRepository
+                                        .LoginUserAsync(request);
+
+                if (loginResult.Succeeded)
                 {
-                    Message = loginResult.Message,
-                    Body = loginResult.Token,
-                    IsSuccess = true
-                });
-            }
+                    return Ok(new ApiResponse<string>
+                    {
+                        Message = loginResult.Message,
+                        Body = loginResult.Token,
+                        IsSuccess = true
+                    });
+                }
 
-            // user cannot login due to many login attempts
-            // the lockout end date is sent back to the client
-            if (loginResult.IsLockedOut)
-            {
-                return Ok(new ApiErrorResponse
+                // user cannot login due to many login attempts
+                // the lockout end date is sent back to the client
+                if (loginResult.IsLockedOut)
+                {
+                    return Ok(new ApiErrorResponse
+                    {
+                        ErrorMessage = loginResult.Message
+                    });
+                }
+
+                // user is not locked out, but failed to log in
+                return BadRequest(new ApiErrorResponse
                 {
                     ErrorMessage = loginResult.Message
                 });
             }
-
-            // user is not locked out, but failed to log in
-            return BadRequest(new ApiErrorResponse
+            catch (AuthFailedException ex)
             {
-                ErrorMessage = loginResult.Message
-            });
-
+                // invalid credentials
+                return BadRequest(new ApiErrorResponse
+                {
+                    ErrorMessage = ex.Message
+                });
+            }
         }
         else
         {
+            _logger.LogInformation("Model validations error occured on log in");
+
+            return BadRequest(ModelState);
+        }
+    }
+
+    [HttpPost("register")]
+    public async Task<IActionResult> Register([FromBody] RegisterRequest request)
+    {
+        if (ModelState.IsValid)
+        {
+            try
+            {
+                var registerResult = await _authRepository
+                                           .RegisterUserAsync(request);
+
+                if (registerResult.Succeeded)
+                {
+                    return Ok(new ApiResponse<string>
+                    {
+                        Message = registerResult.Message,
+                        Body = registerResult.Token,
+                        IsSuccess = true
+                    });
+                }
+
+                return BadRequest(new ApiErrorResponse
+                {
+                    ErrorMessage = registerResult.Message
+                });
+            }
+            catch (UserCreationFailedException ex)
+            {
+                // sign up failed
+                return BadRequest(new ApiErrorResponse
+                {
+                    ErrorMessage = ex.Message
+                });
+            }
+        }
+        else
+        {
+            _logger.LogInformation("Model validations error occured on registering new user");
+
             return BadRequest(ModelState);
         }
     }
