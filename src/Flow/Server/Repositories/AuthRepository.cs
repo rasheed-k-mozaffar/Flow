@@ -80,11 +80,13 @@ public class AuthRepository : IAuthRepository
             var lockoutEndsIn = await _userManager
                         .GetLockoutEndDateAsync(user);
 
+            var diff = lockoutEndsIn - DateTime.Now;
+
             _logger.LogInformation("User {email} attempted login while on lockout", user.Email);
 
             return new UserManagerResponse
             {
-                Message = $"Too many login attempts, try again on {lockoutEndsIn}",
+                Message = $"Too many login attempts, try again in {diff.Value.TotalSeconds:N0} seconds",
                 Token = null,
                 Succeeded = false,
                 IsLockedOut = true,
