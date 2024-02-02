@@ -1,46 +1,52 @@
 ﻿@page "/auth/signup"
+@using BlazorAnimate
 
 <PageTitle>Flow - Sign up</PageTitle>
 
 <div class="flex justify-center items-center min-h-screen">
     <div class="w-2/12 xs:w-11/12 sm:w-10/12 md:w-4/12 lg:w-3/12 xl:2/12">
         <Animate Animation="Animations.FadeLeft" Duration="TimeSpan.FromSeconds(1)" Delay="TimeSpan.FromSeconds(0.5)">
-            @if (!SecondFormTime)
+            @if (!secondFormTime)
             {
-            <div class="mb-5">
-                <h1 class="text-3xl font-semibold">Enter your details</h1>
-            </div>
-            <EditForm Model="requestModel" class="mx-auto">
-                <DataAnnotationsValidator />
-                <div class="mb-5 flex items-center gap-1">
-                    <div class="w-full">
-                        <label class="field">
-                            First Name</label>
-                        <InputText @bind-Value="requestModel.FirstName" type="text" id="firstname" class="input-field"
-                            placeholder="John" required />
-                        <ValidationMessage For="(() => requestModel.FirstName)" class="validation-message" />@*first name goes here *@
-                    </div>
-
-                    <div class="w-full">
-                        <label class="label">
-                            Last Name</label>
-                        <InputText @bind-Value="requestModel.LastName" type="text" id="lastname" class="input-field"
-                            placeholder="Doe" required />
-                        <ValidationMessage For="(() => requestModel.LastName)" class="validation-message" />@*last name goes here *@
-                    </div>
-                </div>
                 <div class="mb-5">
-                    <label class="label">
-                        Email</label>
-                    <InputText @bind-Value="requestModel.Email" type="email" id="email" class="input-field"
-                        placeholder="johndoe@mail.com" required />
-                    <ValidationMessage For="(() => requestModel.Email)" class="validation-message" />@*Email goes here *@
+                    <h1 class="text-3xl font-semibold">Enter your details</h1>
                 </div>
-                <button @onclick="PlayAnimation" type="submit" class="primary-btn w-full" hidden=@SecondFormTime>Next</button>
-            </EditForm>
+                <EditForm Model="requestModel" class="mx-auto">
+                    <DataAnnotationsValidator />
+                    <div class="mb-5 flex items-center gap-1">
+                        <div class="w-full">
+                            <label class="field">
+                                First Name</label>
+                            <InputText @bind-Value="requestModel.FirstName" type="text" id="firstname" class="input-field"
+                                placeholder="John" required />
+                            <ValidationMessage For="(() => requestModel.FirstName)" class="validation-message" />@*first
+                        name goes here *@
+                        </div>
+
+                        <div class="w-full">
+                            <label class="label">
+                                Last Name</label>
+                            <InputText @bind-Value="requestModel.LastName" type="text" id="lastname" class="input-field"
+                                placeholder="Doe" required />
+                            <ValidationMessage For="(() => requestModel.LastName)" class="validation-message" />@*last name
+                        goes here *@
+                        </div>
+                    </div>
+                    <div class="mb-5">
+                        <label class="label">
+                            Email</label>
+                        <InputText @bind-Value="requestModel.Email" type="email" id="email" class="input-field"
+                            placeholder="johndoe@mail.com" required />
+                        <ValidationMessage For="(() => requestModel.Email)" class="validation-message" />@*Email goes here
+                    *@
+                    </div>
+                    <button @onclick="PlayAnimation" type="submit" class="primary-btn w-full"
+                        hidden=@secondFormTime>Next</button>
+                </EditForm>
             }
         </Animate>
-        <Animate Animation="Animations.FadeLeft" Duration="TimeSpan.FromSeconds(1)" @ref="SecondFormFadeIn" IsManual="true">
+        <Animate Animation="Animations.FadeLeft" Duration="TimeSpan.FromSeconds(1)" @ref="secondFormFadeIn"
+            IsManual="true">
             <div class="mb-5">
                 <h1 class="text-3xl font-semibold">Create your account</h1>
             </div>
@@ -67,24 +73,22 @@
                         class="input-field" required />
                     <ValidationMessage For="(() => requestModel.RepeatedPassword)" class="validation-message" />
                 </div>
-                <button type="submit" class="primary-btn w-full" >Sign up</button>
+                <button type="submit" class="primary-btn w-full">Sign up</button>
 
                 <div class="flex justify-center mt-5">
                     <p>Already have an account? <a href="/signin" class="link">Sign in here</a></p>
                 </div>
             </EditForm>
-	    </Animate>
+        </Animate>
     </div>
 </div>
 
-@code{
-    private Animate SecondFormFadeIn;
-    private bool SecondFormTime = false; 
-    private void PlayAnimation(){
-        SecondFormFadeIn.Run();
-        SecondFormTime = true;
-    }
-    protected override async Task OnInitializedAsync(){
-        Console.WriteLine(SecondFormTime);
+@code {
+    private Animate? secondFormFadeIn;
+    private bool secondFormTime = false;
+    private void PlayAnimation()
+    {
+        secondFormFadeIn?.Run();
+        secondFormTime = true;
     }
 }

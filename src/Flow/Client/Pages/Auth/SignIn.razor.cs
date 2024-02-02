@@ -4,6 +4,7 @@ namespace Flow.Client.Pages.Auth;
 
 public partial class SignIn : ComponentBase
 {
+#pragma warning disable CS0414
     private bool isMakingRequest = false;
     private string errorMessage = string.Empty;
 
