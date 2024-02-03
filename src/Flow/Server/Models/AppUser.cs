@@ -14,7 +14,7 @@ public class AppUser : IdentityUser
     [MaxLength(2000)]
     public string? Bio { get; set; }
 
-    public required DateOnly DateOfBirth { get; set; }
+    public DateTime? DateOfBirth { get; set; }
 
     public virtual Image? ProfilePicture { get; set; }
 

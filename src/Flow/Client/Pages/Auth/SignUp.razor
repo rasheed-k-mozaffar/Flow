@@ -1,6 +1,5 @@
 @page "/auth/signup"
 @using BlazorAnimate
-@inject IAuthService _auth
 
 <PageTitle>Flow - Sign up</PageTitle>
 
@@ -49,7 +48,8 @@
                 <h1 class="text-3xl font-semibold">Create your account</h1>
             </div>
 
-            <EditForm Model="requestModel" class="mx-auto">
+            <EditForm Model="requestModel" OnValidSubmit="HandleUserRegistrationAsync" class="mx-auto">
+                <DataAnnotationsValidator />
                 <div class="mb-5">
                     <label class="label">
                         Username</label>
@@ -71,7 +71,7 @@
                         class="input-field" required />
                     <ValidationMessage For="(() => requestModel.RepeatedPassword)" class="validation-message" />
                 </div>
-                <button type="submit" @onclick="Register" class="primary-btn w-full">Sign up</button>
+                <button type="submit" class="primary-btn w-full">Sign up</button>
 
                 <div class="flex justify-center mt-5">
                     <p>Already have an account? <a href="/signin" class="link">Sign in here</a></p>
@@ -80,46 +80,3 @@
         </Animate>
     </div>
 </div>
-
-@code {
-    private Animate? secondFormFadeIn;
-    private bool secondFormTime = false;
-    protected EditContext? EC { get; set; }
-    bool firstFormValid = false;
-
-    private void EditContext_OnFieldChanged(object sender,
-                                     FieldChangedEventArgs e)
-    {
-        var validate = EC!.Validate();
-        var numberOfWrongFields = EC.GetValidationMessages();
-        if (numberOfWrongFields.Count() == 3)
-        {
-            firstFormValid = true;
-        }
-    }
-    private void ValidateAndPlayAnimation()
-    {
-        if (firstFormValid)
-        {
-            secondFormFadeIn?.Run();
-            secondFormTime = true;
-        }
-    }
-    protected override void OnInitialized()
-    {
-        EC = new EditContext(requestModel);
-        EC.OnFieldChanged += EditContext_OnFieldChanged;
-        base.OnInitialized();
-    }
-    private async Task Register()
-    {
-        try
-        {
-            await _auth.RegisterUserAsync(requestModel);
-        }
-        catch
-        {
-            Console.WriteLine("Error occured");
-        }
-    }
-}
