@@ -13,7 +13,7 @@ namespace Flow.Client.Services
         }
         public async Task<ApiResponse<string>> RegisterUserAsync(RegisterRequest request)
         {
-            var response = await _httpClient.PostAsJsonAsync("/api/auth/register", request);
+            var response = await _httpClient.PostAsJsonAsync< RegisterRequest>("/api/auth/register", request);
 
             if (!response.IsSuccessStatusCode)
             {
@@ -26,7 +26,7 @@ namespace Flow.Client.Services
         }
         public async Task<ApiResponse<string>> LoginUserAsync(LoginRequest request)
         {
-            var response = await _httpClient.PostAsJsonAsync("/api/auth/login", request);
+            var response = await _httpClient.PostAsJsonAsync< LoginRequest>("/api/auth/login", request);
 
             if (!response.IsSuccessStatusCode)
             {

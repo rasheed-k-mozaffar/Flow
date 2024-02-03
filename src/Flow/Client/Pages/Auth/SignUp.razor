@@ -1,5 +1,6 @@
 @page "/auth/signup"
 @using BlazorAnimate
+@inject IAuthService _auth
 
 <PageTitle>Flow - Sign up</PageTitle>
 
@@ -11,7 +12,7 @@
                 <div class="mb-5">
                     <h1 class="text-3xl font-semibold">Enter your details</h1>
                 </div>
-                <EditForm Model="requestModel" class="mx-auto">
+                <EditForm class="mx-auto" EditContext="@EC">
                     <DataAnnotationsValidator />
                     <div class="mb-5 flex items-center gap-1">
                         <div class="w-full">
@@ -19,8 +20,7 @@
                                 First Name</label>
                             <InputText @bind-Value="requestModel.FirstName" type="text" id="firstname" class="input-field"
                                 placeholder="John" required />
-                            <ValidationMessage For="(() => requestModel.FirstName)" class="validation-message" />@*first
-                        name goes here *@
+                            <ValidationMessage For="(() => requestModel.FirstName)" class="validation-message" />
                         </div>
 
                         <div class="w-full">
@@ -28,8 +28,7 @@
                                 Last Name</label>
                             <InputText @bind-Value="requestModel.LastName" type="text" id="lastname" class="input-field"
                                 placeholder="Doe" required />
-                            <ValidationMessage For="(() => requestModel.LastName)" class="validation-message" />@*last name
-                        goes here *@
+                            <ValidationMessage For="(() => requestModel.LastName)" class="validation-message" />
                         </div>
                     </div>
                     <div class="mb-5">
@@ -37,10 +36,9 @@
                             Email</label>
                         <InputText @bind-Value="requestModel.Email" type="email" id="email" class="input-field"
                             placeholder="johndoe@mail.com" required />
-                        <ValidationMessage For="(() => requestModel.Email)" class="validation-message" />@*Email goes here
-                    *@
+                        <ValidationMessage For="(() => requestModel.Email)" class="validation-message" />
                     </div>
-                    <button @onclick="PlayAnimation" type="submit" class="primary-btn w-full"
+                    <button @onclick="ValidateAndPlayAnimation" type="submit" class="primary-btn w-full"
                         hidden=@secondFormTime>Next</button>
                 </EditForm>
             }
@@ -73,7 +71,7 @@
                         class="input-field" required />
                     <ValidationMessage For="(() => requestModel.RepeatedPassword)" class="validation-message" />
                 </div>
-                <button type="submit" class="primary-btn w-full">Sign up</button>
+                <button type="submit" @onclick="Register" class="primary-btn w-full">Sign up</button>
 
                 <div class="flex justify-center mt-5">
                     <p>Already have an account? <a href="/signin" class="link">Sign in here</a></p>
@@ -86,9 +84,42 @@
 @code {
     private Animate? secondFormFadeIn;
     private bool secondFormTime = false;
-    private void PlayAnimation()
+    protected EditContext? EC { get; set; }
+    bool firstFormValid = false;
+
+    private void EditContext_OnFieldChanged(object sender,
+                                     FieldChangedEventArgs e)
     {
-        secondFormFadeIn?.Run();
-        secondFormTime = true;
+        var validate = EC!.Validate();
+        var numberOfWrongFields = EC.GetValidationMessages();
+        if (numberOfWrongFields.Count() == 3)
+        {
+            firstFormValid = true;
+        }
+    }
+    private void ValidateAndPlayAnimation()
+    {
+        if (firstFormValid)
+        {
+            secondFormFadeIn?.Run();
+            secondFormTime = true;
+        }
+    }
+    protected override void OnInitialized()
+    {
+        EC = new EditContext(requestModel);
+        EC.OnFieldChanged += EditContext_OnFieldChanged;
+        base.OnInitialized();
+    }
+    private async Task Register()
+    {
+        try
+        {
+            await _auth.RegisterUserAsync(requestModel);
+        }
+        catch
+        {
+            Console.WriteLine("Error occured");
+        }
     }
 }
