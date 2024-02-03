@@ -20,8 +20,7 @@ public class RegisterRequest
     [EmailAddress(ErrorMessage = "The email is not a valid email address")]
     public string? Email { get; set; }
 
-    [Required]
-    public DateOnly DateOfBirth { get; set; }
+    public DateTime? DateOfBirth { get; set; }
 
     [Required(ErrorMessage = "Your password is required")]
     [MinLength(6, ErrorMessage = "The password can't be shorter than 6 characters")]
