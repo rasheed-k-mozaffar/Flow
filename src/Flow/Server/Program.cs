@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -76,9 +77,29 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+builder.Services.AddScoped(sp =>
+{
+    var userInfo = new UserInfo();
+    var httpContextAccessor = sp.GetService<IHttpContextAccessor>();
+
+    if (httpContextAccessor is not null)
+    {
+        var httpContext = httpContextAccessor.HttpContext;
+
+        if (httpContext is not null)
+        {
+            userInfo.UserId = httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            userInfo.Name = httpContext.User.FindFirstValue(ClaimTypes.Name);
+        }
+    }
+
+    return userInfo;
+});
+
 #region Custom services registration
 
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
+builder.Services.AddScoped<IContactRequestsRepository, ContactRequestsRepository>();
 
 #endregion
 
