@@ -10,4 +10,6 @@ public class ContactRequest
     public virtual AppUser Sender { get; set; } = null!;
     public virtual AppUser Recipient { get; set; } = null!;
     public RequestStatus Status { get; set; }
+    public Guid? ChatThreadId { get; set; }
+    public virtual ChatThread? ChatThread { get; set; }
 }

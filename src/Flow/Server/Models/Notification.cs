@@ -13,4 +13,5 @@ public class Notification
 
     public virtual AppUser Recipient { get; set; } = null!;
     public string RecipientId { get; set; } = null!;
+    public bool Seen { get; set; }
 }
