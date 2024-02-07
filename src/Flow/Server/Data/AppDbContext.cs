@@ -39,6 +39,10 @@ public class AppDbContext : IdentityDbContext<AppUser>
 				.HasForeignKey(p => p.SenderId)
 				.OnDelete(DeleteBehavior.NoAction);
 
+		builder.Entity<ContactRequest>()
+				.HasOne(p => p.ChatThread)
+				.WithOne();
+
 		builder.Entity<Notification>()
 				.HasOne(p => p.Recipient);
 
