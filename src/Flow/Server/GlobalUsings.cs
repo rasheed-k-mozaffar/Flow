@@ -5,3 +5,5 @@ global using Flow.Shared.AuthRequests;
 global using Flow.Server.Exceptions;
 global using Flow.Server.Options;
 global using Microsoft.EntityFrameworkCore;
+global using Flow.Server.Helpers;
+global using Flow.Shared.DataTransferObjects;
