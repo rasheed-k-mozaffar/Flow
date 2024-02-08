@@ -16,13 +16,15 @@
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="7.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.1.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Client\Flow.Client.csproj" />
     <ProjectReference Include="..\Shared\Flow.Shared.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Helpers/" />
     <Folder Include="Hubs/" />
+    <Folder Include="wwwroot/" />
+    <Folder Include="wwwroot/images/" />
   </ItemGroup>
 </Project>

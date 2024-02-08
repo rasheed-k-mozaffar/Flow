@@ -11,6 +11,10 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 
+// Swagger Config
+builder.Services.AddSwaggerGen();
+
+
 var databaseOptions = new DatabaseOptions();
 // This binds the values from the db options section to a DatabaseOptions object
 builder.Configuration.GetSection("DatabaseOptions").Bind(databaseOptions);
@@ -100,6 +104,7 @@ builder.Services.AddScoped(sp =>
 
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 builder.Services.AddScoped<IContactRequestsRepository, ContactRequestsRepository>();
+builder.Services.AddScoped<IFilesRepository, FilesRepository>();
 
 #endregion
 
@@ -109,6 +114,10 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseWebAssemblyDebugging();
+
+    // use Swagger UI in development
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 else
 {

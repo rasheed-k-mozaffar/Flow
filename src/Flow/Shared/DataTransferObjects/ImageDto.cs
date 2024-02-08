@@ -1,12 +1,11 @@
 ﻿using Flow.Shared.Enums;
 
-namespace Flow.Server.Models;
+namespace Flow.Shared.DataTransferObjects;
 
-public class Image
+public class ImageDto
 {
     public Guid Id { get; set; }
+    public string? RelativeUrl { get; set; }
     public string? AppUserId { get; set; }
-    public required string RelativeUrl { get; set; }
-    public required string FilePath { get; set; }
     public ImageType Type { get; set; }
 }
