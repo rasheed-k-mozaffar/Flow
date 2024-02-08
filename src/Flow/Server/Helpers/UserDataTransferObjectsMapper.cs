@@ -14,7 +14,7 @@ public static class UserDataTransferObjectsMapper
             UserId = user.Id,
             Name = $"{user.FirstName} {user.LastName}",
             Username = user.UserName,
-            ProfilePictureUrl = user.ProfilePicture?.Url // * in case user has a profile picture
+            ProfilePictureUrl = user.ProfilePicture?.RelativeUrl // * in case user has a profile picture
         };
     }
 }
