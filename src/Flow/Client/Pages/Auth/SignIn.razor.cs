@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
 
 namespace Flow.Client.Pages.Auth;
 
 public partial class SignIn : ComponentBase
 {
-#pragma warning disable CS0414
     private bool isMakingRequest = false;
     private string errorMessage = string.Empty;
 
@@ -12,9 +12,46 @@ public partial class SignIn : ComponentBase
 
     #region Dependencies
     [Inject]
-    public NavigationManager NavigationManager { get; set; } = default!;
+    public NavigationManager Nav { get; set; } = default!;
+
+    [Inject]
+    public IAuthService AuthService { get; set; } = default!;
+
+    [Inject]
+    public IJwtsManager JwtsManager { get; set; } = default!;
+
+    [Inject]
+    public AuthenticationStateProvider AuthenticationStateProvider { get; set; } = default!;
 
     #endregion
+
+
+    private async Task HandleUserLoginAsync()
+    {
+        InitStateVariables();
+
+        try
+        {
+            var apiResponse = await AuthService.LoginUserAsync(requestModel);
+
+            if (apiResponse.IsSuccess)
+            {
+                string token = apiResponse.Body!;
+                await JwtsManager.SetJwtAsync(token, requestModel.IsPersistent);
+
+                await AuthenticationStateProvider.GetAuthenticationStateAsync();
+                Nav.NavigateTo("/");
+            }
+        }
+        catch (AuthFailedException ex)
+        {
+            errorMessage = ex.Message;
+        }
+        finally
+        {
+            isMakingRequest = false;
+        }
+    }
 
     /// <summary>
     /// Sets isMakingRequest to true to disable form buttons

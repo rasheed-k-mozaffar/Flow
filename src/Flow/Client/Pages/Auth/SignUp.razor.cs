@@ -1,12 +1,12 @@
 ﻿using BlazorAnimate;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Forms;
 
 namespace Flow.Client.Pages.Auth;
 
 public partial class SignUp : ComponentBase
 {
-#pragma warning disable CS0414
     private bool isMakingRequest = false;
     private string errorMessage = string.Empty;
 
@@ -19,11 +19,18 @@ public partial class SignUp : ComponentBase
     private RegisterRequest requestModel = new();
 
     #region Dependencies
+
     [Inject]
-    public NavigationManager NavigationManager { get; set; } = default!;
+    public NavigationManager Nav { get; set; } = default!;
 
     [Inject]
     public IAuthService AuthService { get; set; } = default!;
+
+    [Inject]
+    public IJwtsManager JwtsManager { get; set; } = default!;
+
+    [Inject]
+    public AuthenticationStateProvider AuthenticationStateProvider { get; set; } = default!;
 
     #endregion
 
@@ -40,12 +47,15 @@ public partial class SignUp : ComponentBase
 
         try
         {
-            var result = await AuthService.RegisterUserAsync(requestModel);
+            var apiResponse = await AuthService.RegisterUserAsync(requestModel);
 
-            if (result.IsSuccess)
+            if (apiResponse.IsSuccess)
             {
-                // TODO: Add the token to the local storage & navigate the user
-                Console.WriteLine($"JWT: {result.Body?.Substring(0, 25)}");
+                string token = apiResponse.Body!;
+                await JwtsManager.SetJwtAsync(token, false);
+
+                await AuthenticationStateProvider.GetAuthenticationStateAsync();
+                Nav.NavigateTo("/");
             }
         }
         catch (AuthFailedException ex)
