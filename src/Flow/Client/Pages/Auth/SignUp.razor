@@ -71,7 +71,7 @@
                         class="input-field" required />
                     <ValidationMessage For="(() => requestModel.RepeatedPassword)" class="validation-message" />
                 </div>
-                <button type="submit" class="primary-btn w-full">Sign up</button>
+                <button type="submit" class="primary-btn w-full" disabled="@isMakingRequest">Sign up</button>
 
                 <div class="flex justify-center mt-5">
                     <p>Already have an account? <a href="/signin" class="link">Sign in here</a></p>
