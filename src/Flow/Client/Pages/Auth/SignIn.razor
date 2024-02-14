@@ -8,6 +8,14 @@
             <h1 class="text-3xl font-semibold">Sign in to your account</h1>
         </div>
         <EditForm Model="requestModel" OnValidSubmit="HandleUserLoginAsync">
+
+            <DataAnnotationsValidator />
+
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <ErrorAlert ErrorMessage="@errorMessage" OnCloseClicked="CloseErrorAlert" />
+            }
+
             <div class="mb-5">
                 <label for="email" class="label">
                     Email</label>

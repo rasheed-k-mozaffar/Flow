@@ -54,6 +54,11 @@ public partial class SignIn : ComponentBase
     }
 
     /// <summary>
+    /// Gets called when the close button on the error alert
+    /// </summary>
+    private void CloseErrorAlert() => errorMessage = string.Empty;
+
+    /// <summary>
     /// Sets isMakingRequest to true to disable form buttons
     /// Sets errorMessage to empty again so that if an error was already there, it would reset it
     /// </summary>
