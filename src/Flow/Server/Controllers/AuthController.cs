@@ -44,7 +44,7 @@ public class AuthController : ControllerBase
                 // the lockout end date is sent back to the client
                 if (loginResult.IsLockedOut)
                 {
-                    return Ok(new ApiErrorResponse
+                    return BadRequest(new ApiErrorResponse
                     {
                         ErrorMessage = loginResult.Message
                     });
