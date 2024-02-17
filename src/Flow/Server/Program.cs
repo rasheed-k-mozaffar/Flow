@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using System.Text;
+using Flow.Server.Hubs;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -14,6 +15,7 @@ builder.Services.AddRazorPages();
 // Swagger Config
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddSignalR();
 
 var databaseOptions = new DatabaseOptions();
 // This binds the values from the db options section to a DatabaseOptions object
@@ -105,6 +107,7 @@ builder.Services.AddScoped(sp =>
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 builder.Services.AddScoped<IContactRequestsRepository, ContactRequestsRepository>();
 builder.Services.AddScoped<IFilesRepository, FilesRepository>();
+builder.Services.AddScoped<INotificationsRepository, NotificationsRepository>();
 
 #endregion
 
@@ -135,6 +138,9 @@ app.UseAuthorization();
 
 app.MapRazorPages();
 app.MapControllers();
+app.MapHub<NotificationsHub>("notifications");
+
 app.MapFallbackToFile("index.html");
+
 
 app.Run();
