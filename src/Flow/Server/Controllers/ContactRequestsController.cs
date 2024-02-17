@@ -51,7 +51,6 @@ public class ContactRequestsController : ControllerBase
             await _contactRequestsRepository
                 .SendConnectRequestAsync(recipientId, contactRequest);
 
-            // TODO : Send notification
             return Ok(new ApiResponse
             {
                 Message = "Contact request sent",
@@ -72,6 +71,13 @@ public class ContactRequestsController : ControllerBase
             });
         }
         catch (ContactRequestOperationFailureException ex)
+        {
+            return BadRequest(new ApiErrorResponse
+            {
+                ErrorMessage = ex.Message
+            });
+        }
+        catch (DatabaseOperationFailedException ex)
         {
             return BadRequest(new ApiErrorResponse
             {
