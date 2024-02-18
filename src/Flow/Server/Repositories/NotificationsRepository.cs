@@ -1,27 +1,27 @@
-﻿using Flow.Server.EventArguments;
-using static Flow.Server.Repositories.INotificationsRepository;
+﻿using Flow.Server.Services;
 
 namespace Flow.Server.Repositories;
 
 public class NotificationsRepository : INotificationsRepository
 {
-    public event NotificationAddedDelegate? OnNotificationAdded;
-
     private const int NOTIFICATIONS_CHUNK_SIZE = 15;
     private readonly AppDbContext _db;
     private readonly UserInfo _userInfo;
     private readonly ILogger<NotificationsRepository> _logger;
+    private readonly INotificationPublisherService _notificationPublisher;
 
     public NotificationsRepository
     (
         AppDbContext db,
         UserInfo userInfo,
-        ILogger<NotificationsRepository> logger
+        ILogger<NotificationsRepository> logger,
+        INotificationPublisherService notificationPublisher
     )
     {
         _db = db;
         _userInfo = userInfo;
         _logger = logger;
+        _notificationPublisher = notificationPublisher;
     }
 
     public async Task<Notification> AddNotificationAsync(Notification notification)
@@ -34,7 +34,7 @@ public class NotificationsRepository : INotificationsRepository
         {
             await _db.SaveChangesAsync();
 
-            OnNotificationAdded?.Invoke(this, new() { Notification = notification });
+            await _notificationPublisher.PublishNotificationToRecipientAsync(notification);
 
             return notification;
         }

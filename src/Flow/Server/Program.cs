@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using System.Text;
 using Flow.Server.Hubs;
+using Flow.Server.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -108,6 +109,7 @@ builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 builder.Services.AddScoped<IContactRequestsRepository, ContactRequestsRepository>();
 builder.Services.AddScoped<IFilesRepository, FilesRepository>();
 builder.Services.AddScoped<INotificationsRepository, NotificationsRepository>();
+builder.Services.AddTransient<INotificationPublisherService, NotificationPublisherService>();
 
 #endregion
 
