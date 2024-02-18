@@ -8,17 +8,20 @@ public class ContactRequestsRepository : IContactRequestsRepository
     private readonly AppDbContext _db;
     private readonly ILogger<ContactRequestsRepository> _logger;
     private readonly UserInfo _userInfo;
+    private readonly INotificationsRepository _notificationsRepository;
 
     public ContactRequestsRepository
     (
         AppDbContext db,
         ILogger<ContactRequestsRepository> logger,
-        UserInfo userInfo
+        UserInfo userInfo,
+        INotificationsRepository notificationsRepository
     )
     {
         _db = db;
         _logger = logger;
         _userInfo = userInfo;
+        _notificationsRepository = notificationsRepository;
     }
 
 
@@ -41,18 +44,25 @@ public class ContactRequestsRepository : IContactRequestsRepository
 
         if (entityEntry.State is EntityState.Added)
         {
-            // TODO: Refactor the notification part into its own repo (INotifcations)
-            var notification = new Notification()
+            try
             {
-                Id = Guid.NewGuid(),
-                RecipientId = request.RecipientId,
-                Recipient = recipient,
-                Content = $"{_userInfo.Name} wants to connect with you",
-                IssuedOn = DateTime.UtcNow,
-                Type = NotificationType.ContactRequest
-            };
+                var notification = new Notification()
+                {
+                    Id = Guid.NewGuid(),
+                    RecipientId = request.RecipientId,
+                    Recipient = recipient,
+                    Content = $"{_userInfo.Name} wants to connect with you",
+                    IssuedOn = DateTime.UtcNow,
+                    Type = NotificationType.ContactRequest
+                };
 
-            await _db.Notifications.AddAsync(notification); // push notification to the db
+                await _notificationsRepository.AddNotificationAsync(notification); // push notification to the db
+            }
+            catch (DatabaseOperationFailedException)
+            {
+                throw;
+            }
+
 
             await _db.SaveChangesAsync();
 
