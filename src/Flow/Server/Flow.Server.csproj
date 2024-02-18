@@ -23,7 +23,6 @@
     <ProjectReference Include="..\Shared\Flow.Shared.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Hubs/" />
     <Folder Include="wwwroot/" />
     <Folder Include="wwwroot/images/" />
   </ItemGroup>

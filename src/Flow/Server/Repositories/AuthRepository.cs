@@ -156,7 +156,8 @@ public class AuthRepository : IAuthRepository
             new Claim(ClaimTypes.Surname, user.LastName),
             new Claim(JwtRegisteredClaimNames.Iss, _jwtSettings.Issuer),
             new Claim(JwtRegisteredClaimNames.Aud, _jwtSettings.Audience),
-            new Claim(JwtRegisteredClaimNames.Exp, expiresIn.ToString())
+            new Claim(JwtRegisteredClaimNames.Exp, expiresIn.ToString()),
+            new Claim(JwtRegisteredClaimNames.Sub, user.Id),
         ];
 
         JwtSecurityToken token = new
