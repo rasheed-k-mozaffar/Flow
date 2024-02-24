@@ -43,4 +43,12 @@ public interface IContactRequestsRepository
     /// </summary>
     /// <returns></returns>
     Task<IEnumerable<ContactRequest>> GetUserContactsAsync();
+
+    /// <summary>
+    /// Gets all the contact requests where the user is involved, requests Sent to or Sent from the 
+    /// current authenticated user
+    /// This will be used to perform search to determine which result is a contact, non contact, or a pending request
+    /// </summary>
+    /// <returns></returns>
+    Task<IEnumerable<ContactRequest>> GetContactRequestsInvolvingUserAsync(CancellationToken cancellationToken);
 }
