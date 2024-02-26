@@ -39,48 +39,54 @@ public class UsersController : ControllerBase
                 (user.UserName!.ToLower().Contains(searchTermLowercase) ||
                 user.FirstName.ToLower().Contains(searchTermLowercase) ||
                 user.LastName.ToLower().Contains(searchTermLowercase)))
+                .OrderBy(u => u.FirstName)
                 .Skip(loadNumber * USERS_CHUNK_SIZE)
                 .Take(USERS_CHUNK_SIZE)
                 .ToListAsync(cancellationToken);
 
-        var userContacts = await _contactsRepository.GetUserContactsAsync();
+        var userContactRequests = await _contactsRepository.GetContactRequestsInvolvingUserAsync(cancellationToken);
 
-        var responseBody = DistinguishContactsFromNonContactsForSearchedUsers(searchResults, userContacts);
+        var responseBody = DistinguishSearchedUsersType(searchResults, userContactRequests);
 
         return Ok(new ApiResponse<ICollection<UserSearchResultDto>>
         {
-            Message = responseBody.Any() ? $"Found {responseBody.Count} results" : "No results found",
+            Message = responseBody.Any() ? $"Found {responseBody.Count} results for \"{searchTerm}\"" : $"No results found for \"{searchTerm}\"",
             Body = responseBody,
             IsSuccess = true
         });
     }
 
 
-    private ICollection<UserSearchResultDto> DistinguishContactsFromNonContactsForSearchedUsers(IEnumerable<AppUser> users, IEnumerable<ContactRequest> userContacts)
+    private ICollection<UserSearchResultDto> DistinguishSearchedUsersType(IEnumerable<AppUser> users, IEnumerable<ContactRequest> userContactRequests)
     {
         var output = new List<UserSearchResultDto>();
 
         foreach (var user in users)
         {
-            var contact = FindContactInCurrentUserContacts(userContacts, user);
+            var contact = FindContactInRequestsInvolvingTheUser(userContactRequests, user);
 
             if (contact is null)
             {
-                output.Add(user.ToUserSearchResultDto(Shared.Enums.SearchedUserType.NonContact));
+                output.Add(user.ToUserSearchResultDto(Shared.Enums.SearchedUserType.NonContact, null));
+            }
+            else if (contact.Status is Shared.Enums.RequestStatus.Pending)
+            {
+                output.Add(user.ToUserSearchResultDto(Shared.Enums.SearchedUserType.PendingRequest, contact.Id));
             }
             else
             {
-                output.Add(user.ToUserSearchResultDto(Shared.Enums.SearchedUserType.Contact));
+                output.Add(user.ToUserSearchResultDto(Shared.Enums.SearchedUserType.Contact, contact.Id));
             }
         }
 
         return output.OrderByDescending(p => p.UserType).ToList();
     }
 
-    private ContactRequest? FindContactInCurrentUserContacts
+    // looks through the user's contact requests and checks to see if the user is involved or not
+    private ContactRequest? FindContactInRequestsInvolvingTheUser
     (
-        IEnumerable<ContactRequest> userContacts,
+        IEnumerable<ContactRequest> userContactRequests,
         AppUser user
     ) =>
-    userContacts.FirstOrDefault(contact => contact.SenderId == user.Id || contact.RecipientId == user.Id);
+    userContactRequests.FirstOrDefault(cr => cr.SenderId == user.Id || cr.RecipientId == user.Id);
 }

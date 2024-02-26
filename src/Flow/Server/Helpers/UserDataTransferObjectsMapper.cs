@@ -28,10 +28,11 @@ public static class UserDataTransferObjectsMapper
     /// <param name="user"></param>
     /// <param name="searchedUserType"></param>
     /// <returns></returns>
-    public static UserSearchResultDto ToUserSearchResultDto(this AppUser user, SearchedUserType searchedUserType)
+    public static UserSearchResultDto ToUserSearchResultDto(this AppUser user, SearchedUserType searchedUserType, Guid? contactRequestId = null)
     {
         return new()
         {
+            ContactRequestId = contactRequestId,
             UserId = user.Id,
             Username = user.UserName,
             FirstName = user.FirstName,

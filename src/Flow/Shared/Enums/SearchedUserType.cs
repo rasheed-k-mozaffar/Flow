@@ -3,5 +3,6 @@
 public enum SearchedUserType
 {
     NonContact,
-    Contact
+    Contact,
+    PendingRequest
 }
