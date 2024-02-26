@@ -1,16 +1,25 @@
-﻿
+﻿@inject NavigationManager Nav
 
-<a href="#" class="flex flex-col items-center bg-white border border-gray-200 rounded-lg shadow lg:flex-row lg:min-w-full md:flex-row md:max-w-xl hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700">
-<div class="flex items-center gap-4 p-2">
-    <div class="relative w-10 h-10 overflow-hidden bg-gray-100 rounded-full dark:bg-gray-600">
-        <svg class="absolute w-12 h-12 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
-       </div>    
-    <div class="font-medium dark:text-white">
-         <div>Hamzeh</div>
-         <div class="text-sm text-gray-500 dark:text-gray-400">how are you bich</div>
+<div @onclick="ChatClicked"
+    class="flex items-center bg-white border border-gray-200 rounded-lg shadow lg:flex-row lg:min-w-full md:flex-row md:max-w-xl hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700">
+    <div class="flex items-center gap-4 p-2">
+        <div>
+            <img class="h-[50px] w-[50px] rounded-full"
+                src="@(ContactModel.Contact!.ProfilePictureUrl ?? "/images/avatar.png")"
+                alt="@ContactModel.Contact.Name" />
+        </div>
+
+        <div class="font-medium dark:text-white">
+            <div>@ContactModel.Contact!.Name</div>
+            <div class="text-sm text-gray-500 dark:text-gray-400">how are you bich</div>
+        </div>
     </div>
 </div>
-</a>
 @code {
+    [Parameter] public ContactDto ContactModel { get; set; } = null!;
 
+    private void ChatClicked()
+    {
+        Nav.NavigateTo($"/{ContactModel.ThreadId}");
+    }
 }
