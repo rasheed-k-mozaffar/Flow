@@ -1,9 +1,11 @@
 ﻿@inherits LayoutComponentBase
 @inject IJSRuntime Js
 
+<SearchUsersModal Show="showSearchModal" OnCloseClicked="CloseSearchModal" />
+
 <main class="h-screen overflow-hidden">
-    <SideBar />
-    <div class=" sm:ml-64 min-h-full">
+    <SideBar OnSearchButtonClicked="OpenSearchModal" />
+    <div class=" sm:ml-80 min-h-full">
         @Body
     </div>
 </main>
@@ -21,8 +23,13 @@
     }
 </style>
 @code {
+    private bool showSearchModal = false;
     protected override async Task OnAfterRenderAsync(bool isFirstRender)
     {
         await Js.InvokeVoidAsync("window.initializeFlowbite");
     }
+
+    private void OpenSearchModal() => showSearchModal = true;
+
+    private void CloseSearchModal() => showSearchModal = false;
 }

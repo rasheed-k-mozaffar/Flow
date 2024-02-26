@@ -211,4 +211,14 @@ public class ContactRequestsRepository : IContactRequestsRepository
 
         return contacts;
     }
+
+    public async Task<IEnumerable<ContactRequest>> GetContactRequestsInvolvingUserAsync(CancellationToken cancellationToken)
+    {
+        var contactRequests = await _db
+                                    .ContactRequests // * include every request made by or sent to this user, regardless of whether the request is resolved or pending
+                                    .Where(cr => (cr.SenderId == _userInfo.UserId || cr.RecipientId == _userInfo.UserId))
+                                    .ToListAsync(cancellationToken);
+
+        return contactRequests;
+    }
 }
