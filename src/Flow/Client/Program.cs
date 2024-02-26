@@ -16,6 +16,8 @@ builder.Services.AddAuthorizationCore();
 builder.Services.AddTransient<AuthorizationMessageHandler>();
 builder.Services.AddScoped<IJwtsManager, JwtsManager>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IContactRequestsService, ContactRequestsService>();
+builder.Services.AddScoped<IUsersService, UsersService>();
 builder.Services.AddScoped<AuthenticationStateProvider, JwtAuthenticationStateProvider>();
 
 
