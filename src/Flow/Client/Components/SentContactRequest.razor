@@ -1,0 +1,26 @@
+﻿<div class="flex justify-between items-center max-h-[150px] gap-2">
+    <div class="flex gap-2">
+        <div>
+            <img class="h-[50px] w-[50px] rounded-full"
+                src="@(Request.Recipient?.ProfilePictureUrl ?? "/images/avatar.png")" alt="@Request.Recipient?.Name" />
+        </div>
+
+        <div>
+            <p>@Request.Recipient?.Name</p>
+            <p class="text-sm font-light text-gray-500">@Request.Recipient?.Username</p>
+        </div>
+    </div>
+
+    <div class="flex justify-between items-center">
+        <button @onclick="CancelClicked" disabled="@DisableButtons"
+            class="ring-1 ring-gray-500 text-gray-500 px-4 py-1 rounded-2xl hover:bg-gray-100 transition-colors">Cancel</button>
+    </div>
+</div>
+
+@code {
+    [Parameter] public PendingRequestSentDto Request { get; set; } = null!;
+    [Parameter] public bool DisableButtons { get; set; }
+    [Parameter] public EventCallback OnCancelClicked { get; set; }
+
+    private void CancelClicked() => OnCancelClicked.InvokeAsync();
+}

@@ -1,0 +1,45 @@
+﻿<div class="flex justify-between items-center max-h-[150px] gap-2">
+    <div class="flex gap-2">
+        <div>
+            <img class="h-[50px] w-[50px] rounded-full"
+                src="@(Request.Sender?.ProfilePictureUrl ?? "/images/avatar.png")" alt="@Request.Sender?.Name" />
+        </div>
+
+        <div>
+            <p>@Request.Sender?.Name</p>
+            <p class="text-sm font-light text-gray-500">@Request.Sender?.Username</p>
+        </div>
+    </div>
+
+    <div class="flex justify-between items-center">
+        <div>
+            <button class="icon-btn" @onclick="AcceptClicked" disabled="@DisableButtons">
+                <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                    fill="none" viewBox="0 0 24 24">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="m5 12 4.7 4.5 9.3-9" />
+                </svg>
+            </button>
+        </div>
+
+        <div>
+            <button class="icon-btn" @onclick="DeclineClicked" disabled="DisableButtons">
+                <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                    fill="none" viewBox="0 0 24 24">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M6 18 18 6m0 12L6 6" />
+                </svg>
+            </button>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public PendingRequestIncomingDto Request { get; set; } = null!;
+    [Parameter] public bool DisableButtons { get; set; }
+    [Parameter] public EventCallback OnAcceptClicked { get; set; }
+    [Parameter] public EventCallback OnDeclineClicked { get; set; }
+
+    private void AcceptClicked() => OnAcceptClicked.InvokeAsync();
+    private void DeclineClicked() => OnDeclineClicked.InvokeAsync();
+}
