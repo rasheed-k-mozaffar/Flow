@@ -1,0 +1,46 @@
+﻿<div class="flex justify-between items-center max-h-[150px] gap-2">
+    <div class="flex gap-2">
+        <div>
+            <img class="h-[50px] w-[50px] rounded-full" src="@(User.ProfilePictureUrl ?? "/images/avatar.png")"
+                alt="@User.Name" />
+        </div>
+
+        <div>
+            <p>@User.Name</p>
+            <p class="text-sm font-light text-gray-500">@User.Username</p>
+        </div>
+    </div>
+
+    <div>
+        @if (User.UserType is SearchedUserType.NonContact)
+        {
+            <button @onclick="AddClicked"
+                class="ring-1 ring-blue-500 text-blue-500 px-4 py-1 rounded-2xl hover:bg-blue-50 transition-colors">Add</button>
+        }
+        else if (User.UserType is SearchedUserType.Contact)
+        {
+            <div class="text-gray-400 font-semibold">Friend</div>
+        }
+        else
+        {
+            <button @onclick="CancelRequestClicked"
+                class="ring-1 ring-gray-500 text-gray-500 px-4 py-1 rounded-2xl hover:bg-gray-100 transition-colors">Requested</button>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public UserSearchResultDto User { get; set; } = null!;
+    [Parameter] public EventCallback OnAddClicked { get; set; }
+    [Parameter] public EventCallback OnCancelRequestClicked { get; set; }
+
+    private void AddClicked()
+    {
+        OnAddClicked.InvokeAsync();
+    }
+
+    private void CancelRequestClicked()
+    {
+        OnCancelRequestClicked.InvokeAsync();
+    }
+}
