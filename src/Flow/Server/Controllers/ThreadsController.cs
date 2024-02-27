@@ -14,7 +14,7 @@ namespace Flow.Server.Controllers
     {
         private readonly ThreadRepository _threads;
         public ThreadsController(ThreadRepository ThreadRepository) {
-            _threads = ThreadRepository;
+            _threads = ThreadRepository; 
         }
         [HttpGet]
         [ProducesResponseType(statusCode: StatusCodes.Status200OK, type: typeof(ApiResponse<Dictionary<string, List<MessageDto>>>))]
