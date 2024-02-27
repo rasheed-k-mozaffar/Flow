@@ -11,6 +11,7 @@
         public async Task<Dictionary<string, List<Message>>> GetPreliminaryMessages() 
         {
             var messagesOfEachThread = new Dictionary<string, List<Message>>();
+
             var userThreads = await _CrRepo.GetUserContactsAsync();
             foreach(var thread in userThreads)
             {
