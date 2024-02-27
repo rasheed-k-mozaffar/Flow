@@ -4,9 +4,9 @@ public class ThreadRepository : IThreadRepository
 {
     private const int MESSAGES_LOAD_SIZE = 20;
     private readonly AppDbContext _db;
-    private readonly ContactRequestsRepository _contactsRepository;
+    private readonly IContactRequestsRepository _contactsRepository;
 
-    public ThreadRepository(AppDbContext db, ContactRequestsRepository contactsRepository)
+    public ThreadRepository(AppDbContext db, IContactRequestsRepository contactsRepository)
     {
         _db = db;
         _contactsRepository = contactsRepository;

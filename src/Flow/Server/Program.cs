@@ -110,6 +110,7 @@ builder.Services.AddScoped<IContactRequestsRepository, ContactRequestsRepository
 builder.Services.AddScoped<IFilesRepository, FilesRepository>();
 builder.Services.AddScoped<INotificationsRepository, NotificationsRepository>();
 builder.Services.AddTransient<INotificationPublisherService, NotificationPublisherService>();
+builder.Services.AddScoped<IThreadRepository, ThreadRepository>();
 
 #endregion
 

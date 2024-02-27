@@ -10,8 +10,8 @@ namespace Flow.Server.Controllers;
 [Authorize]
 public class ThreadsController : ControllerBase
 {
-    private readonly ThreadRepository _threadsRepository;
-    public ThreadsController(ThreadRepository threadRepository)
+    private readonly IThreadRepository _threadsRepository;
+    public ThreadsController(IThreadRepository threadRepository)
     {
         _threadsRepository = threadRepository;
     }
