@@ -1,6 +1,7 @@
-﻿namespace Flow.Server.Repositories
+﻿namespace Flow.Server.Repositories;
+
+public interface IThreadRepository
 {
-    public interface IThreadRepository
-    {
-    }
+    Task<Dictionary<string, List<MessageDto>>> GetPreliminaryMessagesForUserChatThreads();
 }
+
