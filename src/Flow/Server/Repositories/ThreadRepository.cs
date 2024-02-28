@@ -40,8 +40,9 @@ public class ThreadRepository : IThreadRepository
         var threadMessages = await _db
                         .Messages
                         .Where(message => message.ThreadId == request.ThreadId && message.SentOn > request.LastMessageDate)
-                        .OrderByDescending(message => message.SentOn)
+                        .AsSplitQuery()
                         .Take(MESSAGES_LOAD_SIZE)
+                        .OrderByDescending(message => message.SentOn)
                         .Select(msg => msg.ToMessageDto())
                         .ToListAsync();
         return threadMessages;
