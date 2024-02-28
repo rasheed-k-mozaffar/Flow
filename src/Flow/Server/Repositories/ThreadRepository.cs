@@ -35,5 +35,16 @@ public class ThreadRepository : IThreadRepository
 
         return messagesOfEachThread;
     }
+    public async Task<List<MessageDto>> GetMessagesByDate(MessagesRequestDto request)
+    {
+        var threadMessages = await _db
+                        .Messages
+                        .Where(message => message.ThreadId == request.ThreadId && message.SentOn > request.LastMessageDate)
+                        .OrderByDescending(message => message.SentOn)
+                        .Take(MESSAGES_LOAD_SIZE)
+                        .Select(msg => msg.ToMessageDto())
+                        .ToListAsync();
+        return threadMessages;
+    }
 }
 

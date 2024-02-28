@@ -7,7 +7,7 @@ namespace Flow.Server.Controllers;
 
 [Route("/api/[controller]")]
 [ApiController]
-[Authorize]
+//[Authorize]
 public class ThreadsController : ControllerBase
 {
     private readonly IThreadRepository _threadsRepository;
@@ -29,6 +29,21 @@ public class ThreadsController : ControllerBase
             Message = "Messages retrieved successfully",
             Body = userThreadsMessages,
             IsSuccess = true
+        });
+    }
+    [HttpPost]
+    [Route("get-messages-by-date")]
+    [ProducesResponseType(statusCode: StatusCodes.Status200OK, type: typeof(ApiResponse<List<MessageDto>>))]
+    [ProducesResponseType(statusCode: StatusCodes.Status401Unauthorized, type: typeof(UnauthorizedResult))]
+    public async Task<IActionResult> GetChatMessages([FromBody] MessagesRequestDto request)
+    {
+        var LoadedMessages = await _threadsRepository.GetMessagesByDate(request);
+
+        return Ok(new ApiResponse<List<MessageDto>>
+        {
+            Message = "Messages retrieved",
+            IsSuccess = true,
+            Body = LoadedMessages
         });
     }
 }
