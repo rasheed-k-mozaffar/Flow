@@ -29,7 +29,7 @@ public class ThreadRepository : IThreadRepository
                                     .Take(MESSAGES_LOAD_SIZE)
                                     .Select(msg => msg.ToMessageDto())
                                     .ToListAsync();
-
+            threadMessages.Reverse();
             messagesOfEachThread.Add(threadId, threadMessages);
         }
 
