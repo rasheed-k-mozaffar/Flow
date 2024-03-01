@@ -82,4 +82,30 @@ public class FilesRepository : IFilesRepository
 
         return false; // failure for uncaught reason
     }
+    public async Task<string> SavePDF(IFormFile file, string filePath)
+    {
+        string path = "";
+
+        Guid fileIdentifier = Guid.NewGuid();
+        try
+        {
+
+            path = Path.Combine(filePath, fileIdentifier.ToString());
+            string url = $"/pdfs/{fileIdentifier}";
+            using (var fileStream = new FileStream(path, FileMode.Create))
+            {
+                await file.CopyToAsync(fileStream);
+            }
+            var PdfFile = new PDF { FilePath = path, RelativeUrl = url };
+            PdfFile.AppUserId = _userInfo.UserId;
+            await _db.PDFs.AddAsync(PdfFile);
+            await _db.SaveChangesAsync();
+            return PdfFile.RelativeUrl;
+
+        }
+        catch (Exception ex)
+        {
+            throw new PDFdocumentSaveFailedException("PDF document save failed");
+        }
+    }
 }

@@ -1,4 +1,5 @@
-﻿using Flow.Shared.ApiResponses;
+﻿using Azure.Core;
+using Flow.Shared.ApiResponses;
 using Flow.Shared.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -7,7 +8,7 @@ namespace Flow.Server.Controllers;
 
 [ApiController]
 [Route("/api/[controller]")]
-[Authorize]
+//[Authorize]
 public class FilesController : ControllerBase
 {
     private static readonly IEnumerable<string> _allowedFileExtensions = new List<string>
@@ -184,4 +185,59 @@ public class FilesController : ControllerBase
             });
         }
     }
+    [HttpPost]
+    [Route("upload-PDFfile")]
+    public async Task<IActionResult> RecievePDF([FromForm] IFormFile file)
+    {
+        if (file is null)
+        {
+            return BadRequest(new ApiErrorResponse
+            {
+                ErrorMessage = "Invalid request"
+            });
+        }
+        string fileName = file.FileName;
+        string fileExtension = Path.GetExtension(fileName);
+
+        if (fileExtension == ".pdf" && file.Length > 0)
+        {
+            try
+            {
+
+                string filePath = Path.Combine
+                                    (
+                                        _environment.WebRootPath,
+                                        "pdfs"
+                                    );
+                var resultingPath = await _filesRepository.SavePDF(file, filePath);
+
+                return Ok(new ApiResponse<string>
+                {
+                    Message = "file uploaded successfully",
+                    IsSuccess = true,
+                    Body= resultingPath
+                });
+
+            }
+
+            catch (Exception ex)
+            {
+                //Log ex
+                return Ok(new ApiResponse
+                {
+                    Message = "file upload fail",
+                    IsSuccess = true
+                });
+            }
+        }
+        else
+        {
+            return Ok(new ApiResponse
+            {
+                Message = "illegal operation",
+                IsSuccess = false
+            });
+        }
+    }
 }
+
