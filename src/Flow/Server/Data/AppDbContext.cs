@@ -6,6 +6,7 @@ namespace Flow.Server.Data;
 public class AppDbContext : IdentityDbContext<AppUser>
 {
 	public DbSet<Image> Images { get; set; }
+	public DbSet<PDF> PDFs { get; set; }
 	public DbSet<ContactRequest> ContactRequests { get; set; }
 	public DbSet<ChatThread> Threads { get; set; }
 	public DbSet<Message> Messages { get; set; }

@@ -82,4 +82,62 @@ public class FilesRepository : IFilesRepository
 
         return false; // failure for uncaught reason
     }
+    public async Task<string> SavePDF(IFormFile file, string filePath)
+    {
+        string path = "";
+
+        Guid fileIdentifier = Guid.NewGuid();
+        try
+        {
+
+            path = Path.Combine(filePath, fileIdentifier.ToString());
+            string url = $"/pdfs/{fileIdentifier}";
+            using (var fileStream = new FileStream(path, FileMode.Create))
+            {
+                await file.CopyToAsync(fileStream);
+            }
+            var PdfFile = new PDF { FilePath = path, RelativeUrl = url };
+            PdfFile.AppUserId = _userInfo.UserId;
+            await _db.PDFs.AddAsync(PdfFile);
+            await _db.SaveChangesAsync();
+            return PdfFile.RelativeUrl;
+
+        }
+        catch (Exception ex)
+        {
+            throw new PDFdocumentSaveFailedException("PDF document save failed");
+        }
+    }
+    public async Task<bool> RemovePDFAsync(Guid documentId)
+    {
+        var document = await _db
+                        .PDFs
+                        .FindAsync(documentId);
+
+        if (document is null)
+            throw new ResourceNotFoundException(message: "The document you're looking for was not found");
+
+        try
+        {
+            File.Delete(document.FilePath);
+
+            var removalResult = _db.PDFs.Remove(document);
+
+            if (removalResult.State == EntityState.Deleted)
+            {
+                await _db.SaveChangesAsync();
+                return true;
+            }
+        }
+        catch (IOException)
+        {
+            return false;
+        }
+        catch (ArgumentNullException)
+        {
+            return false;
+        }
+
+        return false; // failure for uncaught reason
+    }
 }
