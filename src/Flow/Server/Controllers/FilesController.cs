@@ -137,7 +137,6 @@ public class FilesController : ControllerBase
             });
         }
     }
-
     [HttpDelete]
     [Route("delete-image/{imageId}")]
     [ProducesResponseType(statusCode: StatusCodes.Status200OK, type: typeof(ApiResponse))]
@@ -184,6 +183,50 @@ public class FilesController : ControllerBase
                 ErrorMessage = ex.Message
             });
         }
+    }
+    [HttpGet]
+    [Route("delete-pdf/{pdfId}")]
+    public async Task<IActionResult> DeletePDFDocument(Guid pdfId)
+    {
+        try
+        {
+            bool imageRemoved = await _filesRepository
+                .RemovePDFAsync(pdfId);
+
+            if (imageRemoved)
+            {
+                _logger.LogInformation
+                (
+                    "Document with the ID: {pdfId} was deleted from the server",
+                    pdfId
+                );
+
+                return Ok(new ApiResponse
+                {
+                    Message = "Document deleted successfully",
+                    IsSuccess = true
+                });
+            }
+
+            _logger.LogError
+            (
+                "Failed attempt to delete document with the ID: {pdfId}",
+                pdfId
+            );
+
+            return BadRequest(new ApiErrorResponse
+            {
+                ErrorMessage = "Failed to delete document! Please try again"
+            });
+        }
+        catch (ResourceNotFoundException ex)
+        {
+            return NotFound(new ApiErrorResponse
+            {
+                ErrorMessage = ex.Message
+            });
+        }
+
     }
     [HttpPost]
     [Route("upload-PDFfile")]

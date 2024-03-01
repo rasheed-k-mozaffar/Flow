@@ -31,6 +31,8 @@ public interface IFilesRepository
     Task<Image> GetImageAsync(Guid imageId);
 
     Task<string> SavePDF(IFormFile file, string filePath);
+    Task<bool> RemovePDFAsync(Guid documentId);
+
 
     //TODO: Add a method to get all the media sent in a chat thread (Requires a nullable ThreadId proeprty be added to the Image class)
 }
