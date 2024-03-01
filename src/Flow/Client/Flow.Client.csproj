@@ -7,16 +7,9 @@
   <PropertyGroup Condition=" '$(RunConfiguration)' == 'https' " />
   <PropertyGroup Condition=" '$(RunConfiguration)' == 'http' " />
   <ItemGroup>
-    <Content Remove="wwwroot\webcam.js" />
-  </ItemGroup>
-  <ItemGroup>
-    <_ContentIncludedByDefault Remove="wwwroot\webcam.js" />
-  </ItemGroup>
-  <ItemGroup>
     <PackageReference Include="BlazorAnimate" Version="3.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="7.0.15" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="7.0.15" PrivateAssets="all" />
-    <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="7.0.0" />
     <PackageReference Include="Blazored.LocalStorage" Version="4.4.0" />
     <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="7.0.15" />
@@ -29,8 +22,5 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Layout/" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="wwwroot\JS\webcam.js" />
   </ItemGroup>
 </Project>

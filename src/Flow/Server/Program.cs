@@ -71,6 +71,20 @@ builder.Services.AddAuthentication(options =>
     var jwtOptions = new JwtOptions();
     builder.Configuration.GetSection("JwtSettings").Bind(jwtOptions);
 
+    bearerOptions.Events = new JwtBearerEvents()
+    {
+        OnMessageReceived = context =>
+        {
+            var accessToken = context.Request.Query["access_token"];
+            var path = context.HttpContext.Request.Path;
+            if (!string.IsNullOrWhiteSpace(accessToken) && path.StartsWithSegments("/chat-threads-hub"))
+            {
+                context.Token = accessToken;
+            }
+            return Task.CompletedTask;
+        }
+    };
+
     var key = Encoding.UTF8.GetBytes(jwtOptions.Secret);
     bearerOptions.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters()
     {
@@ -111,6 +125,7 @@ builder.Services.AddScoped<IFilesRepository, FilesRepository>();
 builder.Services.AddScoped<INotificationsRepository, NotificationsRepository>();
 builder.Services.AddTransient<INotificationPublisherService, NotificationPublisherService>();
 builder.Services.AddScoped<IThreadRepository, ThreadRepository>();
+builder.Services.AddScoped<IMessagesRepository, MessagesRepository>();
 
 #endregion
 
@@ -142,6 +157,7 @@ app.UseAuthorization();
 app.MapRazorPages();
 app.MapControllers();
 app.MapHub<NotificationsHub>("notifications");
+app.MapHub<ChatHub>("chat-threads-hub");
 
 app.MapFallbackToFile("index.html");
 
