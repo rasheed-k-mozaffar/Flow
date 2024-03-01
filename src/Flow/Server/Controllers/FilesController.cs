@@ -50,7 +50,7 @@ public class FilesController : ControllerBase
 
         string fileName = file.FileName;
         string fileExtension = Path.GetExtension(fileName);
-
+        \
         if (!_allowedFileExtensions.Contains(fileExtension)) // * use of unallowed extension
         {
             return BadRequest(new ApiErrorResponse
@@ -229,7 +229,7 @@ public class FilesController : ControllerBase
     }
     [HttpPost]
     [Route("upload-PDFfile")]
-    public async Task<IActionResult> RecievePDF([FromForm] IFormFile file)
+    public async Task<IActionResult> RecievePDF([FromBody] IFormFile file)
     {
         if (file is null)
         {

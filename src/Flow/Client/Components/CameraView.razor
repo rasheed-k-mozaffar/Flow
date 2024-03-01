@@ -1,0 +1,100 @@
+﻿@using Microsoft.AspNetCore.Http
+@using Microsoft.AspNetCore.Http.Internal
+@using System.Drawing
+@inject IJSRuntime JSRuntime
+@inject HttpClient _http
+
+
+<button @onclick="StartCameraFeed" data-modal-target="extralarge-modal" data-modal-toggle="extralarge-modal" class="text-blue-700 border border-blue-700 hover:bg-blue-700 hover:text-white focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-full text-sm p-2.5 text-center inline-flex items-center dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:focus:ring-blue-800 dark:hover:bg-blue-500"
+    type="button">
+    <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+        <path fill-rule="evenodd" d="M7.5 4.6A2 2 0 0 1 8.9 4h6.2c.5 0 1 .2 1.4.6L17.9 6H19a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8c0-1.1.9-2 2-2h1l1.5-1.4ZM10 12a2 2 0 1 1 4 0 2 2 0 0 1-4 0Zm2-4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z" clip-rule="evenodd" />
+    </svg>
+
+</button>
+
+<!-- Extra Large Modal -->
+<div id="extralarge-modal" tabindex="-1" class="fixed top-0 left-0 right-0 z-50 hidden w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full">
+    <div class="relative w-full max-w-7xl max-h-full">
+        <!-- Modal content -->
+        <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+            <!-- Modal header -->
+            <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
+                <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-hide="extralarge-modal">
+                    <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
+                    </svg>
+                    <span class="sr-only">Close modal</span>
+                </button>
+            </div>
+            <!-- Modal body -->
+            @if (!string.IsNullOrEmpty(frameUri))
+            {
+                <img src="@frameUri" />
+            }
+            else
+            {
+                <canvas class="d-none" id="currentFrame" width="720" height="720" />
+                <video id="videoFeed" width="720" height="720" />
+           }
+            <!-- Modal footer -->
+            <div class="flex items-center p-4 md:p-5 space-x-3 rtl:space-x-reverse border-t border-gray-200 rounded-b dark:border-gray-600">
+                @if (!string.IsNullOrEmpty(frameUri))
+                {
+                    <button @onclick="SendImage" data-modal-hide="extralarge-modal" type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">SendImage</button>
+                }
+                else
+                {
+                    <button @onclick="CaptureFrame" type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Capture image</button>
+                    <button data-modal-hide="extralarge-modal" type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Close</button>
+                }
+                <button data-modal-hide="extralarge-modal" type="button" class="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<br />
+<br />
+
+@code {
+
+    [Parameter]
+    public ImageType typeOfImage{ get; set; }
+
+    private string frameUri = string.Empty;
+    public async Task StartCameraFeed()
+    {
+        await JSRuntime.InvokeVoidAsync("startVideo", "videoFeed");
+    }
+    private async Task CaptureFrame()
+    {
+        await JSRuntime.InvokeAsync<String>("getFrame", "videoFeed", "currentFrame", DotNetObjectReference.Create(this));
+    }
+    [JSInvokable]
+    public void ProcessImage(string imageString)
+    {
+        frameUri = imageString;
+    }
+    public async Task SendImage()
+    {
+        var image = CreateIFormFileFromBase64(frameUri);
+        var formData = new MultipartFormDataContent();
+        var streamContent = new StreamContent(image.OpenReadStream());
+        formData.Add(streamContent, "file", image.FileName);
+        var response = await _http.PostAsync($"api/files/upload-picture?imageType={typeOfImage}", formData);
+
+
+        // await _http.PostAsJsonAsync<IFormFile>("api/files/upload-PDFfile", );
+    }
+    public IFormFile CreateIFormFileFromBase64(string base64File)
+    {
+        var stream = new MemoryStream();
+        var bytes = Convert.FromBase64String(base64File.Trim().Split(",")[1]);
+
+        stream.Write(bytes);
+        stream.Position = 0;
+        return new FormFile(stream, 0, stream.Length, "file.png", "file-name.png");
+    }
+}
