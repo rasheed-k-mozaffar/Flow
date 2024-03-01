@@ -6,10 +6,13 @@
     <div class="h-screen w-full flex justify-center items-center">
         <div class="py-2 px-6 bg-gray-100 text-gray-500 rounded-xl font-medium">
             Select a chat thread to begin texting
+            <CameraView />
+
         </div>
     </div>
 }
 else
 {
     <Conversation ContactModel="@AppState.SelectedThread" />
+
 }
