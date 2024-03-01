@@ -1,9 +1,15 @@
 ﻿@page "/"
 @attribute [Authorize]
 
-<h1>Hello, world!</h1>
-<AuthorizeView>
-    <Authorized>
-        <h1>Hello @context.User.FindFirst(ClaimTypes.Name)!.Value</h1>
-    </Authorized>
-</AuthorizeView>
+@if (AppState.SelectedThread is null)
+{
+    <div class="h-screen w-full flex justify-center items-center">
+        <div class="py-2 px-6 bg-gray-100 text-gray-500 rounded-xl font-medium">
+            Select a chat thread to begin texting
+        </div>
+    </div>
+}
+else
+{
+    <Conversation ContactModel="@AppState.SelectedThread" />
+}
