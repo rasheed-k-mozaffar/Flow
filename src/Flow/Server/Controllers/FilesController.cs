@@ -136,7 +136,6 @@ public class FilesController : ControllerBase
             });
         }
     }
-
     [HttpDelete]
     [Route("delete-image/{imageId}")]
     [ProducesResponseType(statusCode: StatusCodes.Status200OK, type: typeof(ApiResponse))]
@@ -184,4 +183,103 @@ public class FilesController : ControllerBase
             });
         }
     }
+    [HttpGet]
+    [Route("delete-pdf/{pdfId}")]
+    public async Task<IActionResult> DeletePDFDocument(Guid pdfId)
+    {
+        try
+        {
+            bool imageRemoved = await _filesRepository
+                .RemovePDFAsync(pdfId);
+
+            if (imageRemoved)
+            {
+                _logger.LogInformation
+                (
+                    "Document with the ID: {pdfId} was deleted from the server",
+                    pdfId
+                );
+
+                return Ok(new ApiResponse
+                {
+                    Message = "Document deleted successfully",
+                    IsSuccess = true
+                });
+            }
+
+            _logger.LogError
+            (
+                "Failed attempt to delete document with the ID: {pdfId}",
+                pdfId
+            );
+
+            return BadRequest(new ApiErrorResponse
+            {
+                ErrorMessage = "Failed to delete document! Please try again"
+            });
+        }
+        catch (ResourceNotFoundException ex)
+        {
+            return NotFound(new ApiErrorResponse
+            {
+                ErrorMessage = ex.Message
+            });
+        }
+
+    }
+    [HttpPost]
+    [Route("upload-PDFfile")]
+    public async Task<IActionResult> RecievePDF([FromForm] IFormFile file)
+    {
+        if (file is null)
+        {
+            return BadRequest(new ApiErrorResponse
+            {
+                ErrorMessage = "Invalid request"
+            });
+        }
+        string fileName = file.FileName;
+        string fileExtension = Path.GetExtension(fileName);
+
+        if (fileExtension == ".pdf" && file.Length > 0)
+        {
+            try
+            {
+
+                string filePath = Path.Combine
+                                    (
+                                        _environment.WebRootPath,
+                                        "pdfs"
+                                    );
+                var resultingPath = await _filesRepository.SavePDF(file, filePath);
+
+                return Ok(new ApiResponse<string>
+                {
+                    Message = "file uploaded successfully",
+                    IsSuccess = true,
+                    Body= resultingPath
+                });
+
+            }
+
+            catch (Exception ex)
+            {
+                //Log ex
+                return Ok(new ApiResponse
+                {
+                    Message = "file upload fail",
+                    IsSuccess = true
+                });
+            }
+        }
+        else
+        {
+            return Ok(new ApiResponse
+            {
+                Message = "illegal operation",
+                IsSuccess = false
+            });
+        }
+    }
 }
+
