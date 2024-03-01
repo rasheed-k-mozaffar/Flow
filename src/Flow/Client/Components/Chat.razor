@@ -1,0 +1,53 @@
+@inject NavigationManager Nav
+@inject ApplicationState State
+
+<div @onclick="ChatClicked"
+    class="flex items-center bg-white border border-gray-200 rounded-lg shadow lg:flex-row lg:min-w-full md:flex-row md:max-w-xl hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700">
+    <div class="flex items-center gap-4 p-2">
+        <div>
+            <img class="h-[50px] w-[50px] rounded-full"
+                src="@(ContactModel.Contact!.ProfilePictureUrl ?? "/images/avatar.png")"
+                alt="@ContactModel.Contact.Name" />
+        </div>
+
+        <div class="font-medium dark:text-white">
+            <div>@ContactModel.Contact!.Name</div>
+            @if (@State.Threads?[ContactModel.ThreadId.ToString()!] is not null)
+            {
+                <div class="text-sm text-gray-500 dark:text-gray-400">
+                    @if (State.Threads[ContactModel.ThreadId.ToString()!].LastOrDefault()?.SenderId ==
+                   ContactModel.Contact.UserId)
+                    {
+                        <span>@ContactModel.Contact.Name:
+                            @State.Threads[ContactModel.ThreadId.ToString()!].LastOrDefault()?.Content</span>
+                    }
+                    else if (State.Threads[ContactModel.ThreadId.ToString()!].LastOrDefault() == null)
+                    {
+
+                    }
+                    else
+                    {
+                        <span>You: @State.Threads[ContactModel.ThreadId.ToString()!].LastOrDefault()?.Content</span>
+                    }
+                </div>
+
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public ContactDto ContactModel { get; set; } = null!;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        State.OnChange += StateHasChanged;
+    }
+    private void ChatClicked()
+    {
+        State.SelectedThread = ContactModel;
+        State.NotifyStateChanged();
+        Console.WriteLine($"The current thread id: {State.SelectedThread.ThreadId}");
+    }
+}

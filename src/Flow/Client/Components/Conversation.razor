@@ -1,9 +1,55 @@
-﻿<div class=" flex mt-0 p-2 justify-items-center items-center flex-col min-h-screen " style="background:#1F2937">
-    <TopBar/>
-    <MessageArea/>
-    <TextField/>
+﻿<div class="flex p-2 space-y-2 justify-items-center items-center flex-col min-h-screen w-full">
+    @* TOP BAR *@
+    <div
+        class="block w-full h-fit p-1.5 bg-white border top-1 border-gray-200 rounded-lg hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
+        <div class="flex items-center gap-4">
+            <div>
+                <img class="h-[50px] w-[50px] rounded-full"
+                    src="@(ContactModel.Contact!.ProfilePictureUrl ?? "/images/avatar.png")"
+                    alt="@ContactModel.Contact!.Name" />
+            </div>
+
+            <div class="font-medium dark:text-white">
+                <div class="text-xl">@ContactModel.Contact.Name</div>
+                <div class="text-sm text-gray-500 dark:text-gray-400">@ContactModel.Contact.Username</div>
+            </div>
+        </div>
+    </div>
+
+    @* MESSAGES AREA*@
+    <div id="messages-area"
+        class="h-[80vh] w-full border border-gray-200 rounded-lg p-2 space-y-1 overflow-y-scroll overflow-x-hidden">
+        @if (string.IsNullOrEmpty(threadId))
+        {
+            <DefaultSpinner />
+        }
+        else
+        {
+            foreach (var message in AppState.Threads![threadId])
+            {
+                <Message MessageModel="message"
+                    Sent="@(message.SenderId == currentUser.FindFirst(ClaimTypes.NameIdentifier)!.Value)" />
+            }
+        }
+    </div>
+
+    <div class="flex items-center justify-between gap-2 h-full w-full">
+        <div class="w-[96%]">
+            <input type="text" placeholder="Type your message..." @bind="messageModel.Content"
+                class="w-full border-0 bg-gray-100 rounded-md ring-1 ring-slate-900/5 focus:ring-0" />
+        </div>
+
+        <div class="w-[4%]">
+            <button @onclick="HandleSendingMessageAsync"
+                class="p-3 rounded-full bg-blue-500 flex justify-center items-center transition-all hover:bg-blue-600">
+                <svg class="w-6 h-6 rotate-90 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                    fill="currentColor" viewBox="0 0 24 24">
+                    <path fill-rule="evenodd"
+                        d="M12 2c.4 0 .8.3 1 .6l7 18a1 1 0 0 1-1.4 1.3L13 19.5V13a1 1 0 1 0-2 0v6.5L5.4 22A1 1 0 0 1 4 20.6l7-18a1 1 0 0 1 1-.6Z"
+                        clip-rule="evenodd" />
+                </svg>
+
+            </button>
+        </div>
+    </div>
 </div>
-
-@code {
-
-}

@@ -6,28 +6,29 @@
     <LangVersion>12.0</LangVersion>
     <UserSecretsId>bd1cae7c-c683-4cfb-a5de-779a2c1b09fc</UserSecretsId>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(RunConfiguration)' == 'https' " />
-  <PropertyGroup Condition=" '$(RunConfiguration)' == 'http' " />
+  <PropertyGroup Condition=" '$(RunConfiguration)' == 'https' "/>
+  <PropertyGroup Condition=" '$(RunConfiguration)' == 'http' "/>
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="7.0.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="7.0.1" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.1" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.1" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="7.0.1" />
-    <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="7.0.1"/>
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="7.0.1"/>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.1"/>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.1"/>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.1"/>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="7.0.1"/>
+    <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.1.0"/>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="7.0.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0"/>
+    <PackageReference Include="SimdLinq" Version="1.3.2"/>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Client\Flow.Client.csproj" />
-    <ProjectReference Include="..\Shared\Flow.Shared.csproj" />
+    <ProjectReference Include="..\Client\Flow.Client.csproj"/>
+    <ProjectReference Include="..\Shared\Flow.Shared.csproj"/>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="wwwroot/" />
-    <Folder Include="wwwroot/images/" />
+    <Folder Include="wwwroot/"/>
+    <Folder Include="wwwroot/images/"/>
   </ItemGroup>
 </Project>
