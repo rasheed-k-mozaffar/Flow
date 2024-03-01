@@ -50,7 +50,7 @@ public class FilesController : ControllerBase
 
         string fileName = file.FileName;
         string fileExtension = Path.GetExtension(fileName);
-        \
+        
         if (!_allowedFileExtensions.Contains(fileExtension)) // * use of unallowed extension
         {
             return BadRequest(new ApiErrorResponse
