@@ -1,5 +1,4 @@
-﻿using Azure.Core;
-using Flow.Shared.ApiResponses;
+﻿using Flow.Shared.ApiResponses;
 using Flow.Shared.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -8,7 +7,7 @@ namespace Flow.Server.Controllers;
 
 [ApiController]
 [Route("/api/[controller]")]
-//[Authorize]
+[Authorize]
 public class FilesController : ControllerBase
 {
     private static readonly IEnumerable<string> _allowedFileExtensions = new List<string>

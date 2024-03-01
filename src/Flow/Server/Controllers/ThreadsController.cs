@@ -7,7 +7,7 @@ namespace Flow.Server.Controllers;
 
 [Route("/api/[controller]")]
 [ApiController]
-//[Authorize]
+[Authorize]
 public class ThreadsController : ControllerBase
 {
     private readonly IThreadRepository _threadsRepository;
