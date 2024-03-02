@@ -36,7 +36,7 @@
             {
                 <canvas class="d-none" id="currentFrame" style="z-index:-1; position:absolute; top:-1000px; left:-1000px;" width="@width" height="@height" />
                 <video id="videoFeed" width="2000" height="2000" />
-           }
+            }
                     
             <!-- Modal footer -->
             <div class="flex items-center p-4 md:p-5 space-x-3 rtl:space-x-reverse border-t border-gray-200 rounded-b dark:border-gray-600">
@@ -102,7 +102,8 @@
         if (string.IsNullOrEmpty(frameUri))
         {
             await JSRuntime.InvokeVoidAsync("CloseStream", "videoFeed", "currentFrame");
-            frameUri = string.Empty;
+            StateHasChanged();
         }
+        frameUri = string.Empty;    
     }
 }

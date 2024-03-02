@@ -101,6 +101,7 @@ function getFrame(src, dest, dotNetHelper) {
 function CloseStream(src, dest) {
     let video = document.getElementById(src);
     let canvas = document.getElementById(dest);
+    ResetCanvas(dest);
     if (video.srcObject != null) {
         const stream = video.srcObject;
         if (stream) {
@@ -109,4 +110,17 @@ function CloseStream(src, dest) {
             video.srcObject = null;
         }
     }
+}
+function ResetCanvas(dest) {
+    let c = document.getElementById(dest);
+    let context = c.getContext('2d');
+    // Store the current transformation matrix
+    context.save();
+
+    // Use the identity matrix while clearing the canvas
+    context.setTransform(1, 0, 0, 1, 0, 0);
+    context.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Restore the transform
+    context.restore();
 }
