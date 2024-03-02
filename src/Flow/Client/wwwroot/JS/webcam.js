@@ -43,13 +43,14 @@ function startVideo(src, RearCamera) {
                 };
                 const track = stream.getVideoTracks()[0];
                 const settings = track.getSettings();
-
+    video.style.webkitTransform = "scaleX(1)";
+    video.style.transform = "scaleX(1)";
                 // Extract width and height from the stream settings
                 width = settings.width;
                 height = settings.height;
                 //mirror image
-                video.style.webkitTransform = "scaleX(-1)";
-    video.style.transform = "scaleX(-1)";
+    //            video.style.webkitTransform = "scaleX(-1)";
+    //video.style.transform = "scaleX(-1)";
             });
         }
     }
@@ -72,10 +73,8 @@ function startVideo(src, RearCamera) {
                 width = settings.width;
                 height = settings.height;
                 console.log("width "+width);
-                console.log("height "+height);
-                //mirror image
-                video.style.webkitTransform = "scaleX(-1)";
-                video.style.transform = "scaleX(-1)";
+                console.log("height " + height);
+
             });
         }
     }
@@ -84,6 +83,7 @@ function getFrame(src, dest) {
     let video = document.getElementById(src);
     let canvas = document.getElementById(dest);
     canvas.getContext('2d').drawImage(video, 0, 0, width, height);
+
     // Stop the webcam stream
     const stream = video.srcObject;
 
