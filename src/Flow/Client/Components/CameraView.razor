@@ -10,7 +10,6 @@
     <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
         <path fill-rule="evenodd" d="M7.5 4.6A2 2 0 0 1 8.9 4h6.2c.5 0 1 .2 1.4.6L17.9 6H19a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8c0-1.1.9-2 2-2h1l1.5-1.4ZM10 12a2 2 0 1 1 4 0 2 2 0 0 1-4 0Zm2-4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z" clip-rule="evenodd" />
     </svg>
-
 </button>
 
 <!-- Extra Large Modal -->
@@ -88,9 +87,6 @@
         var streamContent = new StreamContent(image.OpenReadStream());
         formData.Add(streamContent, "file", image.FileName);
         var response = await _http.PostAsync($"api/files/upload-picture?imageType={typeOfImage}", formData);
-
-
-        // await _http.PostAsJsonAsync<IFormFile>("api/files/upload-PDFfile", );
     }
     public IFormFile CreateIFormFileFromBase64(string base64File)
     {
@@ -103,6 +99,10 @@
     }
     public async Task CloseVideoStream()
     {
-        await JSRuntime.InvokeVoidAsync("CloseStream", "videoFeed", "currentFrame");
+        if (string.IsNullOrEmpty(frameUri))
+        {
+            await JSRuntime.InvokeVoidAsync("CloseStream", "videoFeed", "currentFrame");
+            frameUri = string.Empty;
+        }
     }
 }

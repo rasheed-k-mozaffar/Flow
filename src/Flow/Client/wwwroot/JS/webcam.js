@@ -101,12 +101,12 @@ function getFrame(src, dest, dotNetHelper) {
 function CloseStream(src, dest) {
     let video = document.getElementById(src);
     let canvas = document.getElementById(dest);
-
-    const stream = video.srcObject;
-    if (stream) {
-        const tracks = stream.getTracks();
-        tracks.forEach(track => track.stop());
-        video.srcObject = null;
+    if (video.srcObject != null) {
+        const stream = video.srcObject;
+        if (stream) {
+            const tracks = stream.getTracks();
+            tracks.forEach(track => track.stop());
+            video.srcObject = null;
+        }
     }
-
 }
