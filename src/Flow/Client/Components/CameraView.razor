@@ -11,9 +11,10 @@
         <path fill-rule="evenodd" d="M7.5 4.6A2 2 0 0 1 8.9 4h6.2c.5 0 1 .2 1.4.6L17.9 6H19a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8c0-1.1.9-2 2-2h1l1.5-1.4ZM10 12a2 2 0 1 1 4 0 2 2 0 0 1-4 0Zm2-4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z" clip-rule="evenodd" />
     </svg>
 </button>
+<canvas class="d-none" id="currentFrame" style="z-index:-1; position:absolute; top:-1000px; left:-1000px;" width="@width" height="@height" />
 
 <!-- Extra Large Modal -->
-<div id="default-modal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+<div id="default-modal" data-modal-backdrop="static" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
 @* <div id="default-modal" tabindex="-1" class="fixed top-0 left-0 right-0 z-50 hidden w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full">
     *@        <div class="relative p-4 w-full max-w-2xl max-h-full">
         <!-- Modal content -->
@@ -34,7 +35,6 @@
             }
             else
             {
-                <canvas class="d-none" id="currentFrame" style="z-index:-1; position:absolute; top:-1000px; left:-1000px;" width="@width" height="@height" />
                 <video id="videoFeed" width="2000" height="2000" />
             }
                     
