@@ -24,6 +24,7 @@
 let width=0;
 let height=0;
 function startVideo(src, RearCamera) {
+
     if (RearCamera == true) {
         if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
             navigator.mediaDevices.getUserMedia({
@@ -110,4 +111,7 @@ function CloseStream(src, dest) {
             video.srcObject = null;
         }
     }
+}
+function isMobile() {
+    return /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini|mobile/i.test(navigator.userAgent);
 }
