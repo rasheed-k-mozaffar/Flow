@@ -1,7 +1,9 @@
-﻿using Flow.Server.Models;
+﻿using Flow.Server.Hubs;
+using Flow.Server.Models;
 using Flow.Shared.ApiResponses;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 
 namespace Flow.Server.Controllers;
 
@@ -11,9 +13,21 @@ namespace Flow.Server.Controllers;
 public class ThreadsController : ControllerBase
 {
     private readonly IThreadRepository _threadsRepository;
-    public ThreadsController(IThreadRepository threadRepository)
+    private readonly IMessagesRepository _messagesRepository;
+    private readonly IHubContext<ChatHub, IChatThreadsClient> _chatHubContext;
+    private readonly ILogger<ThreadsController> _logger;
+    public ThreadsController
+    (
+        IThreadRepository threadRepository,
+        IHubContext<ChatHub, IChatThreadsClient> chatHubContext,
+        ILogger<ThreadsController> logger,
+        IMessagesRepository messagesRepository
+    )
     {
         _threadsRepository = threadRepository;
+        _chatHubContext = chatHubContext;
+        _logger = logger;
+        _messagesRepository = messagesRepository;
     }
 
     [HttpGet]
@@ -31,7 +45,8 @@ public class ThreadsController : ControllerBase
             IsSuccess = true
         });
     }
-    [HttpPost]
+
+    [HttpGet]
     [Route("get-messages-by-date")]
     [ProducesResponseType(statusCode: StatusCodes.Status200OK, type: typeof(ApiResponse<List<MessageDto>>))]
     [ProducesResponseType(statusCode: StatusCodes.Status401Unauthorized, type: typeof(UnauthorizedResult))]
@@ -45,6 +60,49 @@ public class ThreadsController : ControllerBase
             IsSuccess = true,
             Body = LoadedMessages
         });
+    }
+
+    [HttpPost]
+    [Route("delete-messages")]
+    [ProducesResponseType(statusCode: StatusCodes.Status200OK, type: typeof(ApiResponse))]
+    [ProducesResponseType(statusCode: StatusCodes.Status400BadRequest, type: typeof(ApiErrorResponse))]
+    [ProducesResponseType(statusCode: StatusCodes.Status500InternalServerError, type: typeof(ApiErrorResponse))]
+    public async Task<IActionResult> DeleteMessages([FromBody] DeleteMessagesRequest request)
+    {
+        try
+        {
+            if (request.MessagesIds is null || !request.MessagesIds.Any())
+            {
+                return BadRequest(new ApiErrorResponse
+                {
+                    ErrorMessage = "You haven't selected any messages to delete"
+                });
+            }
+
+            await _messagesRepository.DeleteMessagesFromThreadAsync(request.ThreadId, request.MessagesIds);
+
+            // propagate the ids to the client
+            await _chatHubContext
+                    .Clients
+                    .Group(request.ThreadId.ToString())
+                    .ReceiveDeletedMessagesIdsAsync(request);
+
+            return Ok(new ApiResponse
+            {
+                Message = "Messages deleted successfully",
+                IsSuccess = true
+            });
+        }
+
+
+        catch (DatabaseOperationFailedException ex)
+        {
+
+            return BadRequest(new ApiErrorResponse
+            {
+                ErrorMessage = ex.Message
+            });
+        }
     }
 }
 

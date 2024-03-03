@@ -1,7 +1,23 @@
-﻿<div class="flex p-2 space-y-2 justify-items-center items-center flex-col min-h-screen w-full">
+﻿@if (wantsToDeleteMessages)
+{
+    <ConfirmMessageDeletesModal Show="wantsToDeleteMessages" OnCancelClicked="CloseConfirmMessageDeletesModal"
+    OnDeleteClicked="HandleSendingDeleteMessagesRequestAsync" />
+}
+
+<div class="flex justify-items-center items-center flex-col min-h-screen max-h-screen w-full relative">
     @* TOP BAR *@
-    <div
-        class="block w-full h-fit p-1.5 bg-white border top-1 border-gray-200 rounded-lg hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
+    <div class="block w-full h-fit p-1.5 bg-white  border-slate-900/5 border-b">
+        <button data-drawer-target="default-sidebar" data-drawer-toggle="default-sidebar"
+            aria-controls="default-sidebar" type="button"
+            class="inline-flex bg-white items-center p-2 mt-2 ms-3 text-sm text-gray-500 rounded-lg sm:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600">
+            <span class="sr-only">Open sidebar</span>
+            <svg class="w-6 h-6" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20"
+                xmlns="http://www.w3.org/2000/svg">
+                <path clip-rule="evenodd" fill-rule="evenodd"
+                    d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 10.5a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10z">
+                </path>
+            </svg>
+        </button>
         <div class="flex items-center gap-4">
             <div>
                 <img class="h-[50px] w-[50px] rounded-full"
@@ -18,7 +34,7 @@
 
     @* MESSAGES AREA*@
     <div id="messages-area"
-        class="h-[80vh] w-full border border-gray-200 rounded-lg p-2 space-y-1 overflow-y-scroll overflow-x-hidden">
+        class="flex-grow h-full w-full border border-gray-200 rounded-lg p-2 space-y-1 overflow-y-scroll overflow-x-hidden">
         @if (string.IsNullOrEmpty(threadId))
         {
             <DefaultSpinner />
@@ -28,28 +44,51 @@
             foreach (var message in AppState.Threads![threadId])
             {
                 <Message MessageModel="message"
-                    Sent="@(message.SenderId == currentUser.FindFirst(ClaimTypes.NameIdentifier)!.Value)" />
+                    Sent="@(message.SenderId == currentUser.FindFirst(ClaimTypes.NameIdentifier)!.Value)"
+                    IsSelected="@(selectedMessages.Contains(message.Id))"
+                    OnMessageSelected="(() => selectedMessages.Add(message.Id))"
+                    OnMessageUnSelected="(() => selectedMessages.Remove(message.Id))" />
             }
         }
     </div>
 
-    <div class="flex items-center justify-between gap-2 h-full w-full">
-        <div class="w-[96%]">
-            <input type="text" placeholder="Type your message..." @bind="messageModel.Content"
-                class="w-full border-0 bg-gray-100 rounded-md ring-1 ring-slate-900/5 focus:ring-0" />
+    @if (selectedMessages.Any())
+    {
+
+        <div class="flex justify-between items-center w-full py-3 px-2">
+            <div>
+                <button @onclick="OpenConfirmMessageDeletesModal" class="text-red-500">Delete</button>
+            </div>
+
+            <div>
+                <button @onclick="(() => selectedMessages.Clear())" class="text-blue-500">Unselect</button>
+            </div>
+
         </div>
 
-        <div class="w-[4%]">
-            <button @onclick="HandleSendingMessageAsync"
-                class="p-3 rounded-full bg-blue-500 flex justify-center items-center transition-all hover:bg-blue-600">
-                <svg class="w-6 h-6 rotate-90 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
-                    fill="currentColor" viewBox="0 0 24 24">
-                    <path fill-rule="evenodd"
-                        d="M12 2c.4 0 .8.3 1 .6l7 18a1 1 0 0 1-1.4 1.3L13 19.5V13a1 1 0 1 0-2 0v6.5L5.4 22A1 1 0 0 1 4 20.6l7-18a1 1 0 0 1 1-.6Z"
-                        clip-rule="evenodd" />
-                </svg>
+    }
+    else
+    {
 
-            </button>
-        </div>
-    </div>
+        <EditForm Model="messageModel" class="flex items-center justify-between gap-2 bottom-0 h-fit w-full">
+            <div class="w-full">
+                <input autofocus type="text" placeholder="Type your message..." @bind="messageModel.Content"
+                    @bind:event="oninput" class="w-full py-3 border-0 bg-gray-100 ring-1 ring-slate-900/5 focus:ring-0" />
+            </div>
+
+            @if (!string.IsNullOrEmpty(messageModel.Content))
+            {
+                <button @onclick="HandleSendingMessageAsync" type="submit"
+                    class="p-2 flex items-center justify-center absolute right-0">
+                    <svg class="w-8 h-8 rotate-90 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                        fill="currentColor" viewBox="0 0 24 24">
+                        <path fill-rule="evenodd"
+                            d="M12 2c.4 0 .8.3 1 .6l7 18a1 1 0 0 1-1.4 1.3L13 19.5V13a1 1 0 1 0-2 0v6.5L5.4 22A1 1 0 0 1 4 20.6l7-18a1 1 0 0 1 1-.6Z"
+                            clip-rule="evenodd" />
+                    </svg>
+                </button>
+            }
+        </EditForm>
+
+    }
 </div>

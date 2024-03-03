@@ -1,8 +1,7 @@
-﻿<div class="flex justify-start space-x-2 @(Sent ? null : "flex-row-reverse") items-center">
+﻿<div class="flex @(Sent ? "justify-start" : "justify-end") space-x-2 items-center">
     @if (IsSelected)
     {
-        <Animate Animation="@(Sent ? Animations.FadeRight : Animations.FadeLeft)" Duration="TimeSpan.FromMilliseconds(250)"
-            @ref="onSelectAnimation">
+        <Animate Animation="Animations.FadeRight" Duration="TimeSpan.FromMilliseconds(250)" @ref="onSelectAnimation">
             <svg class="w-6 h-6 text-green-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor"
                 viewBox="0 0 24 24">
                 <path fill-rule="evenodd"
@@ -20,15 +19,28 @@
 
 @code {
     private Animate? onSelectAnimation = new();
-    public bool IsSelected { get; set; } = false;
+    [Parameter] public bool IsSelected { get; set; } = false;
     [Parameter] public MessageDto MessageModel { get; set; } = null!;
     [Parameter] public EventCallback OnMessageSelected { get; set; }
+    [Parameter] public EventCallback OnMessageUnSelected { get; set; }
     [Parameter] public bool Sent { get; set; }
 
     private void MessageClicked()
     {
-        onSelectAnimation?.Run();
-        IsSelected = !IsSelected;
-        OnMessageSelected.InvokeAsync();
+        if (Sent)
+        {
+            onSelectAnimation?.Run();
+
+            IsSelected = !IsSelected;
+
+            if (IsSelected)
+            {
+                OnMessageSelected.InvokeAsync();
+            }
+            else
+            {
+                OnMessageUnSelected.InvokeAsync();
+            }
+        }
     }
 }

@@ -21,6 +21,7 @@ builder.Services.AddScoped<IContactRequestsService, ContactRequestsService>();
 builder.Services.AddScoped<IUsersService, UsersService>();
 builder.Services.AddScoped<AuthenticationStateProvider, JwtAuthenticationStateProvider>();
 builder.Services.AddScoped<IThreadsService, ThreadsService>();
+builder.Services.AddScoped<IMessagesService, MessagesService>();
 
 builder.Services.AddSingleton<ApplicationState>();
 

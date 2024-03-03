@@ -41,6 +41,12 @@ public class ApplicationState
             NotifyStateChanged();
         });
 
+        HubConnection.On<DeleteMessagesRequest>("ReceiveDeletedMessagesIdsAsync", request =>
+        {
+            Threads?[request.ThreadId.ToString()].RemoveAll(m => request.MessagesIds!.Contains(m.Id));
+            NotifyStateChanged();
+        });
+
         await HubConnection.StartAsync();
     }
 }
