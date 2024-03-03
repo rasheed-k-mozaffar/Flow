@@ -1,6 +1,4 @@
-﻿using System.Runtime.InteropServices;
-using System.Security.Claims;
-using System.Windows.Markup;
+﻿using System.Security.Claims;
 using Flow.Client.State;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -24,7 +22,14 @@ public partial class Conversation : ComponentBase
     [Inject]
     public IJSRuntime Js { get; set; } = default!;
 
+    [Inject]
+    public IMessagesService MessagesService { get; set; } = default!;
+
+    private bool wantsToDeleteMessages = false;
+
+    private ICollection<Guid> selectedMessages = new List<Guid>();
     private string? threadId;
+    private string _errorMessage = string.Empty;
     public AuthenticationState? authState;
     private ClaimsPrincipal currentUser = new();
 
@@ -46,6 +51,8 @@ public partial class Conversation : ComponentBase
         await Js.InvokeVoidAsync("scrollToBottom", "messages-area");
         await base.OnParametersSetAsync();
         threadId = ContactModel.ThreadId.ToString();
+        selectedMessages.Clear();
+        wantsToDeleteMessages = false;
 
     }
 
@@ -61,4 +68,31 @@ public partial class Conversation : ComponentBase
             messageModel = new();
         }
     }
+
+    private async Task HandleSendingDeleteMessagesRequestAsync()
+    {
+        try
+        {
+            DeleteMessagesRequest request = new()
+            {
+                ThreadId = Guid.Parse(threadId!),
+                MessagesIds = selectedMessages
+            };
+
+            await MessagesService.SendDeleteMessagesRequestAsync(request);
+            selectedMessages.Clear();
+        }
+        catch (OperationFailureException ex)
+        {
+            _errorMessage = ex.Message;
+        }
+        finally
+        {
+            CloseConfirmMessageDeletesModal();
+        }
+    }
+
+    private void OpenConfirmMessageDeletesModal() => wantsToDeleteMessages = true;
+
+    private void CloseConfirmMessageDeletesModal() => wantsToDeleteMessages = false;
 }
