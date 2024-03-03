@@ -18,7 +18,7 @@
                     @if (State.Threads[ContactModel.ThreadId.ToString()!].LastOrDefault()?.SenderId ==
                    ContactModel.Contact.UserId)
                     {
-                        <span>@ContactModel.Contact.Name:
+                        <span>@ContactModel.Contact.Name!.Split(' ')[0]:
                             @State.Threads[ContactModel.ThreadId.ToString()!].LastOrDefault()?.Content</span>
                     }
                     else if (State.Threads[ContactModel.ThreadId.ToString()!].LastOrDefault() == null)
