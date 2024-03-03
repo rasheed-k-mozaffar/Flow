@@ -37,7 +37,7 @@ public partial class SignUp : ComponentBase
     protected override void OnInitialized()
     {
         EC = new EditContext(requestModel);
-        EC.OnFieldChanged += EditContext_OnFieldChanged!;
+        //EC.OnFieldChanged += EditContext_OnFieldChanged!;
         base.OnInitialized();
     }
 
@@ -94,6 +94,12 @@ public partial class SignUp : ComponentBase
     }
     private void ValidateAndPlayAnimation()
     {
+        var validate = EC!.Validate();
+        var numberOfWrongFields = EC.GetValidationMessages();
+        if (numberOfWrongFields.Count() == 3)
+        {
+            firstFormValid = true;
+        }
         if (firstFormValid)
         {
             secondFormFadeIn?.Run();
