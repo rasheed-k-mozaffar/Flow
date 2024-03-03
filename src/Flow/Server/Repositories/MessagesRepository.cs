@@ -11,6 +11,16 @@ public class MessagesRepository : IMessagesRepository
         _logger = logger;
     }
 
+    public async Task DeleteMessagesFromThreadAsync(Guid threadId, IEnumerable<Guid> idsOfMessagesToDelete)
+    {
+        int deletedEntitesCount = await _db
+                                        .Messages
+                                        .Where(m => m.ThreadId == threadId && idsOfMessagesToDelete.Contains(m.Id))
+                                        .ExecuteDeleteAsync();
+        if (deletedEntitesCount <= 0)
+            throw new DatabaseOperationFailedException("Something went wrong while deleting the messages");
+    }
+
     public async Task SaveMessageAsync(Message message)
     {
         var entityEntry = await _db

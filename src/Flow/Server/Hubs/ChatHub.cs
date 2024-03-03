@@ -53,6 +53,12 @@ public class ChatHub : Hub<IChatThreadsClient>
         await LeaveThreadsAsync(threadsIds);
     }
 
+    /// <summary>
+    /// This method will be invoked whenever a user types and sends a message, the invocation of this method causes the propagation of the
+    /// sent message to be received on the other end of the chat thread
+    /// </summary>
+    /// <param name="message"></param>
+    /// <returns></returns>
     public async Task SendMessageAsync(SendMessageDto message)
     {
         await _messagesRepository.SaveMessageAsync(message.ToMessage());
@@ -84,6 +90,7 @@ public interface IChatThreadsClient
 {
     Task SendMessageAsync(SendMessageDto message);
     Task ReceiveMessageAsync(MessageDto message);
+    Task ReceiveDeletedMessagesIdsAsync(DeleteMessagesRequest deletedMessagesIds);
     Task JoinThreadsAsync(Guid? threadId);
     Task LeaveThreadsAsync(Guid? threadId);
 }
