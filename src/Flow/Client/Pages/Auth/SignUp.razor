@@ -3,15 +3,21 @@
 
 <PageTitle>Flow - Sign up</PageTitle>
 
+@if (wantsToCaptureProfilePicture)
+{
+    <CameraView OnCapture="GetCapturedImageUri" Show="wantsToCaptureProfilePicture" OnCloseClicked="CloseCameraModal"
+    typeOfImage="ImageType.ProfilePicture" />
+}
+
 <div class="flex justify-center items-center min-h-screen">
-    <div class="w-10/12 sm:w-10/12 md:w-4/12 lg:w-3/12 xl:2/12">
-            @if (!string.IsNullOrEmpty(errorMessage))
-            {
-                <ErrorAlert ErrorMessage="@errorMessage" OnCloseClicked="CloseErrorAlert"/>
-            }
-        <Animate Animation="Animations.FadeLeft" Duration="TimeSpan.FromSeconds(1)" Delay="TimeSpan.FromSeconds(0.5)">
-            @if (!secondFormTime)
-            {
+    <div class="w-10/12 sm:w-10/12 md:w-4/12 lg:w-4/12 xl:4/12">
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <ErrorAlert ErrorMessage="@errorMessage" OnCloseClicked="CloseErrorAlert" />
+        }
+        @if (displayFirstForm)
+        {
+            <Animate Animation="Animations.FadeLeft" Duration="TimeSpan.FromSeconds(1)" @ref="firstFormAnimation">
                 <div class="mb-5">
                     <h1 class="text-3xl font-semibold">Enter your details</h1>
                 </div>
@@ -41,46 +47,122 @@
                             placeholder="johndoe@mail.com" required />
                         <ValidationMessage For="(() => requestModel.Email)" class="validation-message" />
                     </div>
-                    <button @onclick="ValidateAndPlayAnimation" type="submit" class="primary-btn w-full"
-                        hidden=@secondFormTime>Next</button>
+                    <button @onclick="ValidateAndPlayAnimation" type="submit" class="primary-btn w-full">Next</button>
                 </EditForm>
-            }
-        </Animate>
-        <Animate Animation="Animations.FadeLeft" Duration="TimeSpan.FromSeconds(1)" @ref="secondFormFadeIn"
-            IsManual="true">
-            <div class="mb-5">
-                <h1 class="text-3xl font-semibold">Create your account</h1>
-            </div>
+            </Animate>
+        }
 
-            <EditForm Model="requestModel" OnValidSubmit="HandleUserRegistrationAsync" class="mx-auto">
-                <DataAnnotationsValidator />
+        @if (displaySecondForm)
+        {
+            <Animate Animation="Animations.FadeLeft" Duration="TimeSpan.FromSeconds(1)" @ref="secondFormFadeIn">
                 <div class="mb-5">
-                    <label class="label">
-                        Username</label>
-                    <InputText @bind-Value="requestModel.Username" type="text" id="username" class="input-field"
-                        placeholder="johndoe123" required />
-                    <ValidationMessage For="(() => requestModel.Username)" class="validation-message" />
+                    <h1 class="text-3xl font-semibold">Create your account</h1>
                 </div>
 
-                <div class="mb-5">
-                    <label class="label">
-                        Password</label>
-                    <InputText @bind-Value="requestModel.Password" type="password" id="password" class="input-field"
-                        required />
-                    <ValidationMessage For="(() => requestModel.Password)" class="validation-message" />
-                </div>
-                <div class="mb-5">
-                    <label class="label">Repeat password</label>
-                    <InputText @bind-Value="requestModel.RepeatedPassword" type="password" id="repeat-password"
-                        class="input-field" required />
-                    <ValidationMessage For="(() => requestModel.RepeatedPassword)" class="validation-message" />
-                </div>
-                <button type="submit" class="primary-btn w-full" disabled="@isMakingRequest">Sign up</button>
+                <EditForm Model="requestModel" OnValidSubmit="MoveToFinalForm" class="mx-auto">
+                    <DataAnnotationsValidator />
+                    <div class="mb-5">
+                        <label class="label">
+                            Username</label>
+                        <InputText @bind-Value="requestModel.Username" type="text" id="username" class="input-field"
+                            placeholder="johndoe123" required />
+                        <ValidationMessage For="(() => requestModel.Username)" class="validation-message" />
+                    </div>
 
-                <div class="flex justify-center mt-5">
-                    <p>Already have an account? <a href="/signin" class="link">Sign in here</a></p>
+                    <div class="mb-5">
+                        <label class="label">
+                            Password</label>
+                        <InputText @bind-Value="requestModel.Password" type="password" id="password" class="input-field"
+                            required />
+                        <ValidationMessage For="(() => requestModel.Password)" class="validation-message" />
+                    </div>
+                    <div class="mb-5">
+                        <label class="label">Repeat password</label>
+                        <InputText @bind-Value="requestModel.RepeatedPassword" type="password" id="repeat-password"
+                            class="input-field" required />
+                        <ValidationMessage For="(() => requestModel.RepeatedPassword)" class="validation-message" />
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <button type="button" class="secondary-btn" @onclick="GoBackToFirstForm">Back</button>
+                        <button type="submit" class="primary-btn">Next</button>
+                    </div>
+
+                    <div class="flex justify-center mt-5">
+                        <p>Already have an account? <a href="/signin" class="link">Sign in here</a></p>
+                    </div>
+                </EditForm>
+            </Animate>
+        }
+
+        @if (displayFinalForm)
+        {
+            <Animate Animation="Animations.FadeLeft" DurationMs="500" @ref="finalFormAnimation">
+                <div class="w-full">
+                    <div class="mb-5">
+                        <h1 class="text-3xl font-semibold">Complete your profile</h1>
+                    </div>
+
+                    <div class="w-full">
+                        <div>
+                            <div class="w-full flex justify-center mb-3">
+                                <img class="w-[200px] h-[200px] rounded-full object-cover"
+                                    src="@(string.IsNullOrEmpty(profilePictureTempUrl) ? "/images/avatar.png" : profilePictureTempUrl)"
+                                    alt="user avatar" />
+                            </div>
+
+                            <div class="space-y-2">
+                                <div class="flex items-center justify-center space-x-2">
+                                    <label class="primary-btn flex justify-center items-center space-x-2 w-full">
+                                        <InputFile class="hidden" OnChange="SelectProfilePicture" />
+                                        <div>Choose a profile picture</div>
+                                        <svg class="w-6 h-6 text-white" aria-hidden="true"
+                                            xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                                            <path fill-rule="evenodd"
+                                                d="M3 6c0-1.1.9-2 2-2h5.5a2 2 0 0 1 1.6.7L14 7H3V6Zm0 3v10c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2V9H3Z"
+                                                clip-rule="evenodd" />
+                                        </svg>
+
+                                    </label>
+
+                                    <button @onclick="OpenCameraModal"
+                                        class="primary-btn flex justify-center items-center space-x-2 w-full">
+                                        <div>Take new one</div>
+                                        <svg class="w-6 h-6 text-white" aria-hidden="true"
+                                            xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                                            <path fill-rule="evenodd"
+                                                d="M7.5 4.6A2 2 0 0 1 8.9 4h6.2c.5 0 1 .2 1.4.6L17.9 6H19a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8c0-1.1.9-2 2-2h1l1.5-1.4ZM10 12a2 2 0 1 1 4 0 2 2 0 0 1-4 0Zm2-4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z"
+                                                clip-rule="evenodd" />
+                                        </svg>
+                                    </button>
+                                </div>
+
+                                @if (!string.IsNullOrEmpty(profilePictureTempUrl))
+                                {
+                                    <button @onclick="(() => profilePictureTempUrl = string.Empty)"
+                                        class="secondary-btn w-full">Remove
+                                        picture</button>
+                                }
+
+                                <EditForm Model="requestModel">
+                                    <DataAnnotationsValidator />
+                                    <InputTextArea style="height: 100px" @bind-Value="requestModel.Bio" class="input-field"
+                                        placeholder="Write a bio...(Optional)" />
+                                    <ValidationMessage For="(() => requestModel.Bio)" class="validation-message" />
+                                </EditForm>
+
+                                <div class="flex justify-between items-center">
+                                    <button class="secondary-btn" disabled="@isMakingRequest" @onclick="GoBackToSecondForm">
+                                        Back
+                                    </button>
+                                    <button class="primary-btn" disabled="@isMakingRequest"
+                                        @onclick="HandleUserRegistrationAsync">Complete Sign Up</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </EditForm>
-        </Animate>
+            </Animate>
+        }
     </div>
 </div>

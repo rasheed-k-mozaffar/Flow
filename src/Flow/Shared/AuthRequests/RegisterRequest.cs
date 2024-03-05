@@ -31,5 +31,8 @@ public class RegisterRequest
     [Compare(nameof(Password), ErrorMessage = "The repeated password doesn't match your password")]
     public string? RepeatedPassword { get; set; }
 
+    [MaxLength(2000)]
+    public string? Bio { get; set; }
+
     public string? ProfilePictureUrl { get; set; }
 }
