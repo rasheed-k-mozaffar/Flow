@@ -21,7 +21,6 @@ public partial class SearchUsersModal : ComponentBase
     private string errorMessage = string.Empty;
     private string successMessage = string.Empty;
     private bool isPerformingSearch = false;
-    private bool isMakingRequest = false;
 
     private async Task PerformSearchAsync()
     {
@@ -82,7 +81,6 @@ public partial class SearchUsersModal : ComponentBase
 
     private async Task SendRequestToUserAsync(string recipientId)
     {
-        isMakingRequest = true;
         errorMessage = string.Empty;
 
         try
@@ -105,15 +103,10 @@ public partial class SearchUsersModal : ComponentBase
         {
             Console.WriteLine(ex.Message);
         }
-        finally
-        {
-            isMakingRequest = false;
-        }
     }
 
     private async Task CancelContactRequestAsync(Guid? requestId)
     {
-        isMakingRequest = true;
         errorMessage = string.Empty;
 
         try
@@ -133,10 +126,6 @@ public partial class SearchUsersModal : ComponentBase
         catch (OperationFailureException ex)
         {
             errorMessage = ex.Message;
-        }
-        finally
-        {
-            isMakingRequest = false;
         }
     }
 

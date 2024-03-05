@@ -265,6 +265,7 @@ public class FilesController : ControllerBase
             catch (Exception ex)
             {
                 //Log ex
+                _logger.LogError(ex.Message);
                 return Ok(new ApiResponse
                 {
                     Message = "file upload fail",

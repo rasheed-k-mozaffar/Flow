@@ -103,7 +103,7 @@ public class FilesRepository : IFilesRepository
             return PdfFile.RelativeUrl;
 
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             throw new PDFdocumentSaveFailedException("PDF document save failed");
         }
