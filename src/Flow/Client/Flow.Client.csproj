@@ -4,8 +4,8 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(RunConfiguration)' == 'https' "/>
-  <PropertyGroup Condition=" '$(RunConfiguration)' == 'http' "/>
+  <PropertyGroup Condition=" '$(RunConfiguration)' == 'https' " />
+  <PropertyGroup Condition=" '$(RunConfiguration)' == 'http' " />
   <ItemGroup>
 
     <PackageReference Include="BlazorAnimate" Version="3.0.0" />
@@ -21,9 +21,9 @@
 
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Shared\Flow.Shared.csproj"/>
+    <ProjectReference Include="..\Shared\Flow.Shared.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Layout/"/>
+    <Folder Include="Layout/" />
   </ItemGroup>
 </Project>
