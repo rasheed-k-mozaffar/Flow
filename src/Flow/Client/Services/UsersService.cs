@@ -7,7 +7,7 @@ namespace Flow.Client.Services;
 public class UsersService : IUsersService
 {
     private const string BASE_URL = "/api/users";
-    private const string SEARCH_URL = "search-users";
+    private const string SEARCH_URL = $"{BASE_URL}/search-users";
 
     private readonly HttpClient _httpClient;
 
@@ -18,7 +18,7 @@ public class UsersService : IUsersService
 
     public async Task<ApiResponse<ICollection<UserSearchResultDto>>> SearchAsync(string searchTerm, CancellationToken cancellationToken, int loadNumber = 0)
     {
-        string requestUrl = $"{BASE_URL}/{SEARCH_URL}?searchTerm={searchTerm}&loadNumber={loadNumber}";
+        string requestUrl = $"{SEARCH_URL}?searchTerm={searchTerm}&loadNumber={loadNumber}";
         HttpResponseMessage response = await _httpClient.GetAsync(requestUrl, cancellationToken);
 
         if (!response.IsSuccessStatusCode)
