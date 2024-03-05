@@ -1,20 +1,32 @@
 ﻿using BlazorAnimate;
+using Flow.Client.Extensions;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Forms;
+using Microsoft.AspNetCore.Http;
 
 namespace Flow.Client.Pages.Auth;
 
 public partial class SignUp : ComponentBase
 {
+    private const int MAX_ALLOWED_FILE_SIZE = 1024 * 1024 * 5; // 5 Migs
+    private static readonly string[] _allowedExtensions = { ".jpeg", ".png", ".webp", ".jpg" };
     private bool isMakingRequest = false;
     private string errorMessage = string.Empty;
 
+    private Animate? firstFormAnimation;
     private Animate? secondFormFadeIn;
+    private Animate? finalFormAnimation;
     bool firstFormValid = false;
-    private bool secondFormTime = false;
+
+    private bool displayFirstForm = true;
+    private bool displaySecondForm = false;
+    private bool displayFinalForm = false;
+    private bool wantsToCaptureProfilePicture = false;
 
     protected EditContext? EC { get; set; }
+    private IFormFile? profilePictureFile;
+    private string? profilePictureTempUrl;
 
     private RegisterRequest requestModel = new();
 
@@ -32,13 +44,24 @@ public partial class SignUp : ComponentBase
     [Inject]
     public AuthenticationStateProvider AuthenticationStateProvider { get; set; } = default!;
 
+    [Inject]
+    public IFilesService FilesService { get; set; } = default!;
+
     #endregion
 
     protected override void OnInitialized()
     {
         EC = new EditContext(requestModel);
         //EC.OnFieldChanged += EditContext_OnFieldChanged!;
+        firstFormAnimation?.Run();
         base.OnInitialized();
+    }
+
+    private void MoveToFinalForm()
+    {
+        displayFinalForm = true;
+        finalFormAnimation?.Run();
+        displaySecondForm = false;
     }
 
     private async Task HandleUserRegistrationAsync()
@@ -47,16 +70,21 @@ public partial class SignUp : ComponentBase
 
         try
         {
-            var apiResponse = await AuthService.RegisterUserAsync(requestModel);
+            var registrationResult = await AuthService.RegisterUserAsync(requestModel);
 
-            if (apiResponse.IsSuccess)
+            if (registrationResult.IsSuccess)
             {
-                string token = apiResponse.Body!;
-                await JwtsManager.SetJwtAsync(token, false);
+                await JwtsManager.SetJwtAsync(registrationResult.Body!, true);
 
                 await AuthenticationStateProvider.GetAuthenticationStateAsync();
+
+                await UploadProfilePictureAsync();
+
+                await Task.Delay(1000);
                 Nav.NavigateTo("/");
             }
+
+
         }
         catch (AuthFailedException ex)
         {
@@ -67,6 +95,73 @@ public partial class SignUp : ComponentBase
             isMakingRequest = false;
         }
     }
+
+    private async Task UploadProfilePictureAsync()
+    {
+        try
+        {
+            var apiResponse = await FilesService
+                .UploadImageAsync(profilePictureFile!, ImageType.ProfilePicture);
+
+            if (apiResponse.IsSuccess)
+            {
+                requestModel.ProfilePictureUrl = apiResponse.Body!.RelativeUrl;
+            }
+        }
+        catch (FileUploadFailedException ex)
+        {
+            errorMessage = ex.Message;
+        }
+    }
+
+    private async Task SelectProfilePicture(InputFileChangeEventArgs eventArgs)
+    {
+        errorMessage = string.Empty;
+        var file = eventArgs.File;
+
+        if (file is not null) // validate and process the image
+        {
+            var extension = Path.GetExtension(file.Name);
+
+            if (!_allowedExtensions.Contains(extension))
+            {
+                errorMessage = "File format is not allowed";
+                return;
+            }
+
+            IBrowserFile imageFile;
+
+            if (!extension.Equals(".jpeg", StringComparison.OrdinalIgnoreCase))
+            {
+                imageFile = await eventArgs.File.RequestImageFileAsync(".jpeg", 500, 500);
+            }
+
+            imageFile = eventArgs.File;
+
+
+            if (imageFile.Size > MAX_ALLOWED_FILE_SIZE)
+            {
+                errorMessage = "File size is too large";
+                return;
+            }
+
+            Console.WriteLine("Image Size: {0} Bytes", imageFile.Size);
+
+            // read the file data
+            var buffer = new byte[file.Size];
+            await imageFile.OpenReadStream(MAX_ALLOWED_FILE_SIZE).ReadAsync(buffer);
+
+            // Convert to base64-encoded data URL
+            var base64String = Convert.ToBase64String(buffer);
+            profilePictureTempUrl = $"data:{imageFile.ContentType};base64,{base64String}";
+            profilePictureFile = FileConverter.ConvertToIFromFileFromBase64ImageString(profilePictureTempUrl);
+        }
+    }
+
+    private void OpenCameraModal() => wantsToCaptureProfilePicture = true;
+    private void CloseCameraModal() => wantsToCaptureProfilePicture = false;
+    private void GetCapturedImageUri(string capturedFrame) => profilePictureTempUrl = capturedFrame;
+
 
     /// <summary>
     /// Gets called when the close button on the error alert
@@ -102,8 +197,24 @@ public partial class SignUp : ComponentBase
         }
         if (firstFormValid)
         {
+            displaySecondForm = true;
             secondFormFadeIn?.Run();
-            secondFormTime = true;
+            displayFirstForm = false;
         }
+    }
+
+    private void GoBackToFirstForm()
+    {
+        displayFirstForm = true;
+        firstFormAnimation?.Run();
+        displaySecondForm = false;
+        displayFinalForm = false;
+    }
+
+    private void GoBackToSecondForm()
+    {
+        displaySecondForm = true;
+        secondFormFadeIn?.Run();
+        displayFinalForm = false;
     }
 }
