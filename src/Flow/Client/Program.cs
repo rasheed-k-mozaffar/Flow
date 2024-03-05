@@ -5,6 +5,7 @@ using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.Authorization;
 using Blazored.SessionStorage;
 using Flow.Client.State;
+using System.Security.AccessControl;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
@@ -22,6 +23,7 @@ builder.Services.AddScoped<IUsersService, UsersService>();
 builder.Services.AddScoped<AuthenticationStateProvider, JwtAuthenticationStateProvider>();
 builder.Services.AddScoped<IThreadsService, ThreadsService>();
 builder.Services.AddScoped<IMessagesService, MessagesService>();
+builder.Services.AddScoped<IFilesService, FilesService>();
 
 builder.Services.AddSingleton<ApplicationState>();
 
