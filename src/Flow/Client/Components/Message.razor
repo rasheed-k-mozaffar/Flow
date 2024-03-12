@@ -1,24 +1,25 @@
-﻿<div class="flex @(Sent ? "justify-start" : "justify-end") space-x-2 items-center">
-    @if (IsSelected)
+﻿<div class="flex z-30 @(Sent ? "justify-start" : "flex-row-reverse space-x-reverse")  space-x-2 items-center">
+    @if (MessageModel.Type is MessageType.Text)
     {
-        <Animate Animation="Animations.FadeRight" Duration="TimeSpan.FromMilliseconds(250)" @ref="onSelectAnimation">
-            <svg class="w-6 h-6 text-green-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor"
-                viewBox="0 0 24 24">
-                <path fill-rule="evenodd"
-                    d="M2 12a10 10 0 1 1 20 0 10 10 0 0 1-20 0Zm13.7-1.3a1 1 0 0 0-1.4-1.4L11 12.6l-1.8-1.8a1 1 0 0 0-1.4 1.4l2.5 2.5c.4.4 1 .4 1.4 0l4-4Z"
-                    clip-rule="evenodd" />
-            </svg>
-        </Animate>
+        <div @onclick="MessageClicked" class="w-fit min-w-[50px] max-w-[75%] text-wrap px-4 py-2 rounded-3xl bg-blue-600 @(Sent ? "text-white" : "bg-gray-100 text-gray-600 text-end")
+            @(IsSelected && Sent ? "bg-red-500 translate-x-4" : null) transition-all">
+            <div>@MessageModel.Content</div>
+        </div>
     }
-    <div @onclick="MessageClicked"
-        class="w-fit gap-5 max-w-[75%] flex justify-between items-end px-4 py-2 rounded-3xl @(Sent ? "bg-blue-400 text-white" : "bg-gray-100 text-gray-600")">
-        <div>@MessageModel.Content</div>
-        <div class="text-xs">@MessageModel.SentOn.ToLocalTime().ToShortTimeString()</div>
+    else if (MessageModel.Type is MessageType.Image)
+    {
+        <div @onclick="MessageClicked">
+            <img class="rounded-xl max-w-[500px] max-h-[500px] transition-all @(IsSelected && Sent ? "border-2 border-red-500 translate-x-4" : null)"
+                src="@MessageModel.Content" />
+        </div>
+    }
+
+    <div class="text-xs text-gray-500 transition-all @(IsSelected ? "translate-x-4" : null)">
+        @MessageModel.SentOn.ToLocalTime().ToShortTimeString()
     </div>
 </div>
 
 @code {
-    private Animate? onSelectAnimation = new();
     [Parameter] public bool IsSelected { get; set; } = false;
     [Parameter] public MessageDto MessageModel { get; set; } = null!;
     [Parameter] public EventCallback OnMessageSelected { get; set; }
@@ -29,8 +30,6 @@
     {
         if (Sent)
         {
-            onSelectAnimation?.Run();
-
             IsSelected = !IsSelected;
 
             if (IsSelected)
