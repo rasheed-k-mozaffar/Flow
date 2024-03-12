@@ -1,7 +1,12 @@
 ﻿using System.Security.Claims;
+using BlazorAnimate;
+using Flow.Client.Extensions;
 using Flow.Client.State;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Components.Forms;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Internal;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.JSInterop;
 
@@ -9,6 +14,10 @@ namespace Flow.Client.Components;
 
 public partial class Conversation : ComponentBase
 {
+    private const int MAX_ALLOWED_FILE_SIZE = 1024 * 1024 * 10; // 10 Migs
+    private static readonly string[] _allowedExtensions = { ".jpeg", ".png", ".webp", ".jpg" };
+
+    private InputText? messageInput;
     private SendMessageDto messageModel = new();
 
     [Parameter] public ContactDto ContactModel { get; set; } = null!;
@@ -25,47 +34,92 @@ public partial class Conversation : ComponentBase
     [Inject]
     public IMessagesService MessagesService { get; set; } = default!;
 
+    [Inject]
+    public IFilesService FilesService { get; set; } = default!;
+
     private bool wantsToDeleteMessages = false;
 
     private ICollection<Guid> selectedMessages = new List<Guid>();
+    private ICollection<IFormFile>? selectedImages;
     private string? threadId;
     private string _errorMessage = string.Empty;
+    private bool _isMakingNetworkRequest = false;
     public AuthenticationState? authState;
     private ClaimsPrincipal currentUser = new();
+    private string currentUserId = string.Empty;
+    private bool isSendButtonEnabled = false;
+    private bool isChatRendered = false;
+
+    private async Task ScrollToBottom(bool toBottom)
+    {
+        await Js.InvokeVoidAsync("scrollToBottom", "messages-area");
+    }
 
     protected override async Task OnInitializedAsync()
     {
-        // * subscribe to the OnChange event that gets fired when a new message is received
-        AppState.OnChange += StateHasChanged;
         authState = await AuthStateProvider.GetAuthenticationStateAsync();
         currentUser = authState.User;
+        currentUserId = authState.User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        await Js.InvokeVoidAsync("scrollToBottom", "messages-area");
+        if (!isChatRendered)
+        {
+            await Js.InvokeVoidAsync("scrollToBottom", "messages-area");
+            isChatRendered = true;
+        }
+
+        try
+        {
+            if (messageInput?.Element != null && messageInput.Element.HasValue)
+            {
+                await messageInput.Element.Value.FocusAsync();
+            }
+        }
+        catch (JSException) { }
     }
 
     protected override async Task OnParametersSetAsync()
     {
-        await Js.InvokeVoidAsync("scrollToBottom", "messages-area");
+        isChatRendered = false;
         await base.OnParametersSetAsync();
         threadId = ContactModel.ThreadId.ToString();
-        selectedMessages.Clear();
+        selectedMessages?.Clear();
         wantsToDeleteMessages = false;
+    }
 
+    private void SelectMessage(Guid messageId)
+    {
+        selectedMessages.Add(messageId);
+    }
+
+    private void UnSelectMessage(Guid messageId)
+    {
+        selectedMessages.Remove(messageId);
+    }
+
+    private void UpdateSendButtonVisibility(ChangeEventArgs eventArgs)
+    {
+        isSendButtonEnabled = !string.IsNullOrEmpty(eventArgs.Value?.ToString());
     }
 
     private async Task HandleSendingMessageAsync()
     {
+        if (string.IsNullOrEmpty(messageModel.Content))
+            return;
+
+        messageModel.MessageId = Guid.NewGuid();
         messageModel.ThreadId = (Guid)ContactModel.ThreadId!;
-        messageModel.SenderId = currentUser.FindFirst(ClaimTypes.NameIdentifier)!.Value;
+        messageModel.SenderId = currentUserId;
         if (AppState.HubConnection is not null)
         {
             await AppState.HubConnection.InvokeAsync("SendMessageAsync", messageModel);
-            await Js.InvokeVoidAsync("scrollToBottom", "messages-area");
+            await ScrollToBottom(toBottom: true);
             AppState.NotifyStateChanged();
+
             messageModel = new();
+            UpdateSendButtonVisibility(new ChangeEventArgs());
         }
     }
 
@@ -90,6 +144,100 @@ public partial class Conversation : ComponentBase
         {
             CloseConfirmMessageDeletesModal();
         }
+    }
+
+    private async Task HandleSendingImagesAsync()
+    {
+        _isMakingNetworkRequest = true;
+        _errorMessage = string.Empty;
+        try
+        {
+            if (selectedImages is not null && selectedImages.Any())
+            {
+                // perform the upload for each image
+                foreach (var image in selectedImages)
+                {
+                    var apiResponse = await FilesService.UploadImageAsync(image, ImageType.NormalImage);
+
+                    if (apiResponse.IsSuccess)
+                    {
+                        messageModel = new()
+                        {
+                            Type = MessageType.Image,
+                            Content = apiResponse.Body!.RelativeUrl!
+                        };
+
+                        await HandleSendingMessageAsync();
+                    }
+                }
+            }
+            else
+            {
+                _errorMessage = "You didn't select any image";
+                return;
+            }
+        }
+        catch (FileUploadFailedException ex)
+        {
+            _errorMessage = ex.Message;
+        }
+        finally
+        {
+            _isMakingNetworkRequest = false;
+            selectedImages?.Clear();
+        }
+    }
+
+    private async Task GetSelectedImagesAsync(InputFileChangeEventArgs eventArgs)
+    {
+        _errorMessage = string.Empty;
+
+        var files = eventArgs.GetMultipleFiles();
+        selectedImages = new List<IFormFile>();
+
+        foreach (var file in files)
+        {
+            if (file is not null)
+            {
+                var extension = Path.GetExtension(file.Name);
+
+                if (!_allowedExtensions.Contains(extension))
+                {
+                    _errorMessage = "File format ({extension}) is not allowed";
+                    continue;
+                }
+
+                IBrowserFile imageFile;
+
+                if (!extension.Equals(".jpeg", StringComparison.OrdinalIgnoreCase))
+                {
+                    imageFile = await file.RequestImageFileAsync(".jpeg", 1280, 720);
+                }
+
+                imageFile = file;
+
+
+                if (imageFile.Size > MAX_ALLOWED_FILE_SIZE)
+                {
+                    _errorMessage = $"{file.Name}: File size is too large";
+                    continue;
+                }
+
+                Console.WriteLine("Image Size: {0} Bytes", imageFile.Size);
+
+                // read the file data
+                var buffer = new byte[imageFile.Size];
+                await imageFile.OpenReadStream(MAX_ALLOWED_FILE_SIZE).ReadAsync(buffer);
+
+                // Convert to base64-encoded data URL
+                var base64String = Convert.ToBase64String(buffer);
+                var tempUrl = $"data:{imageFile.ContentType};base64,{base64String}";
+
+                selectedImages.Add(FileConverter.ConvertToIFromFileFromBase64ImageString(tempUrl));
+            }
+        }
+
+        await HandleSendingImagesAsync();
     }
 
     private void OpenConfirmMessageDeletesModal() => wantsToDeleteMessages = true;
