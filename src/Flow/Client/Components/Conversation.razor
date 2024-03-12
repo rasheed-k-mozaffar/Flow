@@ -4,6 +4,13 @@
     OnDeleteClicked="HandleSendingDeleteMessagesRequestAsync" />
 }
 
+<ErrorToast Message="@_errorMessage" DisplayToast="@(!string.IsNullOrEmpty(_errorMessage))"
+    DisplayFor="TimeSpan.FromSeconds(5)" OnCloseClicked="(() => _errorMessage = string.Empty)"
+    TimerElapsed="(() => _errorMessage = string.Empty)" />
+
+
+
+
 <div class="flex justify-items-center items-center flex-col min-h-screen max-h-screen w-full relative">
     @* TOP BAR *@
     <div class="block w-full h-fit p-1.5 bg-white  border-slate-900/5 border-b">
@@ -33,62 +40,129 @@
     </div>
 
     @* MESSAGES AREA*@
-    <div id="messages-area"
-        class="flex-grow h-full w-full border border-gray-200 rounded-lg p-2 space-y-1 overflow-y-scroll overflow-x-hidden">
+    <div id="messages-area" class="flex-grow h-full w-full p-2 space-y-1 overflow-y-scroll overflow-x-hidden">
         @if (string.IsNullOrEmpty(threadId))
         {
             <DefaultSpinner />
         }
         else
         {
-            foreach (var message in AppState.Threads![threadId])
+            var groupedMessagesByDay = AppState.Threads![threadId].GroupBy(p => p.SentOn.Day);
+            foreach (var messageGroup in groupedMessagesByDay)
             {
-                <Message MessageModel="message"
-                    Sent="@(message.SenderId == currentUser.FindFirst(ClaimTypes.NameIdentifier)!.Value)"
-                    IsSelected="@(selectedMessages.Contains(message.Id))"
-                    OnMessageSelected="(() => selectedMessages.Add(message.Id))"
-                    OnMessageUnSelected="(() => selectedMessages.Remove(message.Id))" />
+                var date = new DateTime(DateTime.Now.Year, DateTime.Now.Month, messageGroup.Key);
+                <div class="w-full flex items-center justify-center h-fit">
+                    <div class="w-fit rounded-xl py-2 px-3 bg-gray-100 text-gray-500 font-light text-sm">
+                        @date.ToString("dd MMMM")</div>
+                </div>
+                foreach (var message in messageGroup)
+                {
+                    <Message MessageModel="message"
+                        Sent="@(message.SenderId == currentUser.FindFirst(ClaimTypes.NameIdentifier)!.Value)"
+                        IsSelected="@(selectedMessages.Contains(message.Id))" OnMessageSelected="(() => SelectMessage(message.Id))"
+                        OnMessageUnSelected="(() => UnSelectMessage(message.Id))" />
+                }
             }
         }
     </div>
 
-    @if (selectedMessages.Any())
-    {
 
-        <div class="flex justify-between items-center w-full py-3 px-2">
-            <div>
-                <button @onclick="OpenConfirmMessageDeletesModal" class="text-red-500">Delete</button>
-            </div>
 
-            <div>
-                <button @onclick="(() => selectedMessages.Clear())" class="text-blue-500">Unselect</button>
+    <EditForm Model="messageModel" class=" bottom-0 h-fit w-full relative px-2">
+        <div class="w-full relative">
+            <div tabindex="-1"
+                class="flex justify-center items-center w-full h-0 bg-transparent absolute bottom-[5rem] z-10 gap-2 @(selectedMessages.Any() ? "functions-buttons-strip-show" : "functions-buttons-strip-hidden")">
+                <button type="button" @onclick="OpenConfirmMessageDeletesModal"
+                    class="p-4 bg-red-600 rounded-full z-40 cursor-pointer transition-all hover:bg-red-700">
+                    <svg class="w-6 h-6 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
+                        viewBox="0 0 24 24">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M5 7h14m-9 3v8m4-8v8M10 3h4a1 1 0 0 1 1 1v3H9V4a1 1 0 0 1 1-1ZM6 7h12v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7Z" />
+                    </svg>
+                </button>
+
+                <button type="button" @onclick="(() => selectedMessages.Clear())"
+                    class="p-4 bg-gray-100 rounded-full z-40 cursor-pointer transition-all hover:bg-gray-300">
+                    <svg class="w-6 h-6 text-gray-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
+                        viewBox="0 0 24 24">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M3 9h13a5 5 0 0 1 0 10H7M3 9l4-4M3 9l4 4" />
+                    </svg>
+                </button>
             </div>
+            <InputText placeholder="Type your message..." @bind-Value="messageModel.Content" @ref="messageInput"
+                @oninput="UpdateSendButtonVisibility" disabled="@_isMakingNetworkRequest"
+                class="w-full text-wrap h-auto py-3 rounded-lg text-gray-800  pl-[1rem] pr-[3rem] border-0 bg-gray-200 ring-1 ring-slate-900/5 focus:ring-0 focus:outline-none" />
+
+            @* ! SEND BUTTON *@
+
+            <button @onclick="HandleSendingMessageAsync" type="submit"
+                class="flex items-center justify-center p-2 absolute right-0 top-0 transition-all ">
+                <svg class="w-8 h-8 rotate-90 transition-all @(isSendButtonEnabled ? "text-blue-500" : "text-gray-50")"
+                    aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                    <path fill-rule="evenodd"
+                        d="M12 2c.4 0 .8.3 1 .6l7 18a1 1 0 0 1-1.4 1.3L13 19.5V13a1 1 0 1 0-2 0v6.5L5.4 22A1 1 0 0 1 4 20.6l7-18a1 1 0 0 1 1-.6Z"
+                        clip-rule="evenodd" />
+                </svg>
+            </button>
 
         </div>
 
-    }
-    else
-    {
-
-        <EditForm Model="messageModel" class="flex items-center justify-between gap-2 bottom-0 h-fit w-full">
-            <div class="w-full">
-                <input autofocus type="text" placeholder="Type your message..." @bind="messageModel.Content"
-                    @bind:event="oninput" class="w-full py-3 border-0 bg-gray-100 ring-1 ring-slate-900/5 focus:ring-0" />
-            </div>
-
-            @if (!string.IsNullOrEmpty(messageModel.Content))
-            {
-                <button @onclick="HandleSendingMessageAsync" type="submit"
-                    class="p-2 flex items-center justify-center absolute right-0">
-                    <svg class="w-8 h-8 rotate-90 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
-                        fill="currentColor" viewBox="0 0 24 24">
+        <div class="flex w-full justify-center items-center space-x-4 h-fit transition-all py-1">
+            <div>
+                <label class="icon-btn">
+                    <InputFile OnChange="GetSelectedImagesAsync" class="hidden" multiple />
+                    <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true"
+                        xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                        <path fill-rule="evenodd" d="M13 10c0-.6.4-1 1-1a1 1 0 1 1 0 2 1 1 0 0 1-1-1Z"
+                            clip-rule="evenodd" />
                         <path fill-rule="evenodd"
-                            d="M12 2c.4 0 .8.3 1 .6l7 18a1 1 0 0 1-1.4 1.3L13 19.5V13a1 1 0 1 0-2 0v6.5L5.4 22A1 1 0 0 1 4 20.6l7-18a1 1 0 0 1 1-.6Z"
+                            d="M2 6c0-1.1.9-2 2-2h16a2 2 0 0 1 2 2v12c0 .6-.2 1-.6 1.4a1 1 0 0 1-.9.6H4a2 2 0 0 1-2-2V6Zm6.9 12 3.8-5.4-4-4.3a1 1 0 0 0-1.5.1L4 13V6h16v10l-3.3-3.7a1 1 0 0 0-1.5.1l-4 5.6H8.9Z"
                             clip-rule="evenodd" />
                     </svg>
-                </button>
-            }
-        </EditForm>
 
-    }
+                </label>
+            </div>
+
+            <div>
+                <button class="icon-btn">
+                    <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true"
+                        xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <path stroke="currentColor" stroke-linejoin="round" stroke-width="2"
+                            d="M4 18V8c0-.6.4-1 1-1h1.5l1.7-1.7c.2-.2.4-.3.7-.3h6.2c.3 0 .5.1.7.3L17.5 7H19c.6 0 1 .4 1 1v10c0 .6-.4 1-1 1H5a1 1 0 0 1-1-1Z" />
+                        <path stroke="currentColor" stroke-linejoin="round" stroke-width="2"
+                            d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                    </svg>
+                </button>
+            </div>
+
+            <div>
+                <button class="icon-btn">
+                    <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true"
+                        xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                        <path fill-rule="evenodd"
+                            d="M9 2.2V7H4.2l.4-.5 3.9-4 .5-.3Zm2-.2v5a2 2 0 0 1-2 2H4a2 2 0 0 0-2 2v7c0 1.1.9 2 2 2 0 1.1.9 2 2 2h12a2 2 0 0 0 2-2 2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2V4a2 2 0 0 0-2-2h-7Zm-6 9a1 1 0 0 0-1 1v5a1 1 0 1 0 2 0v-1h.5a2.5 2.5 0 0 0 0-5H5Zm1.5 3H6v-1h.5a.5.5 0 0 1 0 1Zm4.5-3a1 1 0 0 0-1 1v5c0 .6.4 1 1 1h1.4a2.6 2.6 0 0 0 2.6-2.6v-1.8a2.6 2.6 0 0 0-2.6-2.6H11Zm1 5v-3h.4a.6.6 0 0 1 .6.6v1.8a.6.6 0 0 1-.6.6H12Zm5-5a1 1 0 0 0-1 1v5a1 1 0 1 0 2 0v-1h1a1 1 0 1 0 0-2h-1v-1h1a1 1 0 1 0 0-2h-2Z"
+                            clip-rule="evenodd" />
+                    </svg>
+
+                </button>
+            </div>
+        </div>
+
+    </EditForm>
+
 </div>
+
+
+<style>
+    .functions-buttons-strip-hidden {
+        pointer-events: none;
+        transform: translateY(300px);
+        transition: .3s ease;
+    }
+
+    .functions-buttons-strip-show {
+        transform: translateY(0);
+        transition: .3s ease;
+    }
+</style>

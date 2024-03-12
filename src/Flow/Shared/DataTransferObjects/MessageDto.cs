@@ -10,4 +10,5 @@ public class MessageDto
     public required string Content { get; set; }
     public DateTime SentOn { get; set; }
     public MessageStatus Status { get; set; }
+    public MessageType Type { get; set; }
 }

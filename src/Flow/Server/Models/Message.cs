@@ -19,6 +19,8 @@ public class Message
 
     public required string Content { get; set; }
 
+    public MessageType Type { get; set; }
+
     public DateTime SentOn { get; set; }
 
     public MessageStatus Status { get; set; }

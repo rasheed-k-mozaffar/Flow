@@ -93,11 +93,23 @@ public class ThreadsController : ControllerBase
                 IsSuccess = true
             });
         }
-
-
+        catch (ResourceNotFoundException ex)
+        {
+            return NotFound(new ApiErrorResponse
+            {
+                ErrorMessage = ex.Message
+            });
+        }
         catch (DatabaseOperationFailedException ex)
         {
 
+            return BadRequest(new ApiErrorResponse
+            {
+                ErrorMessage = ex.Message
+            });
+        }
+        catch (IOException ex)
+        {
             return BadRequest(new ApiErrorResponse
             {
                 ErrorMessage = ex.Message
