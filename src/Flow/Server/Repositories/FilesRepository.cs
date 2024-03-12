@@ -140,4 +140,39 @@ public class FilesRepository : IFilesRepository
 
         return false; // failure for uncaught reason
     }
+
+    public async Task<bool> RemoveImageByRelativeUrlAsync(string relativeUrl)
+    {
+        var image = await _db
+                        .Images
+                        .AsTracking()
+                        .FirstOrDefaultAsync(p => p.RelativeUrl == relativeUrl);
+
+        if (image is null)
+            throw new ResourceNotFoundException("The image was not found");
+
+
+        try
+        {
+            File.Delete(image.FilePath);
+
+            var removalResult = _db.Images.Remove(image);
+
+            if (removalResult.State == EntityState.Deleted)
+            {
+                await _db.SaveChangesAsync();
+                return true;
+            }
+        }
+        catch (IOException)
+        {
+            return false;
+        }
+        catch (ArgumentNullException)
+        {
+            return false;
+        }
+
+        return false;
+    }
 }

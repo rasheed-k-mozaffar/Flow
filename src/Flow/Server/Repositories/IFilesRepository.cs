@@ -21,6 +21,12 @@ public interface IFilesRepository
     /// <returns>A boolean indicating whether the operation succeeded or not</returns>
     Task<bool> RemoveImageAsync(Guid imageId);
 
+    /// <summary>
+    /// Removes the image record from the db and file system using the relative path
+    /// </summary>
+    /// <param name="relativeUrl"></param>
+    /// <returns></returns>
+    Task<bool> RemoveImageByRelativeUrlAsync(string relativeUrl);
 
     /// <summary>
     /// Gets the image from the database using its id, regardless if the image is a profile picture or
