@@ -49,6 +49,7 @@ public partial class Conversation : ComponentBase
     private string currentUserId = string.Empty;
     private bool isSendButtonEnabled = false;
     private bool isChatRendered = false;
+    private bool wantsToTakePicture = false;
 
     private async Task ScrollToBottom(bool toBottom)
     {
@@ -240,6 +241,35 @@ public partial class Conversation : ComponentBase
 
         await HandleSendingImagesAsync();
     }
+
+    private async Task HandleSendingPictureAsync(string base64Image)
+    {
+        var formFile = FileConverter.ConvertToIFromFileFromBase64ImageString(base64Image);
+
+        try
+        {
+            var apiResponse = await FilesService.UploadImageAsync(formFile, ImageType.NormalImage);
+
+            if (apiResponse.IsSuccess)
+            {
+                messageModel = new()
+                {
+                    Type = MessageType.Image,
+                    Content = apiResponse.Body!.RelativeUrl!
+                };
+
+                await HandleSendingMessageAsync();
+            }
+        }
+        catch (FileUploadFailedException ex)
+        {
+            _errorMessage = ex.Message;
+        }
+    }
+
+    private void OpenCameraView() => wantsToTakePicture = true;
+
+    private void CloseCameraView() => wantsToTakePicture = false;
 
     private void OpenConfirmMessageDeletesModal() => wantsToDeleteMessages = true;
 

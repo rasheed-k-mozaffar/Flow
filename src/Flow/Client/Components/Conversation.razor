@@ -8,7 +8,13 @@
     DisplayFor="TimeSpan.FromSeconds(5)" OnCloseClicked="(() => _errorMessage = string.Empty)"
     TimerElapsed="(() => _errorMessage = string.Empty)" />
 
-
+@if (wantsToTakePicture)
+{
+    <div class="fixed z-50 top-0 right-0 w-full h-full flex items-center justify-center bg-gray-700/80 backdrop-blur-lg ">
+    <CameraView Show="wantsToTakePicture" OnCloseClicked="CloseCameraView" typeOfImage="ImageType.NormalImage"
+        Title="@($"Send image to {ContactModel.Contact?.Name}")" OnSendImageClicked="HandleSendingPictureAsync" />
+</div>
+}
 
 
 <div class="flex justify-items-center items-center flex-col min-h-screen max-h-screen w-full relative">
@@ -125,7 +131,7 @@
             </div>
 
             <div>
-                <button class="icon-btn">
+                <button class="icon-btn" @onclick="OpenCameraView">
                     <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true"
                         xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <path stroke="currentColor" stroke-linejoin="round" stroke-width="2"
