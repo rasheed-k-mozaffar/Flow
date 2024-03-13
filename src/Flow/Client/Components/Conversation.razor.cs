@@ -116,6 +116,7 @@ public partial class Conversation : ComponentBase
         {
             await AppState.HubConnection.InvokeAsync("SendMessageAsync", messageModel);
             await ScrollToBottom(toBottom: true);
+
             AppState.NotifyStateChanged();
 
             messageModel = new();

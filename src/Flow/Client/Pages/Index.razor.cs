@@ -1,6 +1,7 @@
 ﻿using System.Runtime.InteropServices;
 using Flow.Client.State;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.SignalR.Client;
 
@@ -19,11 +20,16 @@ public partial class Index : ComponentBase, IAsyncDisposable
     [Inject]
     public IThreadsService ThreadsService { get; set; } = default!;
 
+    [Inject]
+    public AuthenticationStateProvider AuthenticationStateProvider { get; set; } = default!;
+
     protected override async Task OnInitializedAsync()
     {
         AppState.OnChange += StateHasChanged;
         var userJwt = await JwtsManager.GetJwtAsync();
         AppState.UserJwt = userJwt;
+
+        AppState.AuthState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
 
         await AppState.InitHubConnection();
 
