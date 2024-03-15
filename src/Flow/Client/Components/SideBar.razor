@@ -4,8 +4,7 @@
     <div class="h-full border-r border-l border-gray-200  overflow-y-auto dark:bg-gray-800">
         <div class="top-0 flex justify-between items-center z-50   px-3 py-3">
             <div> @* Chats Button *@
-                <button class="icon-btn @(!displayNotificationsTab && !displayContactsTab ? "bg-gray-200" : "")"
-                    @onclick="DisplayChatsTab">
+                <button class="icon-btn @(!displayContactsTab ? "bg-gray-200" : "")" @onclick="DisplayChatsTab">
                     <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true"
                         xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -34,18 +33,6 @@
                 </button>
             </div>
 
-            <div> @* Notifications Button *@
-                <button class="icon-btn @(displayNotificationsTab ? "bg-gray-200" : "")"
-                    @onclick="DisplayNotificationsTab">
-                    <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true"
-                        xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 5.4V3m0 2.4a5.3 5.3 0 0 1 5.1 5.3v1.8c0 2.4 1.9 3 1.9 4.2 0 .6 0 1.2-.5 1.2h-13c-.5 0-.5-.6-.5-1.2 0-1.2 1.9-1.8 1.9-4.2v-1.8A5.3 5.3 0 0 1 12 5.4Zm-8.1 5.3c0-2 .8-4.1 2.2-5.7m14 5.7c0-2-.8-4.1-2.2-5.7M8.5 18a3.5 3.5 0 0 0 7 0h-7Z" />
-                    </svg>
-                </button>
-            </div>
-
-
             <div> @* Settings Button *@
                 <button class="icon-btn w-full">
                     <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true"
@@ -59,15 +46,7 @@
             </div>
         </div>
 
-        @if (displayNotificationsTab)
-        {
-            <Animate Animation="Animations.FadeRight" Duration="TimeSpan.FromSeconds(0.5)" @ref="notificationsTabAnimation">
-                <h1 class="font-bold text-xl text-gray-700 my-3">Notifications</h1>
-
-                @* TODO: *@
-            </Animate>
-        }
-        else if (displayContactsTab)
+        @if (displayContactsTab)
         {
             <Animate Animation="Animations.FadeRight" Duration="TimeSpan.FromSeconds(0.5)" @ref="contactsTabAnimation">
                 <div class="flex justify-between items-center">

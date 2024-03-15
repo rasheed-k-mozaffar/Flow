@@ -1,5 +1,4 @@
 ﻿using Flow.Shared.Enums;
-using Microsoft.AspNetCore.Components.Forms;
 
 namespace Flow.Server.Repositories;
 
@@ -8,20 +7,17 @@ public class ContactRequestsRepository : IContactRequestsRepository
     private readonly AppDbContext _db;
     private readonly ILogger<ContactRequestsRepository> _logger;
     private readonly UserInfo _userInfo;
-    private readonly INotificationsRepository _notificationsRepository;
 
     public ContactRequestsRepository
     (
         AppDbContext db,
         ILogger<ContactRequestsRepository> logger,
-        UserInfo userInfo,
-        INotificationsRepository notificationsRepository
+        UserInfo userInfo
     )
     {
         _db = db;
         _logger = logger;
         _userInfo = userInfo;
-        _notificationsRepository = notificationsRepository;
     }
 
 
@@ -44,26 +40,6 @@ public class ContactRequestsRepository : IContactRequestsRepository
 
         if (entityEntry.State is EntityState.Added)
         {
-            try
-            {
-                var notification = new Notification()
-                {
-                    Id = Guid.NewGuid(),
-                    RecipientId = request.RecipientId,
-                    Recipient = recipient,
-                    Content = $"{_userInfo.Name} wants to connect with you",
-                    IssuedOn = DateTime.UtcNow,
-                    Type = NotificationType.ContactRequest
-                };
-
-                await _notificationsRepository.AddNotificationAsync(notification); // push notification to the db
-            }
-            catch (DatabaseOperationFailedException)
-            {
-                throw;
-            }
-
-
             await _db.SaveChangesAsync();
 
             _logger.LogInformation

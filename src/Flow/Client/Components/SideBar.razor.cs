@@ -12,7 +12,6 @@ public partial class SideBar : ComponentBase
 
     [Parameter] public EventCallback OnSearchButtonClicked { get; set; }
     [Parameter] public EventCallback OnContactsButtonClicked { get; set; }
-    [Parameter] public EventCallback OnNotificationsButtonClicked { get; set; }
 
     private IEnumerable<ContactDto> contacts = new List<ContactDto>();
     private List<PendingRequestIncomingDto> incomingContactRequests = new();
@@ -25,11 +24,9 @@ public partial class SideBar : ComponentBase
     private bool isLoadingContactRequests = true;
 
     // * these variables will be used to determine which tab to display
-    private bool displayNotificationsTab = false;
     private bool displayContactsTab = false;
 
     private Animate contactsTabAnimation = new();
-    private Animate notificationsTabAnimation = new();
     private Animate chatsTabAnimation = new();
 
     private void SearchButtonClicked() => OnSearchButtonClicked.InvokeAsync();
@@ -178,20 +175,12 @@ public partial class SideBar : ComponentBase
     #region Animation Methods
     private void DisplayContactsTab()
     {
-        displayNotificationsTab = false;
         displayContactsTab = true;
         contactsTabAnimation.Run();
-    }
-    private void DisplayNotificationsTab()
-    {
-        displayContactsTab = false;
-        displayNotificationsTab = true;
-        notificationsTabAnimation.Run();
     }
 
     private void DisplayChatsTab()
     {
-        displayNotificationsTab = false;
         displayContactsTab = false;
         chatsTabAnimation.Run();
     }
