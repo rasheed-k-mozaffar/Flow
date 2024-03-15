@@ -37,19 +37,15 @@ public partial class SideBar : ComponentBase
     protected override async Task OnInitializedAsync()
     {
         chatsTabAnimation.Run();
-        await LoadContactsAsync();
-
-        await LoadIncomingPendingContactRequestsAsync();
-        await LoadSentPendingContactRequestsAsync();
         lastContactRequestsRefreshTime = TimeOnly.FromDateTime(DateTime.Now.ToLocalTime());
 
-        isLoadingContactRequests = false;
-    }
+        var loadContactsTask = LoadContactsAsync();
+        var loadIncomingReqsTask = LoadIncomingPendingContactRequestsAsync();
+        var loadSentReqsTask = LoadSentPendingContactRequestsAsync();
 
-    // TODO: Load the notifications after the side bar renders
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        await base.OnAfterRenderAsync(firstRender);
+        await Task.WhenAll(loadContactsTask, loadIncomingReqsTask, loadSentReqsTask);
+
+        isLoadingContactRequests = false;
     }
 
     private async Task LoadContactsAsync()
@@ -60,8 +56,6 @@ public partial class SideBar : ComponentBase
         {
             contacts = apiResponse.Body!.ToList();
         }
-
-        await Task.Delay(500);
 
         isLoadingContacts = false;
     }
