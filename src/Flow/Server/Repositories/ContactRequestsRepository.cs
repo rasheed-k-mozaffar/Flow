@@ -1,4 +1,7 @@
-﻿using Flow.Shared.Enums;
+﻿using Flow.Server.Hubs;
+using Flow.Shared.Enums;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.SignalR;
 
 namespace Flow.Server.Repositories;
 
@@ -6,22 +9,28 @@ public class ContactRequestsRepository : IContactRequestsRepository
 {
     private readonly AppDbContext _db;
     private readonly ILogger<ContactRequestsRepository> _logger;
+    private readonly IHubContext<ContactRequestsHub, IContactsClient> _contactsHubContext;
+    private readonly UserManager<AppUser> _userManager;
     private readonly UserInfo _userInfo;
 
     public ContactRequestsRepository
     (
         AppDbContext db,
         ILogger<ContactRequestsRepository> logger,
-        UserInfo userInfo
+        UserInfo userInfo,
+        IHubContext<ContactRequestsHub, IContactsClient> contactsHubContext,
+        UserManager<AppUser> userManager
     )
     {
         _db = db;
         _logger = logger;
         _userInfo = userInfo;
+        _contactsHubContext = contactsHubContext;
+        _userManager = userManager;
     }
 
 
-    public async Task SendConnectRequestAsync(string userId, ContactRequest request)
+    public async Task SendConnectRequestAsync(string username, ContactRequest request)
     {
         // find the recipient
         var recipient = await _db
@@ -32,6 +41,11 @@ public class ContactRequestsRepository : IContactRequestsRepository
             throw new UserNotFoundException(message: "User not found");
 
         request.SenderId = _userInfo.UserId!;
+        request.Recipient = recipient;
+
+        var requestSender = await _userManager.FindByIdAsync(request.SenderId);
+
+        request.Sender = requestSender!;
 
         // process the connect request
         var entityEntry = await _db
@@ -49,6 +63,24 @@ public class ContactRequestsRepository : IContactRequestsRepository
                 recipient.UserName
             );
 
+            // * Notify the recipient of the request
+            var notifyRecipientTask = _contactsHubContext
+                                        .Clients
+                                        .User(request.RecipientId)
+                                        .ReceiveContactRequestAsync
+                                        (
+                                            request.ToPendingContactRequestIncomingDto()
+                                        );
+
+            var notifySenderTask = _contactsHubContext
+                                        .Clients
+                                        .User(request.SenderId)
+                                        .ReceiveSentContactRequestAsync
+                                        (
+                                            request.ToPendingContactRequestSentDto()
+                                        );
+
+            await Task.WhenAll(notifyRecipientTask, notifySenderTask);
             return;
         }
 
@@ -70,7 +102,7 @@ public class ContactRequestsRepository : IContactRequestsRepository
                             .FindAsync(requestId);
 
         if (request is null)
-            throw new ResourceNotFoundException(message: "The request you're looking for was not found");
+            throw new ResourceNotFoundException(message: "Request not found");
 
         var deletionResult = _db.ContactRequests.Remove(request);
 
@@ -84,6 +116,18 @@ public class ContactRequestsRepository : IContactRequestsRepository
             );
 
             await _db.SaveChangesAsync();
+
+            var notifyRecipientTask = _contactsHubContext
+                                        .Clients
+                                        .Users(request.RecipientId)
+                                        .ReceiveCancelledRequestIdForRecipientAsync(requestId);
+
+            var notifySenderTask = _contactsHubContext
+                                        .Clients
+                                        .Users(request.SenderId)
+                                        .ReceiveCancelledRequestIdForSenderAsync(requestId);
+
+            await Task.WhenAll(notifyRecipientTask, notifySenderTask);
             return;
         }
 
@@ -130,6 +174,24 @@ public class ContactRequestsRepository : IContactRequestsRepository
             );
 
             await _db.SaveChangesAsync();
+
+            var notifyRecipientTask = _contactsHubContext
+                                        .Clients
+                                        .User(request.RecipientId)
+                                        .ReceiveNewContact(request.ToContactDto(request.RecipientId));
+
+            var notifySenderTask = _contactsHubContext
+                                        .Clients
+                                        .User(request.SenderId)
+                                        .ReceiveNewContact(request.ToContactDto(request.SenderId));
+
+            var notifySenderAboutAcceptedReqTask = _contactsHubContext
+                                        .Clients
+                                        .User(request.SenderId)
+                                        .ReceiveAcceptedRequestId(requestId);
+
+            await Task.WhenAll(notifyRecipientTask, notifySenderTask);
+
             return;
         }
         else
