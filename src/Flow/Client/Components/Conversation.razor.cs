@@ -113,9 +113,9 @@ public partial class Conversation : ComponentBase
         messageModel.MessageId = Guid.NewGuid();
         messageModel.ThreadId = (Guid)ContactModel.ThreadId!;
         messageModel.SenderId = currentUserId;
-        if (AppState.HubConnection is not null)
+        if (AppState.ChatHubConnection is not null)
         {
-            await AppState.HubConnection.InvokeAsync("SendMessageAsync", messageModel);
+            await AppState.ChatHubConnection.InvokeAsync("SendMessageAsync", messageModel);
             await ScrollToBottom(toBottom: true);
 
             AppState.NotifyStateChanged();

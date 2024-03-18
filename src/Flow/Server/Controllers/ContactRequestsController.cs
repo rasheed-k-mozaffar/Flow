@@ -1,11 +1,6 @@
-﻿using System.Reflection.Metadata.Ecma335;
-using Flow.Shared.ApiResponses;
+﻿using Flow.Shared.ApiResponses;
 using Flow.Shared.Enums;
-
-// using Flow.Shared.DataTransferObjects;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Authorization.Infrastructure;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Flow.Server.Controllers;
@@ -44,6 +39,7 @@ public class ContactRequestsController : ControllerBase
             // ? Maybe a refactor? Maybe...
             var contactRequest = new ContactRequest()
             {
+                Id = Guid.NewGuid(),
                 SenderId = _userInfo.UserId!,
                 RecipientId = recipientId,
             };
@@ -51,9 +47,10 @@ public class ContactRequestsController : ControllerBase
             await _contactRequestsRepository
                 .SendConnectRequestAsync(recipientId, contactRequest);
 
-            return Ok(new ApiResponse
+            return Ok(new ApiResponse<Guid>
             {
                 Message = "Contact request sent",
+                Body = contactRequest.Id,
                 IsSuccess = true
             });
         }

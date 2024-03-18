@@ -76,7 +76,7 @@ builder.Services.AddAuthentication(options =>
         {
             var accessToken = context.Request.Query["access_token"];
             var path = context.HttpContext.Request.Path;
-            if (!string.IsNullOrWhiteSpace(accessToken) && path.StartsWithSegments("/chat-threads-hub"))
+            if (!string.IsNullOrWhiteSpace(accessToken) && (path.StartsWithSegments("/chat-threads-hub") || path.StartsWithSegments("/contacts-hub")))
             {
                 context.Token = accessToken;
             }
@@ -154,6 +154,7 @@ app.UseAuthorization();
 app.MapRazorPages();
 app.MapControllers();
 app.MapHub<ChatHub>("chat-threads-hub");
+app.MapHub<ContactRequestsHub>("contacts-hub");
 
 app.MapFallbackToFile("index.html");
 

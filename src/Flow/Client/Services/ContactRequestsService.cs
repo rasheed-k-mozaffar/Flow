@@ -97,7 +97,7 @@ public class ContactRequestsService : IContactRequestsService
         return successResponse!;
     }
 
-    public async Task<ApiResponse> SendContactRequestAsync(string recipientId)
+    public async Task<ApiResponse<Guid>> SendContactRequestAsync(string recipientId)
     {
         string requestUrl = $"{SEND_REQUEST_URL}/{recipientId}";
         HttpResponseMessage response = await _httpClient.PostAsync(requestUrl, null);
@@ -108,7 +108,7 @@ public class ContactRequestsService : IContactRequestsService
             throw new OperationFailureException(errorResponse!.ErrorMessage);
         }
 
-        var successResponse = await response.Content.ReadFromJsonAsync<ApiResponse>();
+        var successResponse = await response.Content.ReadFromJsonAsync<ApiResponse<Guid>>();
         return successResponse!;
     }
 }

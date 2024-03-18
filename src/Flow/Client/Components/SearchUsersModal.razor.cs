@@ -93,9 +93,10 @@ public partial class SearchUsersModal : ComponentBase
                 var recipient = searchResults.First(r => r.UserId == recipientId);
                 searchResults.Remove(recipient);
                 recipient.UserType = SearchedUserType.PendingRequest;
+                recipient.ContactRequestId = requestResult.Body;
                 searchResults.Add(recipient);
 
-                successMessage = $"Successfully sent contact request to {recipient.Name}";
+                successMessage = $"Sent request to {recipient.Name}";
                 StateHasChanged();
             }
         }

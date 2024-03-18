@@ -1,0 +1,64 @@
+﻿<div class="h-full w-full">
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div class="my-2">
+            <ErrorAlert ErrorMessage="@errorMessage" OnCloseClicked="(() => errorMessage = string.Empty)" />
+        </div>
+    }
+
+    <div>
+        <h1 class="font-bold text-xl text-gray-700 my-3">Requests</h1>
+    </div>
+
+    <div class="h-full w-full overflow-y-auto">
+        @if (!DisplayRequests)
+        {
+            <DefaultSpinner />
+        }
+        else
+        {
+            <ul class="mb-5 space-y-2 h-1/2">
+                <div class="font-medium">Your connection requests</div>
+                <hr />
+                @if (AppState.SentContactRequests.Any())
+                {
+                    foreach (var r in AppState.SentContactRequests)
+                    {
+                        <li>
+                            <SentContactRequest Request="r"
+                                OnCancelClicked="(() => HandleCancellingContactRequestAsync(r.RequestId))" />
+                        </li>
+                    }
+                }
+                else
+                {
+                    <div class="h-20 flex justify-center items-center">
+                        <div>Nothing sent from you</div>
+                    </div>
+                }
+            </ul>
+
+            <ul class="mb-5 space-y-2 h-1/2">
+            <div class="font-medium">Sent to you</div>
+            <hr />
+            @if (AppState.IncomingContactRequests.Any())
+                {
+                    foreach (var r in AppState.IncomingContactRequests)
+                    {
+                        <li>
+                            <IncomingContactRequest Request="r" OnAcceptClicked="(() => AcceptContactRequestAsync(r.RequestId))"
+                                OnDeclineClicked="(() => DeclineContactRequestAsync(r.RequestId))"
+                                DisableButtons="isMakingApiCall" />
+                        </li>
+                    }
+                }
+                else
+                {
+                    <div class="h-20 flex justify-center items-center">
+                        <div>No incoming requests</div>
+                    </div>
+                }
+            </ul>
+        }
+    </div>
+</div>

@@ -1,0 +1,29 @@
+﻿@inject ApplicationState AppState
+
+<button class="relative icon-btn @(DisplayReqsTab ? "bg-gray-200" : "")" @onclick="(() => OnClicked.InvokeAsync())">
+    <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
+        viewBox="0 0 24 24">
+        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M7 6H5m2 3H5m2 3H5m2 3H5m2 3H5m11-1a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2M7 3h11c.6 0 1 .4 1 1v16c0 .6-.4 1-1 1H7a1 1 0 0 1-1-1V4c0-.6.4-1 1-1Zm8 7a2 2 0 1 1-4 0 2 2 0 0 1 4 0Z" />
+    </svg>
+
+    @if (AppState.IncomingContactRequests.Count > 0)
+    {
+        <span class="sr-only">Notifications</span>
+        <div
+        class="absolute inline-flex items-center justify-center w-5 h-5 text-[10px] font-medium text-white bg-red-500 border-2 border-white -top-0 -end-0 rounded-full dark:border-gray-900">
+        @AppState.IncomingContactRequests.Count()
+    </div>
+    }
+</button>
+
+
+@code {
+    [Parameter] public bool DisplayReqsTab { get; set; }
+    [Parameter] public EventCallback OnClicked { get; set; }
+
+    protected override void OnInitialized()
+    {
+        AppState.OnChange += StateHasChanged;
+    }
+}
