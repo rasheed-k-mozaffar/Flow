@@ -54,8 +54,8 @@ public class ChatHub : Hub<IChatThreadsClient>
     }
 
     /// <summary>
-    /// This method will be invoked whenever a user types and sends a message, the invocation of this method causes the propagation of the
-    /// sent message to be received on the other end of the chat thread
+    /// This method will be invoked whenever a user types and sends a message, the invocation of this method 
+    /// causes the propagation of the sent message to be received on the other end of the chat thread
     /// </summary>
     /// <param name="message"></param>
     /// <returns></returns>
@@ -65,7 +65,23 @@ public class ChatHub : Hub<IChatThreadsClient>
         await Clients.Group(message.ThreadId.ToString()).ReceiveMessageAsync(message.ToMessageReceivedDto());
     }
 
-    public async Task JoinThreadsAsync(IEnumerable<Guid?> threads)
+    public async Task JoinThreadAsync(Guid threadId)
+    {
+        _logger.LogWarning("User {username} joined Chat Thread {threadId}", _userInfo.Name, threadId);
+        await Groups.AddToGroupAsync(Context.ConnectionId, threadId.ToString()!);
+    }
+
+    public async Task LeaveThreadAsync(Guid threadId)
+    {
+        _logger.LogWarning("User {username} left Chat Thread {threadId}", _userInfo.Name, threadId);
+        await Groups.RemoveFromGroupAsync(Context.User!.FindFirstValue(ClaimTypes.NameIdentifier)!, threadId.ToString()!);
+    }
+
+
+    #region On Connect Methods
+    // * These two methods are going to only be used upon connecting to the hub
+
+    private async Task JoinThreadsAsync(IEnumerable<Guid?> threads)
     {
         // Join the user to their chat threads 
         foreach (var threadId in threads)
@@ -75,7 +91,7 @@ public class ChatHub : Hub<IChatThreadsClient>
         }
     }
 
-    public async Task LeaveThreadsAsync(IEnumerable<Guid?> threads)
+    private async Task LeaveThreadsAsync(IEnumerable<Guid?> threads)
     {
         // Remove the user from their chat threads 
         foreach (var threadId in threads)
@@ -84,6 +100,8 @@ public class ChatHub : Hub<IChatThreadsClient>
             await Groups.RemoveFromGroupAsync(Context.User!.FindFirstValue(ClaimTypes.NameIdentifier)!, threadId.ToString()!);
         }
     }
+
+    #endregion
 }
 
 public interface IChatThreadsClient
@@ -91,6 +109,6 @@ public interface IChatThreadsClient
     Task SendMessageAsync(SendMessageDto message);
     Task ReceiveMessageAsync(MessageDto message);
     Task ReceiveDeletedMessagesIdsAsync(DeleteMessagesRequest deletedMessagesIds);
-    Task JoinThreadsAsync(Guid? threadId);
-    Task LeaveThreadsAsync(Guid? threadId);
+    Task JoinThreadAsync(Guid threadId);
+    Task LeaveThreasAsync(Guid threadId);
 }
