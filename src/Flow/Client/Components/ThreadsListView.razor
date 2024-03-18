@@ -1,0 +1,29 @@
+﻿@inject ApplicationState AppState
+
+<div class="my-3 px-3">
+    <SearchBar /> @* Search Contacts *@ @* TODO Remove this component and replace it with a search form*@
+</div>
+
+@if (IsLoadingContacts)
+{
+    <div class="h-full w-full flex justify-center items-center">
+    <DefaultSpinner />
+</div>
+}
+else
+{
+    <ul class="h-full overflow-y-auto">
+    @foreach (var contact in AppState.Contacts)
+        {
+            <Chat ContactModel="contact" />
+        }
+    </ul>
+}
+
+@code {
+    [Parameter] public bool IsLoadingContacts { get; set; }
+    protected override void OnInitialized()
+    {
+        AppState.OnChange += StateHasChanged;
+    }
+}
