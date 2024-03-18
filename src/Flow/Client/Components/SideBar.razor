@@ -4,7 +4,7 @@
     <div class="h-full border-r border-l border-gray-200  overflow-y-auto dark:bg-gray-800">
         <div class="top-0 flex justify-between items-center z-50   px-3 py-3">
             <div> @* Chats Button *@
-                <button class="icon-btn @(!displayContactsTab ? "bg-gray-200" : "")" @onclick="DisplayChatsTab">
+                <button class="icon-btn @(!displayReqsTab ? "bg-gray-200" : "")" @onclick="DisplayChatsTab">
                     <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true"
                         xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -23,14 +23,8 @@
                 </button>
             </div>
 
-            <div> @* Incoming Requests Button *@
-                <button class="icon-btn @(displayContactsTab ? "bg-gray-200" : "")" @onclick="DisplayContactsTab">
-                    <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true"
-                        xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M7 6H5m2 3H5m2 3H5m2 3H5m2 3H5m11-1a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2M7 3h11c.6 0 1 .4 1 1v16c0 .6-.4 1-1 1H7a1 1 0 0 1-1-1V4c0-.6.4-1 1-1Zm8 7a2 2 0 1 1-4 0 2 2 0 0 1 4 0Z" />
-                    </svg>
-                </button>
+            <div> @* Requests Button *@
+                <RequestsTabButton OnClicked="DisplayContactsTab" DisplayReqsTab="@displayReqsTab" />
             </div>
 
             <div> @* Settings Button *@
@@ -46,110 +40,19 @@
             </div>
         </div>
 
-        @if (displayContactsTab)
+        @if (displayReqsTab)
         {
-            <Animate Animation="Animations.FadeRight" Duration="TimeSpan.FromSeconds(0.5)" @ref="contactsTabAnimation">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <h1 class="font-bold text-xl text-gray-700 my-3">Contacts</h1>
-                    </div>
-
-                    <div>
-                        <button class="icon-btn" @onclick="RefreshContactRequestsAsync">
-                            <svg class="w-5 h-5 text-gray-800 dark:text-white" aria-hidden="true"
-                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M17.7 7.7A7.1 7.1 0 0 0 5 10.8M18 4v4h-4m-7.7 8.3A7.1 7.1 0 0 0 19 13.2M6 20v-4h4" />
-                            </svg>
-                        </button>
-                    </div>
+            <Animate Animation="Animations.FadeIn" Duration="TimeSpan.FromSeconds(0.5)" @ref="contactsTabAnimation">
+                <div class="px-2">
+                    <ContactRequestsListView DisplayRequests="@isDoneLoadingContactRequests" ErrorMessage="@errorMessage" />
                 </div>
-
-                @if (isLoadingContactRequests)
-                {
-                    <DefaultSpinner />
-                }
-                else
-                {
-                    <ul class="mb-5 space-y-2">
-                        <div class="text-sm text-gray-600">Last refresh: @lastContactRequestsRefreshTime.ToString()</div>
-                        <div class="font-medium">Your connection requests</div>
-                        <hr />
-                        @if (sentContactRequests.Any())
-                        {
-                            foreach (var r in sentContactRequests)
-                            {
-                                <li>
-                                    <SentContactRequest Request="r"
-                                        OnCancelClicked="(() => HandleCancellingContactRequestAsync(r.RequestId))" />
-                                </li>
-                            }
-                        }
-                        else
-                        {
-                            <div class="h-20 flex justify-center items-center">
-                                <div>No requests are se</div>
-                            </div>
-                        }
-                    </ul>
-
-                    <ul class="mb-5 space-y-2">
-                <div class="font-medium">Sent to you</div>
-                <hr />
-                @if (incomingContactRequests.Any())
-                        {
-                            foreach (var r in incomingContactRequests)
-                            {
-                                <li>
-                                    <IncomingContactRequest Request="r" OnAcceptClicked="(() => AcceptContactRequestAsync(r.RequestId))"
-                                        OnDeclineClicked="(() => DeclineContactRequestAsync(r.RequestId))"
-                                        DisableButtons="isMakingApiCall" />
-                                </li>
-                            }
-                        }
-                        else
-                        {
-                            <div class="h-20 flex justify-center items-center">
-                                <div>No incoming requests</div>
-                            </div>
-                        }
-                    </ul>
-                }
             </Animate>
         }
         else
         {
-            <Animate Animation="Animations.FadeRight" Duration="TimeSpan.FromSeconds(0.5)" @ref="chatsTabAnimation">
-                <div class="my-3 px-3">
-                    <SearchBar /> @* Search Contacts *@
-                </div>
-
-                @if (isLoadingContacts)
-                {
-                    <div class="h-[75%] w-full flex justify-center items-center">
-                        <DefaultSpinner />
-                    </div>
-                }
-                else
-                {
-                    <ul class="h-full overflow-y-auto">
-                        @foreach (var contact in contacts)
-                        {
-                            <Chat ContactModel="contact" />
-                        }
-                    </ul>
-                }
+            <Animate Animation="Animations.FadeIn" Duration="TimeSpan.FromSeconds(0.5)" @ref="chatsTabAnimation">
+                <ThreadsListView IsLoadingContacts="@isLoadingContacts" />
             </Animate>
         }
     </div>
 </aside>
-
-
-@code {
-    private ContactDto demoContact = new()
-        {
-            RequestId = Guid.NewGuid(),
-            ThreadId = Guid.NewGuid(),
-            Contact = new UserDetailsDto()
-        };
-}

@@ -1,5 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
 using BlazorAnimate;
+using Flow.Client.State;
 using Flow.Shared.ApiResponses;
 using Microsoft.AspNetCore.Components;
 
@@ -10,21 +11,22 @@ public partial class SideBar : ComponentBase
     [Inject]
     public IContactRequestsService ContactsService { get; set; } = default!;
 
+    [Inject]
+    public ApplicationState AppState { get; set; } = default!;
+
     [Parameter] public EventCallback OnSearchButtonClicked { get; set; }
     [Parameter] public EventCallback OnContactsButtonClicked { get; set; }
 
-    private IEnumerable<ContactDto> contacts = new List<ContactDto>();
     private List<PendingRequestIncomingDto> incomingContactRequests = new();
     private List<PendingRequestSentDto> sentContactRequests = new();
-    private TimeOnly lastContactRequestsRefreshTime;
 
     private bool isMakingApiCall = false; // * this will be used to disable buttons
     private string errorMessage = string.Empty;
     private bool isLoadingContacts = true;
-    private bool isLoadingContactRequests = true;
+    private bool isDoneLoadingContactRequests = false;
 
     // * these variables will be used to determine which tab to display
-    private bool displayContactsTab = false;
+    private bool displayReqsTab = false;
 
     private Animate contactsTabAnimation = new();
     private Animate chatsTabAnimation = new();
@@ -34,15 +36,14 @@ public partial class SideBar : ComponentBase
     protected override async Task OnInitializedAsync()
     {
         chatsTabAnimation.Run();
-        lastContactRequestsRefreshTime = TimeOnly.FromDateTime(DateTime.Now.ToLocalTime());
 
-        var loadContactsTask = LoadContactsAsync();
-        var loadIncomingReqsTask = LoadIncomingPendingContactRequestsAsync();
-        var loadSentReqsTask = LoadSentPendingContactRequestsAsync();
+        var contactsTask = LoadContactsAsync();
+        var incomingReqsTask = LoadIncomingPendingContactRequestsAsync();
+        var sentReqsTask = LoadSentPendingContactRequestsAsync();
 
-        await Task.WhenAll(loadContactsTask, loadIncomingReqsTask, loadSentReqsTask);
+        await Task.WhenAll(contactsTask, incomingReqsTask, sentReqsTask);
 
-        isLoadingContactRequests = false;
+        isDoneLoadingContactRequests = true;
     }
 
     private async Task LoadContactsAsync()
@@ -51,18 +52,10 @@ public partial class SideBar : ComponentBase
 
         if (apiResponse.IsSuccess)
         {
-            contacts = apiResponse.Body!.ToList();
+            AppState.Contacts = apiResponse.Body!.ToList();
         }
 
         isLoadingContacts = false;
-    }
-
-    private async Task RefreshContactRequestsAsync()
-    {
-        await LoadSentPendingContactRequestsAsync();
-        await LoadIncomingPendingContactRequestsAsync();
-        lastContactRequestsRefreshTime = TimeOnly.FromDateTime(DateTime.Now.ToLocalTime());
-        await InvokeAsync(StateHasChanged);
     }
 
     private async Task LoadSentPendingContactRequestsAsync()
@@ -73,7 +66,7 @@ public partial class SideBar : ComponentBase
 
             if (apiResponse.IsSuccess)
             {
-                sentContactRequests = apiResponse.Body!.ToList();
+                AppState.SentContactRequests = apiResponse.Body!.ToList();
             }
         }
         catch (ApiGetRequestFailedException ex)
@@ -90,7 +83,7 @@ public partial class SideBar : ComponentBase
 
             if (apiResponse.IsSuccess)
             {
-                incomingContactRequests = apiResponse.Body!.ToList();
+                AppState.IncomingContactRequests = apiResponse.Body!.ToList();
             }
         }
         catch (ApiGetRequestFailedException ex)
@@ -99,89 +92,16 @@ public partial class SideBar : ComponentBase
         }
     }
 
-
-
-    private async Task HandleCancellingContactRequestAsync(Guid requestId)
-    {
-        isMakingApiCall = true;
-        errorMessage = string.Empty;
-
-        try
-        {
-            var cancellationResult = await ContactsService.CancelRequestAsync(requestId);
-
-            if (cancellationResult.IsSuccess)
-            {
-                var cancelledRequest = sentContactRequests.First(r => r.RequestId == requestId);
-                sentContactRequests.Remove(cancelledRequest);
-            }
-        }
-        catch (OperationFailureException ex)
-        {
-            errorMessage = ex.Message;
-        }
-        finally
-        {
-            isMakingApiCall = false;
-        }
-    }
-
-
-    private async Task AcceptContactRequestAsync(Guid requestId)
-    {
-        var acceptanceSucceeded = await HandleResolvingContactRequestAsync(requestId, RequestStatus.Accepted);
-
-        if (acceptanceSucceeded)
-        {
-            var resolvedRequest = incomingContactRequests.First(r => r.RequestId == requestId);
-            incomingContactRequests.Remove(resolvedRequest);
-        }
-    }
-
-    private async Task DeclineContactRequestAsync(Guid requestId)
-    {
-        var declineSucceeded = await HandleResolvingContactRequestAsync(requestId, RequestStatus.Declined);
-
-        if (declineSucceeded)
-        {
-            var resolvedRequest = incomingContactRequests.First(r => r.RequestId == requestId);
-            incomingContactRequests.Remove(resolvedRequest);
-        }
-    }
-
-    private async Task<bool> HandleResolvingContactRequestAsync(Guid requestId, RequestStatus newStatus)
-    {
-        isMakingApiCall = true;
-        errorMessage = string.Empty;
-
-        var apiResponse = new ApiResponse();
-
-        try
-        {
-            apiResponse = await ContactsService.ResolveRequestAsync(requestId, newStatus);
-        }
-        catch (OperationFailureException ex)
-        {
-            errorMessage = ex.Message;
-        }
-        finally
-        {
-            isMakingApiCall = false;
-        }
-
-        return apiResponse.IsSuccess;
-    }
-
     #region Animation Methods
     private void DisplayContactsTab()
     {
-        displayContactsTab = true;
+        displayReqsTab = true;
         contactsTabAnimation.Run();
     }
 
     private void DisplayChatsTab()
     {
-        displayContactsTab = false;
+        displayReqsTab = false;
         chatsTabAnimation.Run();
     }
     #endregion
