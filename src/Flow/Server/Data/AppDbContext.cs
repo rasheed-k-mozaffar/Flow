@@ -10,6 +10,7 @@ public class AppDbContext : IdentityDbContext<AppUser>
 	public DbSet<ContactRequest> ContactRequests { get; set; }
 	public DbSet<ChatThread> Threads { get; set; }
 	public DbSet<Message> Messages { get; set; }
+	public DbSet<UserSettings> SettingsEntries { get; set; }
 
 	public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
 	{
@@ -47,5 +48,11 @@ public class AppDbContext : IdentityDbContext<AppUser>
 				.HasOne(p => p.Thread)
 				.WithMany(p => p.Messages)
 				.HasForeignKey(p => p.ThreadId);
+
+		builder.Entity<AppUser>()
+				.HasOne(p => p.Settings)
+				.WithOne(p => p.AppUser)
+				.HasForeignKey<UserSettings>(p => p.AppUserId)
+				.OnDelete(DeleteBehavior.Cascade);
 	}
 }
