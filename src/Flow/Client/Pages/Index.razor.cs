@@ -31,18 +31,23 @@ public partial class Index : ComponentBase, IAsyncDisposable
 
         AppState.AuthState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
 
-        await AppState.InitHubConnection();
-
         await LoadThreadsAndMessagesAsync();
+        await AppState.InitializeHubsAsync();
+
     }
 
     public async ValueTask DisposeAsync()
     {
         AppState.OnChange -= StateHasChanged;
 
-        if (AppState.HubConnection is not null)
+        if (AppState.ChatHubConnection is not null)
         {
-            await AppState.HubConnection.DisposeAsync();
+            await AppState.ChatHubConnection.DisposeAsync();
+        }
+
+        if (AppState.ContactsHubConnection is not null)
+        {
+            await AppState.ContactsHubConnection.DisposeAsync();
         }
     }
 
