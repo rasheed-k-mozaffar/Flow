@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using System.Text;
+using Flow.Server.Decorators;
 using Flow.Server.Hubs;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -16,6 +17,7 @@ builder.Services.AddRazorPages();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddSignalR();
+builder.Services.AddMemoryCache();
 
 var databaseOptions = new DatabaseOptions();
 // This binds the values from the db options section to a DatabaseOptions object
@@ -117,6 +119,10 @@ builder.Services.AddScoped(sp =>
 });
 
 #region Custom services registration
+builder.Services.AddScoped<ColorSchemesRepository>();
+builder.Services.AddScoped<UserSettingsRepository>();
+builder.Services.AddScoped<IColorSchemesRepository, CachedColorSchemesRepository>();
+builder.Services.AddScoped<IUserSettingsRepository, CachedUserSettingsRepository>();
 
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 builder.Services.AddScoped<IContactRequestsRepository, ContactRequestsRepository>();
