@@ -1383,6 +1383,10 @@ input:checked + .toggle-bg {
   z-index: 9999;
 }
 
+.z-\[10000\] {
+  z-index: 10000;
+}
+
 .-mx-1 {
   margin-left: -0.25rem;
   margin-right: -0.25rem;
@@ -1542,10 +1546,6 @@ input:checked + .toggle-bg {
   height: 50px;
 }
 
-.h-\[75\%\] {
-  height: 75%;
-}
-
 .h-auto {
   height: auto;
 }
@@ -1654,6 +1654,10 @@ input:checked + .toggle-bg {
 
 .w-full {
   width: 100%;
+}
+
+.w-screen {
+  width: 100vw;
 }
 
 .min-w-\[50px\] {
@@ -2251,6 +2255,11 @@ input:checked + .toggle-bg {
   line-height: 1rem;
 }
 
+.text-2xl {
+  font-size: 1.5rem;
+  line-height: 2rem;
+}
+
 .font-bold {
   font-weight: 700;
 }
@@ -2475,6 +2484,10 @@ input:checked + .toggle-bg {
 
 .ease-out {
   transition-timing-function: cubic-bezier(0, 0, 0.2, 1);
+}
+
+.ease-in-out {
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 h1:focus {
