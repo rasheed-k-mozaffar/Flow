@@ -1,8 +1,8 @@
 ﻿<div class="flex z-30 @(Sent ? "justify-start" : "flex-row-reverse space-x-reverse")  space-x-2 items-center">
     @if (MessageModel.Type is MessageType.Text)
     {
-        <div @onclick="MessageClicked" class="w-fit min-w-[50px] max-w-[75%] text-wrap px-4 py-2 rounded-3xl bg-blue-600 @(Sent ? "text-white" : "bg-gray-100 text-gray-600 text-end")
-            @(IsSelected && Sent ? "bg-red-500 translate-x-4" : null) transition-all">
+        <div @onclick="MessageClicked" class="w-fit min-w-[50px] max-w-[75%] text-wrap px-4 py-2 rounded-3xl  @(Sent && !IsSelected ? $"{BackgroundColor} text-white" : "bg-gray-100 text-gray-600 text-end")
+            @(IsSelected && Sent ? "bg-red-500 text-gray-800 translate-x-4" : null) transition-all">
             <div>@MessageModel.Content</div>
         </div>
     }
@@ -14,12 +14,13 @@
         </div>
     }
 
-    <div class="text-xs text-gray-500 transition-all @(IsSelected ? "translate-x-4" : null)">
+    <div class="text-xs text-gray-500 dark:text-gray-200 transition-all @(IsSelected ? "translate-x-4" : null)">
         @MessageModel.SentOn.ToLocalTime().ToShortTimeString()
     </div>
 </div>
 
 @code {
+    [Parameter] public string? BackgroundColor { get; set; } = "bg-blue-600";
     [Parameter] public bool IsSelected { get; set; } = false;
     [Parameter] public MessageDto MessageModel { get; set; } = null!;
     [Parameter] public EventCallback OnMessageSelected { get; set; }

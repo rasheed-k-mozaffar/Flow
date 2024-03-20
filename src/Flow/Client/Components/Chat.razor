@@ -2,7 +2,7 @@
 @inject ApplicationState State
 
 <div @onclick="ChatClicked"
-    class="flex cursor-pointer transition-all items-center border-b border-gray-200 @(State.SelectedThread?.ThreadId == ContactModel.ThreadId ? "bg-blue-600 text-white" : "bg-white text-gray-600" ) lg:flex-row lg:min-w-full md:flex-row md:max-w-xl">
+    class="flex cursor-pointer transition-all items-center border-b border-gray-100 dark:border-gray-700 @(State.SelectedThread?.ThreadId == ContactModel.ThreadId ? $"{State.UserSettings.ColorScheme?.AccentsColor?.BgColor} text-white" : "bg-white text-gray-600 dark:bg-gray-600 dark:text-gray-100" ) lg:flex-row lg:min-w-full md:flex-row md:max-w-xl">
     <div class="flex items-center gap-4 p-2">
         <div>
             <img class="h-[50px] w-[50px] rounded-full"
