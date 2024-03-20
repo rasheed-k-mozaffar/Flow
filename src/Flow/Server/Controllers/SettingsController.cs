@@ -10,6 +10,7 @@ namespace Flow.Server.Controllers;
 public class SettingsController : ControllerBase
 {
     private readonly IUserSettingsRepository _userSettingsRepo;
+    private readonly IColorSchemesRepository _schemesRepository;
     private readonly UserInfo _userInfo;
     private readonly ILogger<SettingsController> _logger;
 
@@ -17,12 +18,14 @@ public class SettingsController : ControllerBase
     (
         IUserSettingsRepository userSettingsRepo,
         UserInfo userInfo,
-        ILogger<SettingsController> logger
+        ILogger<SettingsController> logger,
+        IColorSchemesRepository schemesRepository
     )
     {
         _userSettingsRepo = userSettingsRepo;
         _userInfo = userInfo;
         _logger = logger;
+        _schemesRepository = schemesRepository;
     }
 
     [HttpGet("get-settings")]
@@ -49,5 +52,20 @@ public class SettingsController : ControllerBase
                 ErrorMessage = ex.Message
             });
         }
+    }
+
+    [HttpGet("get-color-schemes")]
+    [ProducesResponseType(statusCode: StatusCodes.Status200OK, type: typeof(ApiResponse<IEnumerable<ColorSchemeDto>>))]
+    [ProducesResponseType(statusCode: StatusCodes.Status401Unauthorized, type: typeof(UnauthorizedResult))]
+    public async Task<IActionResult> GetColorSchemes()
+    {
+        var schemes = await _schemesRepository.GetSchemesAsync();
+
+        return Ok(new ApiResponse<IEnumerable<ColorSchemeDto>>
+        {
+            Message = "Schemes retrieved successfully",
+            Body = schemes.Select(s => s.ToColorSchemeDto()),
+            IsSuccess = true
+        });
     }
 }

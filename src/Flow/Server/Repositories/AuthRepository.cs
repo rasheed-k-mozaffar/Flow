@@ -11,18 +11,24 @@ public class AuthRepository : IAuthRepository
     #region Dependencies
     private readonly UserManager<AppUser> _userManager;
     private readonly ILogger<AuthRepository> _logger;
+    private readonly IUserSettingsRepository _userSettingsRepo;
     private readonly JwtOptions _jwtSettings;
+    private readonly IConfiguration _config;
 
     public AuthRepository
     (
         UserManager<AppUser> userManager,
         ILogger<AuthRepository> logger,
-        JwtOptions jwtSettings
+        JwtOptions jwtSettings,
+        IUserSettingsRepository userSettingsRepo,
+        IConfiguration config
     )
     {
         _userManager = userManager;
         _logger = logger;
         _jwtSettings = jwtSettings;
+        _userSettingsRepo = userSettingsRepo;
+        _config = config;
     }
     #endregion
 
@@ -123,6 +129,15 @@ public class AuthRepository : IAuthRepository
                 newUser.UserName,
                 newUser.Email
             );
+
+            // * insert a new settings entry in the db for the new user
+            await _userSettingsRepo.InsertNewSettingsEntryAsync(newUser, new UserSettings
+            {
+                Id = Guid.NewGuid(),
+                AppUserId = newUser.Id,
+                AppUser = newUser,
+                ColorSchemeId = 1, // * Sets the color scheme to Flow's default
+            });
 
             return new UserManagerResponse
             {

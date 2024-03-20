@@ -5,4 +5,5 @@ namespace Flow.Client.Services;
 public interface ISettingsService
 {
     Task<ApiResponse<UserSettingsDto>> GetUserSettingsAsync();
+    Task<ApiResponse<IEnumerable<ColorSchemeDto>>> GetColorSchemesAsync();
 }
