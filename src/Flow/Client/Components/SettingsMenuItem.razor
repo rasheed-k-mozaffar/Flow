@@ -1,0 +1,44 @@
+﻿@inject ApplicationState State
+
+<div @onclick="ItemClicked"
+    class="py-3 px-4 flex justify-between items-center rounded-xl
+    @(IsSelected ?  $"{State.UserSettings.ColorScheme?.AccentsColor?.BgColor} text-white" : "hover:bg-gray-100 text-gray-600 dark:text-gray-200 dark:hover:bg-gray-600") cursor-pointer transition-all">
+
+    <div class="flex items-center gap-2">
+        <div>
+            @Icon
+        </div>
+
+        <div class="text-sm font-medium">
+            @Name.ToString()
+        </div>
+    </div>
+
+    <div>
+        <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
+            viewBox="0 0 24 24">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="m9 5 7 7-7 7" />
+        </svg>
+    </div>
+</div>
+
+<div class="bg-violet-500 text-violet-600"></div>
+
+@code {
+    [Parameter] public SettingsItemName Name { get; set; }
+    [Parameter] public RenderFragment? Icon { get; set; }
+    [Parameter] public bool IsSelected { get; set; }
+
+    private void ItemClicked()
+    {
+        State.SelectedSettings = Name;
+        State.NotifyStateChanged();
+    }
+
+    protected override void OnInitialized()
+    {
+        State.OnChange += StateHasChanged;
+    }
+
+}
