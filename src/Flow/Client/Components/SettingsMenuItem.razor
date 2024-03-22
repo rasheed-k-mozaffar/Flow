@@ -1,7 +1,7 @@
 ﻿@inject ApplicationState State
 
 <div @onclick="ItemClicked"
-    class="py-3 px-4 flex justify-between items-center rounded-xl
+    class="py-2 px-4 flex justify-between items-center rounded-xl
     @(IsSelected ?  $"{State.UserSettings.ColorScheme?.AccentsColor?.BgColor} text-white" : "hover:bg-gray-100 text-gray-600 dark:text-gray-200 dark:hover:bg-gray-600") cursor-pointer transition-all">
 
     <div class="flex items-center gap-2">
@@ -23,7 +23,16 @@
     </div>
 </div>
 
-<div class="bg-violet-500 text-violet-600"></div>
+<div class="bg-violet-500 text-violet-500"></div>
+<div class="bg-black text-black"></div>
+<div class="bg-green-500 text-green-500 dark:bg-green-50"></div>
+<div class="bg-orange-400 text-orange-400 dark:bg-orange-50"></div>
+<div class="bg-lime-500 text-lime-500 dark:bg-orange-50"></div>
+<div class="bg-blue-100"></div>
+<div class="bg-violet-100"></div>
+<div class="bg-orange-100"></div>
+<div class="bg-green-100"></div>
+<div class="bg-lime-100"></div>
 
 @code {
     [Parameter] public SettingsItemName Name { get; set; }
