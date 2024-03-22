@@ -4,6 +4,7 @@ using Flow.Server.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Flow.Server.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240318195516_AddSettingsEntriesTable")]
+    partial class AddSettingsEntriesTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -134,50 +137,6 @@ namespace Flow.Server.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Threads");
-                });
-
-            modelBuilder.Entity("Flow.Server.Models.ColorScheme", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("AccentsColor")
-                        .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
-
-                    b.Property<string>("Name")
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar");
-
-                    b.Property<string>("ReceivedMsgBubbleColor")
-                        .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
-
-                    b.Property<string>("SelectedMessageColor")
-                        .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
-
-                    b.Property<string>("SentMsgBubbleColor")
-                        .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("ColorSchemes");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            AccentsColor = "text-blue-500 bg-blue-600",
-                            Name = "Flow's Default",
-                            ReceivedMsgBubbleColor = "bg-gray-100 text-gray-600",
-                            SelectedMessageColor = "bg-red-500 text-white",
-                            SentMsgBubbleColor = "bg-blue-600 text-white"
-                        });
                 });
 
             modelBuilder.Entity("Flow.Server.Models.ContactRequest", b =>
@@ -305,6 +264,11 @@ namespace Flow.Server.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("AccentsColor")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
                     b.Property<int>("ActivityStatus")
                         .HasColumnType("int");
 
@@ -312,9 +276,6 @@ namespace Flow.Server.Migrations
                         .IsRequired()
                         .HasMaxLength(450)
                         .HasColumnType("nvarchar(450)");
-
-                    b.Property<int>("ColorSchemeId")
-                        .HasColumnType("int");
 
                     b.Property<DateTime?>("EditedAt")
                         .HasColumnType("datetime2");
@@ -325,6 +286,16 @@ namespace Flow.Server.Migrations
                     b.Property<bool>("EnableSentMessageSounds")
                         .HasColumnType("bit");
 
+                    b.Property<string>("MessageBubbleColor")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<string>("SendButtonColor")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
                     b.Property<int>("Theme")
                         .HasColumnType("int");
 
@@ -332,8 +303,6 @@ namespace Flow.Server.Migrations
 
                     b.HasIndex("AppUserId")
                         .IsUnique();
-
-                    b.HasIndex("ColorSchemeId");
 
                     b.ToTable("SettingsEntries");
                 });
@@ -545,15 +514,7 @@ namespace Flow.Server.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Flow.Server.Models.ColorScheme", "ColorScheme")
-                        .WithMany()
-                        .HasForeignKey("ColorSchemeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("AppUser");
-
-                    b.Navigation("ColorScheme");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

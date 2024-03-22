@@ -18,6 +18,8 @@ public class AppUser : IdentityUser
 
     public virtual Image? ProfilePicture { get; set; }
 
+    public virtual UserSettings? Settings { get; set; }
+
     public virtual ICollection<ChatThread> Chats { get; set; } = new List<ChatThread>();
     public virtual ICollection<ContactRequest> ContactRequests { get; set; } = new List<ContactRequest>();
 }

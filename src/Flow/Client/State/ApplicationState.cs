@@ -1,4 +1,5 @@
 ﻿using System.Security.Claims;
+using Flow.Client.Enums;
 using Flow.Shared.DataTransferObjects;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.SignalR.Client;
@@ -13,6 +14,13 @@ public class ApplicationState
 
     private readonly IJSRuntime _js;
 
+    /// <summary>
+    /// Represents the user's current settings and color scheme
+    /// </summary>
+    public UserSettingsDto UserSettings { get; set; }
+
+    public SettingsItemName? SelectedSettings { get; set; } = null;
+
     public event Action? OnChange;
     /// <summary>
     /// This represents the chat thread id (Contact) the user is currently in
@@ -25,6 +33,7 @@ public class ApplicationState
     /// </summary>
     public Dictionary<string, List<MessageDto>>? Threads { get; set; }
     public ICollection<ContactDto> Contacts { get; set; }
+    public IEnumerable<ColorSchemeDto>? ColorSchemes { get; set; }
 
     public List<PendingRequestIncomingDto> IncomingContactRequests { get; set; }
     public List<PendingRequestSentDto> SentContactRequests { get; set; }
@@ -44,6 +53,7 @@ public class ApplicationState
         IncomingContactRequests = new();
         SentContactRequests = new();
         Contacts = new List<ContactDto>();
+        UserSettings = new();
     }
 
     public void NotifyStateChanged() => OnChange?.Invoke();

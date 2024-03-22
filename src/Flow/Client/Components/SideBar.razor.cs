@@ -26,10 +26,13 @@ public partial class SideBar : ComponentBase
     private bool isDoneLoadingContactRequests = false;
 
     // * these variables will be used to determine which tab to display
+    private bool displayChatsTab = true;
     private bool displayReqsTab = false;
+    private bool displaySettingsTab = false;
 
     private Animate contactsTabAnimation = new();
     private Animate chatsTabAnimation = new();
+    private Animate settingsTabAnimation = new();
 
     private void SearchButtonClicked() => OnSearchButtonClicked.InvokeAsync();
 
@@ -95,14 +98,35 @@ public partial class SideBar : ComponentBase
     #region Animation Methods
     private void DisplayContactsTab()
     {
+        ResetSettingsState();
+        displayChatsTab = false;
+        displaySettingsTab = false;
         displayReqsTab = true;
         contactsTabAnimation.Run();
     }
 
     private void DisplayChatsTab()
     {
+        ResetSettingsState();
+        displayChatsTab = true;
+        displaySettingsTab = false;
         displayReqsTab = false;
         chatsTabAnimation.Run();
     }
+
+    private void DisplaySettingsTab()
+    {
+        ResetSettingsState();
+        displayReqsTab = false;
+        displayChatsTab = false;
+        displaySettingsTab = true;
+        settingsTabAnimation.Run();
+    }
     #endregion
+
+    private void ResetSettingsState()
+    {
+        AppState.SelectedSettings = null;
+        AppState.NotifyStateChanged();
+    }
 }

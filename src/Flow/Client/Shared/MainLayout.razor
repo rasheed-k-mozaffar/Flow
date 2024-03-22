@@ -1,14 +1,23 @@
 ﻿@inherits LayoutComponentBase
 @inject IJSRuntime Js
+@inject ApplicationState State
 
 <SearchUsersModal Show="showSearchModal" OnCloseClicked="CloseSearchModal" />
-
-<main class="h-screen overflow-hidden">
-    <SideBar OnSearchButtonClicked="OpenSearchModal" />
-    <div class=" sm:ml-80 min-h-full">
-        @Body
-    </div>
-</main>
+@if (!showUi)
+{
+    <LoadingScreen OnSettingsLoaded="ShowUi" />
+}
+else
+{
+    <Animate Animation="Animations.FadeIn" DurationMs="500">
+    <main class="h-screen overflow-hidden @(State.UserSettings.Theme == Theme.Dark ? "dark" : null)">
+        <SideBar OnSearchButtonClicked="OpenSearchModal" />
+        <div class=" sm:ml-80 min-h-full">
+            @Body
+        </div>
+    </main>
+</Animate>
+}
 <style type="text/css">
     ::-webkit-scrollbar {
         width: 6px;
@@ -24,11 +33,19 @@
     }
 </style>
 @code {
+    private bool showUi = false;
     private bool showSearchModal = false;
+
+    protected override void OnInitialized()
+    {
+        State.OnChange += StateHasChanged;
+    }
     protected override async Task OnAfterRenderAsync(bool isFirstRender)
     {
         await Js.InvokeVoidAsync("window.initializeFlowbite");
     }
+
+    private void ShowUi() => showUi = true;
 
     private void OpenSearchModal() => showSearchModal = true;
 

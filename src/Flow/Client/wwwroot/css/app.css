@@ -28,7 +28,7 @@
     }
 
     .icon-btn {
-        @apply flex justify-center items-center rounded-full p-2.5 cursor-pointer transition-colors hover:bg-gray-100  disabled:cursor-not-allowed
+        @apply flex justify-center items-center rounded-full p-2.5 cursor-pointer transition-colors disabled:cursor-not-allowed
     }
 }
 

@@ -1,0 +1,14 @@
+﻿<div @onclick="(() => OnClick.InvokeAsync(this.Scheme))" class="h-fit w-full flex items-center gap-2 cursor-pointer overflow-hidden rounded-xl px-3 py-5 hover:bg-gray-100
+    dark:hover:bg-gray-800 @(IsSelected ? "bg-gray-100 dark:bg-gray-700" : null)">
+
+    <div class="w-5 h-5 rounded-xl @Scheme.AccentsColor?.BgColor">
+    </div>
+
+    <div class="text-medium font-medium text-gray-600 dark:text-gray-200">@Scheme.Name</div>
+</div>
+
+@code {
+    [Parameter] public ColorSchemeDto Scheme { get; set; } = null!;
+    [Parameter] public EventCallback<ColorSchemeDto> OnClick { get; set; }
+    [Parameter] public bool IsSelected { get; set; }
+}

@@ -23,6 +23,9 @@ public partial class Index : ComponentBase, IAsyncDisposable
     [Inject]
     public AuthenticationStateProvider AuthenticationStateProvider { get; set; } = default!;
 
+    [Inject]
+    public ISettingsService SettingsService { get; set; } = default!;
+
     protected override async Task OnInitializedAsync()
     {
         AppState.OnChange += StateHasChanged;
@@ -32,6 +35,7 @@ public partial class Index : ComponentBase, IAsyncDisposable
         AppState.AuthState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
 
         await LoadThreadsAndMessagesAsync();
+        await LoadColorSchemesAsync();
         await AppState.InitializeHubsAsync();
 
     }
@@ -51,13 +55,23 @@ public partial class Index : ComponentBase, IAsyncDisposable
         }
     }
 
-    public async Task LoadThreadsAndMessagesAsync()
+    private async Task LoadThreadsAndMessagesAsync()
     {
         var apiResponse = await ThreadsService.GetPreliminaryThreadsDetailsForUserAsync();
 
         if (apiResponse.IsSuccess)
         {
             AppState.Threads = apiResponse.Body;
+        }
+    }
+
+    private async Task LoadColorSchemesAsync()
+    {
+        var apiResponse = await SettingsService.GetColorSchemesAsync();
+
+        if (apiResponse.IsSuccess)
+        {
+            AppState.ColorSchemes = apiResponse.Body!;
         }
     }
 }

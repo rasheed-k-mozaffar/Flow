@@ -1,13 +1,32 @@
 ﻿@page "/"
 @attribute [Authorize]
 
-@if (AppState.SelectedThread is null)
+@if (AppState.SelectedSettings is not null)
 {
-        <div class="h-screen w-full flex justify-center items-center">
-        <div class="py-2 px-6 bg-gray-100 text-gray-500 rounded-xl font-medium">
-            Select a chat thread to begin texting
-        </div>
+    @if (AppState.SelectedSettings is SettingsItemName.Appearance)
+    {
+        <div class="w-full h-screen flex justify-center bg-white dark:bg-gray-700">
+    <div class="w-1/2">
+        <AppearanceSettings />
     </div>
+</div>
+    }
+    else if (AppState.SelectedSettings is SettingsItemName.Profile)
+    {
+        <div class="w-full h-screen flex justify-center bg-white dark:bg-gray-700">
+    <div class="w-1/2">
+        <ProfileSettings />
+    </div>
+</div>
+    }
+}
+else if (AppState.SelectedThread is null)
+{
+    <div class="h-screen w-full flex justify-center items-center bg-white dark:bg-gray-700">
+    <div class="py-2 px-6 bg-gray-100 text-gray-500 rounded-xl font-medium dark:bg-gray-500 dark:text-gray-200">
+        Select a chat thread to begin texting
+    </div>
+</div>
 
 }
 else
