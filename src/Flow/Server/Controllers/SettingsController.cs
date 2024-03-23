@@ -68,4 +68,38 @@ public class SettingsController : ControllerBase
             IsSuccess = true
         });
     }
+
+    [HttpPost("update-settings")]
+    [ProducesResponseType(statusCode: StatusCodes.Status200OK, type: typeof(ApiResponse))]
+    [ProducesResponseType(statusCode: StatusCodes.Status401Unauthorized, type: typeof(UnauthorizedResult))]
+    [ProducesResponseType(statusCode: StatusCodes.Status404NotFound, type: typeof(ApiErrorResponse))]
+    public async Task<IActionResult> UpdateSettings(UserSettingsDto newSettings)
+    {
+        try
+        {
+            await _userSettingsRepo.UpdateUserSettingsAsync
+            (
+                newSettings.ToUserSettings(_userInfo.UserId!)
+            );
+
+            return Ok(new ApiResponse
+            {
+                Message = "Your settings have been updated!",
+                IsSuccess = true
+            });
+        }
+        catch (ResourceNotFoundException ex)
+        {
+            _logger.LogError
+            (
+                "Failed to find settings with the ID: {settings-id}",
+                newSettings.Id
+            );
+
+            return NotFound(new ApiErrorResponse
+            {
+                ErrorMessage = ex.Message
+            });
+        }
+    }
 }

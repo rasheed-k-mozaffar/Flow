@@ -1,11 +1,21 @@
 ﻿@inherits LayoutComponentBase
 @inject IJSRuntime Js
 @inject ApplicationState State
+@inject NavigationManager Nav
 
 <SearchUsersModal Show="showSearchModal" OnCloseClicked="CloseSearchModal" />
 @if (!showUi)
 {
-    <LoadingScreen OnSettingsLoaded="ShowUi" />
+    <AuthorizeView>
+    <Authorized>
+        <LoadingScreen OnSettingsLoaded="ShowUi" />
+    </Authorized>
+    <NotAuthorized>
+        @{
+                Nav.NavigateTo("/auth/signin");
+            }
+        </NotAuthorized>
+    </AuthorizeView>
 }
 else
 {
