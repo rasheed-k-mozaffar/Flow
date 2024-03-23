@@ -46,6 +46,13 @@ public class CachedUserSettingsRepository : IUserSettingsRepository
 
     public async Task UpdateUserSettingsAsync(UserSettings settings)
     {
-        await _decorated.UpdateUserSettingsAsync(settings);
+        try
+        {
+            await _decorated.UpdateUserSettingsAsync(settings);
+        }
+        catch (ResourceNotFoundException)
+        {
+            throw;
+        }
     }
 }

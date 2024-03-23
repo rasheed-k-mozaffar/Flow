@@ -1,6 +1,5 @@
 ﻿@inject ISettingsService SettingsService
 @inject ApplicationState AppState
-@inject ILocalStorageService LocalStorage
 
 <div
     class="fixed z-[10000] bg-white dark:bg-gray-800 h-screen w-screen flex justify-center items-center space-y-4 flex-col">
@@ -15,7 +14,6 @@
 @code {
     [Parameter] public EventCallback OnSettingsLoaded { get; set; }
 
-    private const string SettingsKey = "app-settings";
     private string _errorMessage = string.Empty;
     private bool isDoneLoadingData = false;
     protected override async Task OnInitializedAsync()
@@ -25,10 +23,6 @@
 
     private async Task LoadUserSettingsAsync()
     {
-        // if the settings are cached, load them directly
-        if (await CacheContainsSettingsAsync())
-            return;
-
         byte retryCount = 0;
 
         // try loading the settings, if the loading failes, a retry is made until it's been made 3 times
@@ -49,7 +43,6 @@
                     AppState.UserSettings = apiResponse.Body!;
 
                     await Task.Delay(1000);
-                    await CacheUserSettingsAsync(AppState.UserSettings);
                     await OnSettingsLoaded.InvokeAsync();
 
                     return;
@@ -62,25 +55,5 @@
             }
         }
         while (retryCount <= 3);
-    }
-
-    private async Task CacheUserSettingsAsync(UserSettingsDto settings)
-    {
-        await LocalStorage.SetItemAsync<UserSettingsDto>(SettingsKey, settings);
-    }
-
-    private async Task<bool> CacheContainsSettingsAsync()
-    {
-        if (await LocalStorage.ContainKeyAsync(SettingsKey))
-        {
-            AppState.UserSettings = await LocalStorage.GetItemAsync<UserSettingsDto>(SettingsKey);
-
-            await Task.Delay(1000);
-            await OnSettingsLoaded.InvokeAsync();
-
-            return true;
-        }
-        else
-            return false;
     }
 }

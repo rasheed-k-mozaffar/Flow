@@ -10,4 +10,5 @@ public class UserSettingsDto
     public bool EnableSentMessageSounds { get; set; }
     public ActivityStatus ActivityStatus { get; set; }
     public ColorSchemeDto? ColorScheme { get; set; }
+    public int ColorSchemeId { get; set; }
 }

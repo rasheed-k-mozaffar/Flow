@@ -95,8 +95,23 @@ public class UserSettingsRepository : IUserSettingsRepository
         await _db.SaveChangesAsync();
     }
 
-    public Task UpdateUserSettingsAsync(UserSettings settings)
+    public async Task UpdateUserSettingsAsync(UserSettings settings)
     {
-        throw new NotImplementedException();
+        var settingsEntry = await _db
+                                .SettingsEntries
+                                .FindAsync(settings.Id);
+
+        if (settingsEntry is null)
+            throw new ResourceNotFoundException("Resource was not found");
+
+        settingsEntry.Theme = settings.Theme;
+        settingsEntry.ActivityStatus = settings.ActivityStatus;
+        settingsEntry.ColorSchemeId = settings.ColorSchemeId;
+        settingsEntry.ColorScheme = settings.ColorScheme;
+        settingsEntry.EditedAt = DateTime.UtcNow;
+        settingsEntry.EnableNotificationSounds = settings.EnableNotificationSounds;
+        settingsEntry.EnableSentMessageSounds = settings.EnableSentMessageSounds;
+
+        await _db.SaveChangesAsync();
     }
 }
