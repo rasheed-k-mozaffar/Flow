@@ -46,19 +46,19 @@ public class ThreadsController : ControllerBase
         });
     }
 
-    [HttpGet]
-    [Route("get-messages-by-date")]
-    [ProducesResponseType(statusCode: StatusCodes.Status200OK, type: typeof(ApiResponse<List<MessageDto>>))]
+    [HttpPost]
+    [Route("get-previous-messages")]
+    [ProducesResponseType(statusCode: StatusCodes.Status200OK, type: typeof(ApiResponse<PreviousMessagesResponse>))]
     [ProducesResponseType(statusCode: StatusCodes.Status401Unauthorized, type: typeof(UnauthorizedResult))]
-    public async Task<IActionResult> GetChatMessages([FromBody] MessagesRequestDto request)
+    public async Task<IActionResult> GetChatMessages([FromBody] LoadPreviousMessagesRequest request)
     {
-        var LoadedMessages = await _threadsRepository.GetMessagesByDate(request);
+        var previousMessagesResponse = await _threadsRepository.GetPreviousMessagesByDateAsync(request);
 
-        return Ok(new ApiResponse<List<MessageDto>>
+        return Ok(new ApiResponse<PreviousMessagesResponse>
         {
             Message = "Messages retrieved",
             IsSuccess = true,
-            Body = LoadedMessages
+            Body = previousMessagesResponse
         });
     }
 

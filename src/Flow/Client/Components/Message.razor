@@ -1,4 +1,5 @@
-﻿<div class="flex z-30 @(Sent ? "justify-start" : "flex-row-reverse space-x-reverse")  space-x-2 items-center">
+﻿<div @attributes="AdditionalAttributes"
+    class="flex z-30 @(Sent ? "justify-start" : "flex-row-reverse space-x-reverse")  space-x-2 items-center">
     @if (MessageModel.Type is MessageType.Text)
     {
         <div @onclick="MessageClicked" class="w-fit min-w-[50px] max-w-[75%] text-wrap px-4 py-2 rounded-3xl @BackgroundColor  @(Sent && !IsSelected ? $"text-white" : "text-gray-600 text-end")
@@ -20,6 +21,8 @@
 </div>
 
 @code {
+    [Parameter(CaptureUnmatchedValues = true)]
+    public Dictionary<string, object>? AdditionalAttributes { get; set; }
     [Parameter] public string? BackgroundColor { get; set; } = "bg-blue-600";
     [Parameter] public bool IsSelected { get; set; } = false;
     [Parameter] public MessageDto MessageModel { get; set; } = null!;

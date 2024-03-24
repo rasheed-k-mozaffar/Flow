@@ -37,6 +37,9 @@ public partial class Conversation : ComponentBase
     [Inject]
     public IFilesService FilesService { get; set; } = default!;
 
+    [Inject]
+    public IThreadsService ThreadsService { get; set; } = default!;
+
     private bool wantsToDeleteMessages = false;
 
     private ICollection<Guid> selectedMessages = new List<Guid>();
@@ -50,6 +53,7 @@ public partial class Conversation : ComponentBase
     private bool isSendButtonEnabled = false;
     private bool isChatRendered = false;
     private bool wantsToTakePicture = false;
+    private bool stillHasMessagesToLoad = true;
 
     private async Task ScrollToBottom(bool toBottom)
     {
@@ -65,6 +69,11 @@ public partial class Conversation : ComponentBase
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        if (firstRender)
+        {
+            await Js.InvokeVoidAsync("addScrollListener", DotNetObjectReference.Create(this), "messages-area");
+        }
+
         if (!isChatRendered)
         {
             await Js.InvokeVoidAsync("scrollToBottom", "messages-area");
@@ -122,6 +131,49 @@ public partial class Conversation : ComponentBase
 
             messageModel = new();
             UpdateSendButtonVisibility(new ChangeEventArgs());
+        }
+    }
+
+    [JSInvokable]
+    public async Task HandleLoadingPreviousMessagesAsync()
+    {
+        if (!stillHasMessagesToLoad)
+            return;
+
+        _isMakingNetworkRequest = true;
+        await InvokeAsync(StateHasChanged);
+
+        try
+        {
+            var lastMessage = AppState.Threads?[threadId!].First();
+
+            var apiResponse = await ThreadsService.LoadPreviousMessagesAsync
+            (
+                new LoadPreviousMessagesRequest
+                {
+                    ThreadId = Guid.Parse(threadId!),
+                    LastMessageDate = (DateTime)(lastMessage!.SentOn)
+                }
+            );
+
+            if (apiResponse.IsSuccess)
+            {
+                AppState.Threads![threadId!]
+                        .InsertRange(0, apiResponse.Body!.Messages);
+
+                stillHasMessagesToLoad = apiResponse.Body.HasUnloadedMessages;
+
+                await Js.InvokeVoidAsync("scrollToLastMessage");
+            }
+        }
+        catch (LoadingMessagesFailedException ex)
+        {
+            _errorMessage = ex.Message;
+        }
+        finally
+        {
+            _isMakingNetworkRequest = false;
+            await InvokeAsync(StateHasChanged);
         }
     }
 
