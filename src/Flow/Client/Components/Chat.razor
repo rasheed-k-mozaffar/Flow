@@ -2,61 +2,60 @@
 @inject ApplicationState State
 
 <div @onclick="ChatClicked"
-    class="flex cursor-pointer transition-all items-center border-b border-gray-100 dark:border-gray-700 @(State.SelectedThread?.ThreadId == ContactModel.ThreadId ? $"{State.UserSettings.ColorScheme?.AccentsColor?.BgColor} text-white" : "bg-white text-gray-600 dark:bg-gray-600 dark:text-gray-100" ) lg:flex-row lg:min-w-full md:flex-row md:max-w-xl">
-    <div class="flex items-center gap-4 p-2">
+    class="flex justify-between items-center p-2 cursor-pointer transition-all  border-b border-gray-100 dark:border-gray-700 @(State.SelectedThread?.UserId == ContactModel.UserId ? $"{State.UserSettings.ColorScheme?.AccentsColor?.BgColor} text-white" : "bg-white text-gray-600 dark:bg-gray-600 dark:text-gray-100" ) lg:flex-row lg:min-w-full md:flex-row md:max-w-xl">
+    <div class="flex items-center gap-4">
         <div>
             <img class="h-[50px] w-[50px] rounded-full object-cover"
-                src="@(ContactModel.Contact!.ProfilePictureUrl ?? "/images/avatar.png")"
-                alt="@ContactModel.Contact.Name" />
+                src="@(ContactModel.ProfilePictureUrl ?? "/images/avatar.png")" alt="@ContactModel.Name" />
         </div>
 
         <div class="font-medium dark:text-white">
-            <div class="font-light">@ContactModel.Contact!.Name</div>
-            @if (@State.Threads?[ContactModel.ThreadId.ToString()!] is not null)
+            <div class="font-light">@ContactModel.Name</div>
+            @if (latestMessage is not null)
             {
                 <div class="text-sm font-light">
-                    @if (State.Threads[ContactModel.ThreadId.ToString()!].LastOrDefault()?.SenderId ==
-                   ContactModel.Contact.UserId)
+                    @if (latestMessage?.SenderId ==
+                   ContactModel.UserId)
                     {
-                        if (State.Threads[ContactModel.ThreadId.ToString()!].LastOrDefault()?.Type is MessageType.Image)
+                        if (latestMessage?.Type is MessageType.Image)
                         {
-                            <span>@ContactModel.Contact.Name!.Split(' ')[0]: Sent an image</span>
+                            <span>@ContactModel.Name!.Split(' ')[0]: Sent an image</span>
                         }
                         else
                         {
-                            if (State.Threads[ContactModel.ThreadId.ToString()!].LastOrDefault()?.Content.Length <= 15)
+                            if (latestMessage?.Content.Length <= 15)
                             {
-                                <span>@ContactModel.Contact.Name!.Split(' ')[0]:
-                                    @State.Threads[ContactModel.ThreadId.ToString()!].LastOrDefault()?.Content</span>
+                                <span>@ContactModel.Name!.Split(' ')[0]:
+                                    @latestMessage?.Content</span>
                             }
                             else
                             {
-                                <span>@ContactModel.Contact.Name!.Split(' ')[0]:
-                                    @State.Threads[ContactModel.ThreadId.ToString()!].LastOrDefault()?.Content.Substring(0, 15)...</span>
+                                <span>@ContactModel.Name!.Split(' ')[0]:
+                                    @latestMessage?.Content.Substring(0, 15)...</span>
                             }
                         }
                     }
-                    else if (State.Threads[ContactModel.ThreadId.ToString()!].LastOrDefault() == null)
+                    else if (latestMessage == null)
                     {
 
                     }
                     else
                     {
-                        if (State.Threads[ContactModel.ThreadId.ToString()!].LastOrDefault()?.Type is MessageType.Image)
+                        if (latestMessage?.Type is MessageType.Image)
                         {
                             <span>You: Image</span>
                         }
                         else
                         {
-                            if(State.Threads[ContactModel.ThreadId.ToString()!].LastOrDefault()?.Content.Length <= 15)
+                            if (latestMessage?.Content.Length <= 15)
                             {
                                 <span>You:
-                                    @State.Threads[ContactModel.ThreadId.ToString()!].LastOrDefault()?.Content</span>
+                                    @latestMessage?.Content</span>
                             }
                             else
                             {
                                 <span>You:
-                                    @State.Threads[ContactModel.ThreadId.ToString()!].LastOrDefault()?.Content.Substring(0, 15)...</span>
+                                    @latestMessage?.Content.Substring(0, 15)...</span>
                             }
                         }
                     }
@@ -65,20 +64,35 @@
             }
         </div>
     </div>
+
+    <div></div>
+
+    <div class="text-sm font-medium text-gray-500 dark:text-gray-200">
+        @latestMessage?.SentOn.ToLocalTime().ToShortTimeString()
+    </div>
 </div>
 
 @code {
-    [Parameter] public ContactDto ContactModel { get; set; } = null!;
+    [Parameter] public UserDetailsDto ContactModel { get; set; } = null!;
+    [Parameter] public Guid ThreadId { get; set; }
+    private MessageDto? latestMessage;
 
     protected override void OnInitialized()
     {
+        latestMessage = State.Threads[ThreadId].Messages.LastOrDefault();
         State.OnChange += StateHasChanged;
         base.OnInitialized();
     }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        latestMessage = State.Threads[ThreadId].Messages.LastOrDefault();
+    }
     private void ChatClicked()
     {
+        State.SelectedThreadId = ThreadId;
         State.SelectedThread = ContactModel;
         State.NotifyStateChanged();
-        Console.WriteLine($"The current thread id: {State.SelectedThread.ThreadId}");
+        Console.WriteLine($"The current thread id: {ThreadId}");
     }
 }

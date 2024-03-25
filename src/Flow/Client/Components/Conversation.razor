@@ -12,7 +12,7 @@
 {
     <div class="fixed z-50 top-0 right-0 w-full h-full flex items-center justify-center bg-gray-700/80 backdrop-blur-lg ">
     <CameraView Show="wantsToTakePicture" OnCloseClicked="CloseCameraView" typeOfImage="ImageType.NormalImage"
-        Title="@($"Send image to {ContactModel.Contact?.Name}")" OnSendImageClicked="HandleSendingPictureAsync" />
+        Title="@($"Send image to {ContactModel.Name}")" OnSendImageClicked="HandleSendingPictureAsync" />
 </div>
 }
 
@@ -34,13 +34,12 @@
         <div class="flex items-center gap-4">
             <div>
                 <img class="h-[50px] w-[50px] rounded-full object-cover"
-                    src="@(ContactModel.Contact!.ProfilePictureUrl ?? "/images/avatar.png")"
-                    alt="@ContactModel.Contact!.Name" />
+                    src="@(ContactModel.ProfilePictureUrl ?? "/images/avatar.png")" alt="@ContactModel.Name" />
             </div>
 
             <div class="font-medium dark:text-white">
-                <div class="text-xl">@ContactModel.Contact.Name</div>
-                <div class="text-sm text-gray-500 dark:text-gray-200">@ContactModel.Contact.Username</div>
+                <div class="text-xl">@ContactModel.Name</div>
+                <div class="text-sm text-gray-500 dark:text-gray-200">@ContactModel.Username</div>
             </div>
         </div>
     </div>
@@ -61,7 +60,7 @@
                 }
             </div>
 
-            var groupedMessagesByDay = AppState.Threads![threadId].GroupBy(p => p.SentOn.Day);
+            var groupedMessagesByDay = AppState.Threads[ThreadId].Messages.GroupBy(p => p.SentOn.Day);
             foreach (var messageGroup in groupedMessagesByDay)
             {
                 var date = new DateTime(DateTime.Now.Year, DateTime.Now.Month, messageGroup.Key);

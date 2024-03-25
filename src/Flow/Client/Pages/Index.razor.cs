@@ -34,8 +34,6 @@ public partial class Index : ComponentBase, IAsyncDisposable
 
         AppState.AuthState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
 
-        await LoadThreadsAndMessagesAsync();
-        await LoadColorSchemesAsync();
         await AppState.InitializeHubsAsync();
 
     }
@@ -52,26 +50,6 @@ public partial class Index : ComponentBase, IAsyncDisposable
         if (AppState.ContactsHubConnection is not null)
         {
             await AppState.ContactsHubConnection.DisposeAsync();
-        }
-    }
-
-    private async Task LoadThreadsAndMessagesAsync()
-    {
-        var apiResponse = await ThreadsService.GetPreliminaryThreadsDetailsForUserAsync();
-
-        if (apiResponse.IsSuccess)
-        {
-            AppState.Threads = apiResponse.Body;
-        }
-    }
-
-    private async Task LoadColorSchemesAsync()
-    {
-        var apiResponse = await SettingsService.GetColorSchemesAsync();
-
-        if (apiResponse.IsSuccess)
-        {
-            AppState.ColorSchemes = apiResponse.Body!;
         }
     }
 }

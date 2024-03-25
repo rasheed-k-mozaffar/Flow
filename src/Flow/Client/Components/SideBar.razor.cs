@@ -55,7 +55,7 @@ public partial class SideBar : ComponentBase
 
         if (apiResponse.IsSuccess)
         {
-            AppState.Contacts = apiResponse.Body!.ToList();
+            AppState.Contacts = apiResponse.Body!;
         }
 
         isLoadingContacts = false;

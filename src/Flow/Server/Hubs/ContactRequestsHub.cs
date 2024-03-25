@@ -14,9 +14,8 @@ public interface IContactsClient
 {
     Task ReceiveContactRequestAsync(PendingRequestIncomingDto request);
     Task ReceiveSentContactRequestAsync(PendingRequestSentDto request);
-    Task ReceiveNewContactAsync(ContactDto newContact);
+    Task ReceiveNewContactAsync(NewContactDto newContact);
     Task ReceiveCancelledRequestIdForRecipientAsync(Guid cancelledRequestId);
     Task ReceiveCancelledRequestIdForSenderAsync(Guid cancelledRequestId);
     Task ReceiveAcceptedRequestId(Guid acceptedRequestId);
-    Task ReceiveNewContact(ContactDto newContact);
 }
