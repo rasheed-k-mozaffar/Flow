@@ -20,7 +20,11 @@ public partial class Conversation : ComponentBase
     private InputText? messageInput;
     private SendMessageDto messageModel = new();
 
-    [Parameter] public ContactDto ContactModel { get; set; } = null!;
+    [Parameter]
+    public UserDetailsDto ContactModel { get; set; } = null!;
+
+    [Parameter]
+    public Guid ThreadId { get; set; }
 
     [Inject]
     public ApplicationState AppState { get; set; } = default!;
@@ -94,7 +98,7 @@ public partial class Conversation : ComponentBase
     {
         isChatRendered = false;
         await base.OnParametersSetAsync();
-        threadId = ContactModel.ThreadId.ToString();
+        threadId = ThreadId.ToString();
         selectedMessages?.Clear();
         wantsToDeleteMessages = false;
     }
@@ -120,7 +124,7 @@ public partial class Conversation : ComponentBase
             return;
 
         messageModel.MessageId = Guid.NewGuid();
-        messageModel.ThreadId = (Guid)ContactModel.ThreadId!;
+        messageModel.ThreadId = ThreadId!;
         messageModel.SenderId = currentUserId;
         if (AppState.ChatHubConnection is not null)
         {
@@ -145,7 +149,7 @@ public partial class Conversation : ComponentBase
 
         try
         {
-            var lastMessage = AppState.Threads?[threadId!].First();
+            var lastMessage = AppState.Threads[ThreadId].Messages.First();
 
             var apiResponse = await ThreadsService.LoadPreviousMessagesAsync
             (
@@ -158,7 +162,8 @@ public partial class Conversation : ComponentBase
 
             if (apiResponse.IsSuccess)
             {
-                AppState.Threads![threadId!]
+                AppState.Threads[ThreadId]
+                        .Messages
                         .InsertRange(0, apiResponse.Body!.Messages);
 
                 stillHasMessagesToLoad = apiResponse.Body.HasUnloadedMessages;
