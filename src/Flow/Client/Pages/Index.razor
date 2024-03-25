@@ -31,5 +31,5 @@ else if (AppState.SelectedThread is null)
 }
 else
 {
-    <Conversation ContactModel="@AppState.SelectedThread" />
+    <Conversation ContactModel="@AppState.SelectedThread" ThreadId="@AppState.SelectedThreadId" />
 }
