@@ -12,10 +12,13 @@
 }
 else
 {
+    var sortedThreads = AppState.Threads
+    .OrderByDescending(kv => kv.Value.Messages.Max(m => m.SentOn))
+    .ToDictionary(kv => kv.Key, kv => kv.Value);
     <ul class="h-full overflow-y-auto">
-    @foreach (var contact in AppState.Contacts)
+    @foreach (var contact in sortedThreads)
         {
-            <Chat ContactModel="contact" />
+            <Chat ContactModel="contact.Value.Contact" ThreadId="contact.Key" />
         }
     </ul>
 }
