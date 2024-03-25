@@ -42,7 +42,7 @@ public interface IContactRequestsRepository
     /// Any contact request the user has sent, or received, if accepted, it's a contact to be retrieved
     /// </summary>
     /// <returns></returns>
-    Task<IEnumerable<ContactRequest>> GetUserContactsAsync();
+    Task<Dictionary<Guid, AppUser>> GetUserContactsAsync();
 
     /// <summary>
     /// Gets all the contact requests where the user is involved, requests Sent to or Sent from the 

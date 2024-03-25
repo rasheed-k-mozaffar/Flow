@@ -2,7 +2,7 @@
 
 public interface IThreadRepository
 {
-    Task<Dictionary<string, List<MessageDto>>> GetPreliminaryMessagesForUserChatThreads();
+    Task<Dictionary<Guid, ChatDetails>> GetChatThreadsAsync();
     Task<PreviousMessagesResponse> GetPreviousMessagesByDateAsync(LoadPreviousMessagesRequest request);
 
 }

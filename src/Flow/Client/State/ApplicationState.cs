@@ -25,14 +25,16 @@ public class ApplicationState
     /// <summary>
     /// This represents the chat thread id (Contact) the user is currently in
     /// </summary>
-    public ContactDto? SelectedThread { get; set; }
+
+    public Guid SelectedThreadId { get; set; }
+    public UserDetailsDto? SelectedThread { get; set; }
 
     /// <summary>
     /// This dictionary will store the ids of each thread the user is part of
     /// and the last 15 messages sent in each thread, this will be used when the app first loads to populate the contacts and t
     /// </summary>
-    public Dictionary<string, List<MessageDto>>? Threads { get; set; }
-    public ICollection<ContactDto> Contacts { get; set; }
+    public Dictionary<Guid, ChatDetails> Threads { get; set; }
+    public Dictionary<Guid, UserDetailsDto> Contacts { get; set; }
     public IEnumerable<ColorSchemeDto>? ColorSchemes { get; set; }
 
     public List<PendingRequestIncomingDto> IncomingContactRequests { get; set; }
@@ -52,7 +54,8 @@ public class ApplicationState
         _js = js;
         IncomingContactRequests = new();
         SentContactRequests = new();
-        Contacts = new List<ContactDto>();
+        Threads = new();
+        Contacts = new();
         UserSettings = new();
     }
 
@@ -79,14 +82,14 @@ public class ApplicationState
 
         ChatHubConnection.On<MessageDto>("ReceiveMessageAsync", async message =>
         {
-            Threads?[message.ThreadId.ToString()].Add(message);
+            Threads[message.ThreadId].Messages.Add(message);
             await _js.InvokeVoidAsync("playMessageSound", message.SenderId == CurrentUserId);
             NotifyStateChanged();
         });
 
         ChatHubConnection.On<DeleteMessagesRequest>("ReceiveDeletedMessagesIdsAsync", request =>
         {
-            Threads?[request.ThreadId.ToString()].RemoveAll(m => request.MessagesIds!.Contains(m.Id));
+            Threads[request.ThreadId].Messages.RemoveAll(m => request.MessagesIds!.Contains(m.Id));
             NotifyStateChanged();
         });
 
@@ -130,10 +133,15 @@ public class ApplicationState
             NotifyStateChanged();
         });
 
-        ContactsHubConnection.On<ContactDto>("ReceiveNewContact", async newContact =>
+        ContactsHubConnection.On<NewContactDto>("ReceiveNewContactAsync", async newContact =>
         {
-            Contacts.Add(newContact);
-            Threads?.Add(newContact.ThreadId.ToString()!, new());
+            Contacts.Add(newContact.ThreadId, newContact.Contact);
+            Threads?.Add(newContact.ThreadId, new ChatDetails
+            {
+                ChatThreadId = newContact.ThreadId,
+                Messages = new(),
+                Contact = newContact.Contact
+            });
 
             // * Join the participants to the Hub groupd
             await ChatHubConnection.InvokeAsync("JoinThreadAsync", newContact.ThreadId);

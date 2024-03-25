@@ -31,7 +31,7 @@ public class ChatHub : Hub<IChatThreadsClient>
 
         var contacts = await _contactsRepository.GetUserContactsAsync();
 
-        var threadsIds = contacts.Select(p => p.ChatThreadId);
+        var threadsIds = contacts.Keys.ToList();
 
         await JoinThreadsAsync(threadsIds);
     }
@@ -48,7 +48,7 @@ public class ChatHub : Hub<IChatThreadsClient>
 
         var contacts = await _contactsRepository.GetUserContactsAsync();
 
-        var threadsIds = contacts.Select(p => p.ChatThreadId);
+        var threadsIds = contacts.Keys.ToList();
 
         await LeaveThreadsAsync(threadsIds);
     }
@@ -81,7 +81,7 @@ public class ChatHub : Hub<IChatThreadsClient>
     #region On Connect Methods
     // * These two methods are going to only be used upon connecting to the hub
 
-    private async Task JoinThreadsAsync(IEnumerable<Guid?> threads)
+    private async Task JoinThreadsAsync(IEnumerable<Guid> threads)
     {
         // Join the user to their chat threads 
         foreach (var threadId in threads)
@@ -91,7 +91,7 @@ public class ChatHub : Hub<IChatThreadsClient>
         }
     }
 
-    private async Task LeaveThreadsAsync(IEnumerable<Guid?> threads)
+    private async Task LeaveThreadsAsync(IEnumerable<Guid> threads)
     {
         // Remove the user from their chat threads 
         foreach (var threadId in threads)

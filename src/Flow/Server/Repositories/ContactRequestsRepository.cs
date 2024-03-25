@@ -178,12 +178,26 @@ public class ContactRequestsRepository : IContactRequestsRepository
             var notifyRecipientTask = _contactsHubContext
                                         .Clients
                                         .User(request.RecipientId)
-                                        .ReceiveNewContact(request.ToContactDto(request.RecipientId));
+                                        .ReceiveNewContactAsync
+                                        (
+                                            new NewContactDto
+                                            {
+                                                ThreadId = thread.Id,
+                                                Contact = request.Sender.ToUserDetailsDto()
+                                            }
+                                        );
 
             var notifySenderTask = _contactsHubContext
                                         .Clients
                                         .User(request.SenderId)
-                                        .ReceiveNewContact(request.ToContactDto(request.SenderId));
+                                        .ReceiveNewContactAsync
+                                        (
+                                            new NewContactDto
+                                            {
+                                                ThreadId = thread.Id,
+                                                Contact = request.Recipient.ToUserDetailsDto()
+                                            }
+                                        );
 
             var notifySenderAboutAcceptedReqTask = _contactsHubContext
                                         .Clients
@@ -240,12 +254,30 @@ public class ContactRequestsRepository : IContactRequestsRepository
     }
 
 
-    public async Task<IEnumerable<ContactRequest>> GetUserContactsAsync()
+    public async Task<Dictionary<Guid, AppUser>> GetUserContactsAsync()
     {
-        var contacts = await _db
-                            .ContactRequests
-                            .Where(cr => (cr.SenderId == _userInfo.UserId || cr.RecipientId == _userInfo.UserId) && cr.Status == RequestStatus.Accepted)
-                            .ToListAsync();
+        Dictionary<Guid, AppUser> contacts = new();
+
+        var acceptedRequests = await _db
+                                    .ContactRequests
+                                    .Where
+                                    (
+                                        req => req.Status == RequestStatus.Accepted &&
+                                        (req.SenderId == _userInfo.UserId || req.RecipientId == _userInfo.UserId)
+                                    )
+                                    .Include(req => req.ChatThread)
+                                    .ToListAsync();
+
+        foreach (var request in acceptedRequests)
+        {
+            var otherParticipantId = request.SenderId == _userInfo.UserId ? request.RecipientId : request.SenderId;
+            var otherParticipant = await _userManager.FindByIdAsync(otherParticipantId);
+
+            if (otherParticipant is not null)
+            {
+                contacts.Add((Guid)request.ChatThreadId!, otherParticipant);
+            }
+        }
 
         return contacts;
     }

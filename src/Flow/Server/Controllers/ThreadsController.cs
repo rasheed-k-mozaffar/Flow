@@ -32,15 +32,15 @@ public class ThreadsController : ControllerBase
 
     [HttpGet]
     [Route("get-latest-messages")]
-    [ProducesResponseType(statusCode: StatusCodes.Status200OK, type: typeof(ApiResponse<Dictionary<string, List<MessageDto>>>))]
+    [ProducesResponseType(statusCode: StatusCodes.Status200OK, type: typeof(ApiResponse<Dictionary<Guid, ChatDetails>>))]
     [ProducesResponseType(statusCode: StatusCodes.Status401Unauthorized, type: typeof(UnauthorizedResult))]
     public async Task<IActionResult> GetLatestMessages()
     {
-        var userThreadsMessages = await _threadsRepository.GetPreliminaryMessagesForUserChatThreads();
+        var userThreadsMessages = await _threadsRepository.GetChatThreadsAsync();
 
-        return Ok(new ApiResponse<Dictionary<string, List<MessageDto>>>
+        return Ok(new ApiResponse<Dictionary<Guid, ChatDetails>>
         {
-            Message = "Messages retrieved successfully",
+            Message = "Chats retrieved successfully",
             Body = userThreadsMessages,
             IsSuccess = true
         });

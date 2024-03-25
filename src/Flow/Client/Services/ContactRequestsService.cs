@@ -38,7 +38,7 @@ public class ContactRequestsService : IContactRequestsService
         return successResponse!;
     }
 
-    public async Task<ApiResponse<IEnumerable<ContactDto>>> GetContactsAsync()
+    public async Task<ApiResponse<Dictionary<Guid, UserDetailsDto>>> GetContactsAsync()
     {
         HttpResponseMessage response = await _httpClient.GetAsync(CONTACTS_URL);
 
@@ -48,7 +48,7 @@ public class ContactRequestsService : IContactRequestsService
             throw new ApiGetRequestFailedException(errorResponse!.ErrorMessage);
         }
 
-        var data = await response.Content.ReadFromJsonAsync<ApiResponse<IEnumerable<ContactDto>>>();
+        var data = await response.Content.ReadFromJsonAsync<ApiResponse<Dictionary<Guid, UserDetailsDto>>>();
         return data!;
     }
 

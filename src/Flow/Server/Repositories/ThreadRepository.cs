@@ -15,28 +15,33 @@ public class ThreadRepository : IThreadRepository
         _contactsRepository = contactsRepository;
     }
 
-    public async Task<Dictionary<string, List<MessageDto>>> GetPreliminaryMessagesForUserChatThreads()
+    public async Task<Dictionary<Guid, ChatDetails>> GetChatThreadsAsync()
     {
-        var messagesOfEachThread = new Dictionary<string, List<MessageDto>>();
+        var threadsAndInitialMessages = new Dictionary<Guid, ChatDetails>();
 
         var userContacts = await _contactsRepository.GetUserContactsAsync();
 
         foreach (var contact in userContacts)
         {
-            string threadId = contact.ChatThreadId.ToString()!;
 
             var threadMessages = await _db
                                     .Messages
-                                    .Where(message => message.ThreadId == contact.ChatThreadId)
+                                    .Where(message => message.ThreadId == contact.Key)
                                     .OrderByDescending(message => message.SentOn)
                                     .Take(DEFAULT_MESSAGES_LOAD_SIZE)
                                     .Select(msg => msg.ToMessageDto())
                                     .ToListAsync();
             threadMessages.Reverse();
-            messagesOfEachThread.Add(threadId, threadMessages);
+
+            threadsAndInitialMessages.Add(contact.Key, new ChatDetails
+            {
+                ChatThreadId = contact.Key,
+                Messages = threadMessages,
+                Contact = contact.Value.ToUserDetailsDto()
+            });
         }
 
-        return messagesOfEachThread;
+        return threadsAndInitialMessages;
     }
     public async Task<PreviousMessagesResponse> GetPreviousMessagesByDateAsync(LoadPreviousMessagesRequest request)
     {

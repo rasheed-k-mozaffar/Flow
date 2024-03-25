@@ -18,13 +18,13 @@ public class ThreadsService : IThreadsService
         _httpClient = httpClient;
     }
 
-    public async Task<ApiResponse<Dictionary<string, List<MessageDto>>>> GetPreliminaryThreadsDetailsForUserAsync()
+    public async Task<ApiResponse<Dictionary<Guid, ChatDetails>>> GetChatsAsync()
     {
         HttpResponseMessage response = await _httpClient.GetAsync(GET_LATEST_MESSAGES_URL);
 
         var results = await response
                             .Content
-                            .ReadFromJsonAsync<ApiResponse<Dictionary<string, List<MessageDto>>>>();
+                            .ReadFromJsonAsync<ApiResponse<Dictionary<Guid, ChatDetails>>>();
 
         return results!;
     }

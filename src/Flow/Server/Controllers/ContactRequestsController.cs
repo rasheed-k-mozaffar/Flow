@@ -223,16 +223,18 @@ public class ContactRequestsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> GetContacts()
     {
-        var contacts = await _contactRequestsRepository
-            .GetUserContactsAsync();
+        Dictionary<Guid, AppUser> contacts = await _contactRequestsRepository.GetUserContactsAsync();
+        Dictionary<Guid, UserDetailsDto> responseBody = new();
 
-        var contactsDtos = contacts
-            .Select(c => c.ToContactDto(_userInfo.UserId!));
+        foreach (var contact in contacts)
+        {
+            responseBody.Add(contact.Key, contact.Value.ToUserDetailsDto());
+        }
 
-        return Ok(new ApiResponse<IEnumerable<ContactDto>>
+        return Ok(new ApiResponse<Dictionary<Guid, UserDetailsDto>>
         {
             Message = "Contacts retrieved successfully",
-            Body = contactsDtos,
+            Body = responseBody,
             IsSuccess = true
         });
     }
