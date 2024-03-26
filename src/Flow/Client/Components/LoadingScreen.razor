@@ -47,8 +47,6 @@
                 if (apiResponse.IsSuccess)
                 {
                     AppState.UserSettings = apiResponse.Body!;
-
-                    await Task.Delay(500);
                     return;
                 }
             }
