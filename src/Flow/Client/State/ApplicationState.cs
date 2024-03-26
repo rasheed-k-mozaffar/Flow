@@ -83,8 +83,8 @@ public class ApplicationState
         ChatHubConnection.On<MessageDto>("ReceiveMessageAsync", async message =>
         {
             Threads[message.ThreadId].Messages.Add(message);
-            await _js.InvokeVoidAsync("playMessageSound", message.SenderId == CurrentUserId);
             NotifyStateChanged();
+            await _js.InvokeVoidAsync("playMessageSound", message.SenderId == CurrentUserId);
         });
 
         ChatHubConnection.On<DeleteMessagesRequest>("ReceiveDeletedMessagesIdsAsync", request =>
@@ -107,8 +107,8 @@ public class ApplicationState
         ContactsHubConnection.On<PendingRequestIncomingDto>("ReceiveContactRequestAsync", async incomingRequest =>
         {
             IncomingContactRequests.Add(incomingRequest);
-            await _js.InvokeVoidAsync("playRequestSound");
             NotifyStateChanged();
+            await Task.Run(async () => await _js.InvokeVoidAsync("playRequestSound"));
         });
 
         ContactsHubConnection.On<PendingRequestSentDto>("ReceiveSentContactRequestAsync", sentRequest =>
