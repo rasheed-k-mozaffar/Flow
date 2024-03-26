@@ -1,8 +1,21 @@
 ﻿@inject ApplicationState State
 <AuthorizeView>
     <section class="h-full w-full overflow-y-auto p-4 transition-all space-y-10">
+        <div class="flex items-center gap-4">
+            <button data-drawer-target="default-sidebar" data-drawer-toggle="default-sidebar"
+                aria-controls="default-sidebar" data-drawer-backdrop="false" type="button"
+                class="sm:hidden flex justify-center items-center p-1">
+                <span class="sr-only">Open sidebar</span>
+                <svg class="w-8 h-8 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                    width="24" height="24" fill="none" viewBox="0 0 24 24">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="m15 19-7-7 7-7" />
+                </svg>
 
-        <h1 class="text-4xl font-bold text-gray-700 dark:text-gray-200">Profile</h1>
+            </button>
+
+            <h1 class="text-4xl font-bold text-gray-700 dark:text-gray-200">Profile</h1>
+        </div>
 
         <div>
             <h2 class="mb-3 text-md font-medium text-gray-700 dark:text-gray-200">Details</h2>
@@ -23,13 +36,6 @@
                             @context.User.FindFirst(ClaimTypes.Email)!.Value
                         </div>
                     </div>
-                </div>
-
-                <div>
-                    <button
-                        class="@(State.UserSettings.ColorScheme?.AccentsColor?.TextColor) text-sm font-light hover:underline">
-                        Change details
-                    </button>
                 </div>
             </div>
         </div>

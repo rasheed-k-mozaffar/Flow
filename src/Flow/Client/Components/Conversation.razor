@@ -17,29 +17,31 @@
 }
 
 
-<div class="flex justify-items-center items-center flex-col min-h-screen max-h-screen w-full relative">
+<div class="flex justify-center items-center flex-col min-h-screen max-h-screen w-full relative">
     @* TOP BAR *@
-    <div class="block w-full h-fit p-1.5 bg-white  border-slate-900/5 border-b dark:bg-gray-700 dark:border-gray-600">
-        <button data-drawer-target="default-sidebar" data-drawer-toggle="default-sidebar"
-            aria-controls="default-sidebar" type="button"
-            class="inline-flex bg-white items-center p-2 mt-2 ms-3 text-sm text-gray-500 rounded-lg sm:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600">
-            <span class="sr-only">Open sidebar</span>
-            <svg class="w-6 h-6" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20"
-                xmlns="http://www.w3.org/2000/svg">
-                <path clip-rule="evenodd" fill-rule="evenodd"
-                    d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 10.5a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10z">
-                </path>
-            </svg>
-        </button>
-        <div class="flex items-center gap-4">
-            <div>
-                <img class="h-[50px] w-[50px] rounded-full object-cover"
-                    src="@(ContactModel.ProfilePictureUrl ?? "/images/avatar.png")" alt="@ContactModel.Name" />
-            </div>
+    <div class="w-full h-fit p-1.5 bg-white  border-slate-900/5 border-b dark:bg-gray-700 dark:border-gray-600">
+        <div class="flex items-center gap-2">
+            <button data-drawer-target="default-sidebar" data-drawer-toggle="default-sidebar"
+                aria-controls="default-sidebar" data-drawer-backdrop="false" type="button"
+                class="sm:hidden flex justify-center items-center p-1">
+                <span class="sr-only">Open sidebar</span>
+                <svg class="w-8 h-8 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                    width="24" height="24" fill="none" viewBox="0 0 24 24">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="m15 19-7-7 7-7" />
+                </svg>
 
-            <div class="font-medium dark:text-white">
-                <div class="text-xl">@ContactModel.Name</div>
-                <div class="text-sm text-gray-500 dark:text-gray-200">@ContactModel.Username</div>
+            </button>
+            <div class="flex items-center gap-4">
+                <div>
+                    <img class="h-[50px] w-[50px] rounded-full object-cover"
+                        src="@(ContactModel.ProfilePictureUrl ?? "/images/avatar.png")" alt="@ContactModel.Name" />
+                </div>
+
+                <div class="font-medium dark:text-white">
+                    <div class="text-xl">@ContactModel.Name</div>
+                    <div class="text-sm text-gray-500 dark:text-gray-200">@ContactModel.Username</div>
+                </div>
             </div>
         </div>
     </div>
