@@ -7,11 +7,13 @@ public class CachedUserSettingsRepository : IUserSettingsRepository
 {
     private readonly UserSettingsRepository _decorated;
     private readonly IMemoryCache _cache;
+    private readonly UserInfo _userInfo;
 
-    public CachedUserSettingsRepository(UserSettingsRepository decorated, IMemoryCache cache)
+    public CachedUserSettingsRepository(UserSettingsRepository decorated, IMemoryCache cache, UserInfo userInfo)
     {
         _decorated = decorated;
         _cache = cache;
+        _userInfo = userInfo;
     }
 
     public async Task<UserSettings> GetUserSettingsAsync(string userId)
@@ -23,7 +25,7 @@ public class CachedUserSettingsRepository : IUserSettingsRepository
             key,
             entry =>
             {
-                entry.SetAbsoluteExpiration(TimeSpan.FromMinutes(5));
+                entry.SetAbsoluteExpiration(TimeSpan.FromHours(24));
                 return _decorated.GetUserSettingsAsync(userId);
             });
 #pragma warning restore CS8603 // Possible null reference return.
@@ -48,7 +50,9 @@ public class CachedUserSettingsRepository : IUserSettingsRepository
     {
         try
         {
+            string key = $"setting-{_userInfo.UserId}";
             await _decorated.UpdateUserSettingsAsync(settings);
+            _cache.Set(key, settings);
         }
         catch (ResourceNotFoundException)
         {
