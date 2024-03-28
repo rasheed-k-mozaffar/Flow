@@ -78,9 +78,11 @@ public partial class SignUp : ComponentBase
 
                 await AuthenticationStateProvider.GetAuthenticationStateAsync();
 
-                await UploadProfilePictureAsync();
+                if (profilePictureFile is not null)
+                {
+                    await UploadProfilePictureAsync();
+                }
 
-                await Task.Delay(1000);
                 Nav.NavigateTo("/");
             }
 

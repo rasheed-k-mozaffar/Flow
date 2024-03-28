@@ -150,7 +150,7 @@
 
     public async Task SendImageClicked()
     {
-        OnSendImageClicked.InvokeAsync(frameUri);
+        await OnSendImageClicked.InvokeAsync(frameUri);
         await CloseVideoStream();
     }
     public async Task ChangeCamera()

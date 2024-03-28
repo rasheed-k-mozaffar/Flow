@@ -16,7 +16,7 @@ public class UsersService : IUsersService
         _httpClient = httpClient;
     }
 
-    public async Task<ApiResponse<ICollection<UserSearchResultDto>>> SearchAsync(string searchTerm, CancellationToken cancellationToken, int loadNumber = 0)
+    public async Task<ApiResponse<UsersSearchResultsResponse>> SearchAsync(string searchTerm, CancellationToken cancellationToken, int loadNumber = 0)
     {
         string requestUrl = $"{SEARCH_URL}?searchTerm={searchTerm}&loadNumber={loadNumber}";
         HttpResponseMessage response = await _httpClient.GetAsync(requestUrl, cancellationToken);
@@ -27,7 +27,7 @@ public class UsersService : IUsersService
             throw new ApiGetRequestFailedException(errorResponse!.ErrorMessage);
         }
 
-        var data = await response.Content.ReadFromJsonAsync<ApiResponse<ICollection<UserSearchResultDto>>>();
+        var data = await response.Content.ReadFromJsonAsync<ApiResponse<UsersSearchResultsResponse>>();
         return data!;
     }
 }

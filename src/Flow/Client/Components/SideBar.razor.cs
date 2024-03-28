@@ -20,7 +20,6 @@ public partial class SideBar : ComponentBase
     private List<PendingRequestIncomingDto> incomingContactRequests = new();
     private List<PendingRequestSentDto> sentContactRequests = new();
 
-    private bool isMakingApiCall = false; // * this will be used to disable buttons
     private string errorMessage = string.Empty;
     private bool isLoadingContacts = true;
     private bool isDoneLoadingContactRequests = false;

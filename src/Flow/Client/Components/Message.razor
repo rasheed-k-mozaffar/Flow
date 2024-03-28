@@ -9,15 +9,17 @@
     }
     else if (MessageModel.Type is MessageType.Image)
     {
-        <div @onclick="MessageClicked">
-            <img class="rounded-xl max-w-[500px] max-h-[500px] transition-all @(IsSelected && Sent ? "border-2 border-red-500 translate-x-4" : null)"
-                src="@MessageModel.Content" />
+        <div class="flex-col space-y-2 @(Sent ? null : "text-end")">
+            <div @onclick="MessageClicked">
+                <img class="rounded-xl max-w-[350px] max-h-[350px] md:max-w-[500px] md:max-h-[500px] transition-all @(IsSelected && Sent ? "border-2 border-red-500 translate-x-4" : null)"
+                    src="@MessageModel.Content" />
+            </div>
+
+            <div class="text-xs text-gray-500 dark:text-gray-200 transition-all @(IsSelected ? "translate-x-4" : null)">
+                @MessageModel.SentOn.ToLocalTime().ToString("h:mm tt").ToUpper()
+            </div>
         </div>
     }
-
-    <div class="text-xs text-gray-500 dark:text-gray-200 transition-all @(IsSelected ? "translate-x-4" : null)">
-        @MessageModel.SentOn.ToLocalTime().ToString("h:mm tt").ToUpper()
-    </div>
 </div>
 
 @code {

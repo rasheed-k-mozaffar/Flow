@@ -16,7 +16,6 @@
     [Parameter] public EventCallback OnSettingsLoaded { get; set; }
 
     private string _errorMessage = string.Empty;
-    private bool isDoneLoadingData = false;
     protected override async Task OnInitializedAsync()
     {
         var settingsTask = LoadUserSettingsAsync();
