@@ -3,10 +3,12 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
 namespace Flow.Server.Migrations
 {
     /// <inheritdoc />
-    public partial class ChangeUsersDobToDateTime : Migration
+    public partial class InitialCreateForFinalDatabase : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -52,6 +54,37 @@ namespace Flow.Server.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AspNetUsers", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ColorSchemes",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true),
+                    SentMsgBubbleColor = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: true),
+                    ReceivedMsgBubbleColor = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: true),
+                    AccentsColor = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: true),
+                    SelectedMessageColor = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ColorSchemes", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PDFs",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    AppUserId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    RelativeUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    FilePath = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PDFs", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -173,37 +206,13 @@ namespace Flow.Server.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ContactRequests",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    SenderId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    RecipientId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Status = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ContactRequests", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_ContactRequests_AspNetUsers_RecipientId",
-                        column: x => x.RecipientId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_ContactRequests_AspNetUsers_SenderId",
-                        column: x => x.SenderId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id");
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Images",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     AppUserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    Url = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    RelativeUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    FilePath = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Type = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -217,22 +226,31 @@ namespace Flow.Server.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Notifications",
+                name: "SettingsEntries",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Type = table.Column<int>(type: "int", nullable: false),
-                    Content = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    IssuedOn = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    RecipientId = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                    ColorSchemeId = table.Column<int>(type: "int", nullable: false),
+                    AppUserId = table.Column<string>(type: "nvarchar(450)", maxLength: 450, nullable: false),
+                    EnableNotificationSounds = table.Column<bool>(type: "bit", nullable: false),
+                    EnableSentMessageSounds = table.Column<bool>(type: "bit", nullable: false),
+                    ActivityStatus = table.Column<int>(type: "int", nullable: false),
+                    Theme = table.Column<int>(type: "int", nullable: false),
+                    EditedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Notifications", x => x.Id);
+                    table.PrimaryKey("PK_SettingsEntries", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Notifications_AspNetUsers_RecipientId",
-                        column: x => x.RecipientId,
+                        name: "FK_SettingsEntries_AspNetUsers_AppUserId",
+                        column: x => x.AppUserId,
                         principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_SettingsEntries_ColorSchemes_ColorSchemeId",
+                        column: x => x.ColorSchemeId,
+                        principalTable: "ColorSchemes",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -262,6 +280,37 @@ namespace Flow.Server.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ContactRequests",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    SenderId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    RecipientId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    ChatThreadId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ContactRequests", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ContactRequests_AspNetUsers_RecipientId",
+                        column: x => x.RecipientId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ContactRequests_AspNetUsers_SenderId",
+                        column: x => x.SenderId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_ContactRequests_Threads_ChatThreadId",
+                        column: x => x.ChatThreadId,
+                        principalTable: "Threads",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Messages",
                 columns: table => new
                 {
@@ -269,6 +318,7 @@ namespace Flow.Server.Migrations
                     ThreadId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     SenderId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Content = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Type = table.Column<int>(type: "int", nullable: false),
                     SentOn = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Status = table.Column<int>(type: "int", nullable: false)
                 },
@@ -287,6 +337,21 @@ namespace Flow.Server.Migrations
                         principalTable: "Threads",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.InsertData(
+                table: "ColorSchemes",
+                columns: new[] { "Id", "AccentsColor", "Name", "ReceivedMsgBubbleColor", "SelectedMessageColor", "SentMsgBubbleColor" },
+                values: new object[,]
+                {
+                    { 1, "text-blue-700 bg-blue-600", "Flow's Default", "bg-gray-100 text-gray-600", "bg-red-500 text-white", "bg-blue-600 text-white" },
+                    { 2, "text-violet-500 bg-violet-500", "Lavender Mist", "bg-violet-100 text-gray-600", "bg-red-500 text-white", "bg-violet-500 text-white" },
+                    { 3, "text-black bg-black", "Steel Tones", "bg-gray-100 text-gray-600", "bg-red-500 text-white", "bg-black text-white" },
+                    { 4, "text-orange-400 bg-orange-400", "Sunny Hues", "bg-orange-100 text-gray-700", "bg-red-500 text-white", "bg-orange-400 text-white" },
+                    { 5, "text-green-500 bg-green-500", "Fresh Leaves", "bg-green-100 text-gray-700", "bg-red-500 text-white", "bg-green-500 text-white" },
+                    { 6, "text-lime-500 bg-lime-500", "Lemon Lime", "bg-lime-100 text-gray-700", "bg-red-500 text-white", "bg-lime-500 text-white" },
+                    { 7, "text-rose-500 bg-rose-500", "Blossom Vibes", "bg-rose-100 text-gray-700", "bg-red-500 text-white", "bg-rose-500 text-white" },
+                    { 8, "text-emerald-500 bg-emerald-500", "Fresh Mint", "bg-emerald-100 text-gray-700", "bg-red-500 text-white", "bg-emerald-500 text-white" }
                 });
 
             migrationBuilder.CreateIndex(
@@ -334,6 +399,13 @@ namespace Flow.Server.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ContactRequests_ChatThreadId",
+                table: "ContactRequests",
+                column: "ChatThreadId",
+                unique: true,
+                filter: "[ChatThreadId] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ContactRequests_RecipientId",
                 table: "ContactRequests",
                 column: "RecipientId");
@@ -361,9 +433,15 @@ namespace Flow.Server.Migrations
                 column: "ThreadId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Notifications_RecipientId",
-                table: "Notifications",
-                column: "RecipientId");
+                name: "IX_SettingsEntries_AppUserId",
+                table: "SettingsEntries",
+                column: "AppUserId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SettingsEntries_ColorSchemeId",
+                table: "SettingsEntries",
+                column: "ColorSchemeId");
         }
 
         /// <inheritdoc />
@@ -397,7 +475,10 @@ namespace Flow.Server.Migrations
                 name: "Messages");
 
             migrationBuilder.DropTable(
-                name: "Notifications");
+                name: "PDFs");
+
+            migrationBuilder.DropTable(
+                name: "SettingsEntries");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
@@ -407,6 +488,9 @@ namespace Flow.Server.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
+
+            migrationBuilder.DropTable(
+                name: "ColorSchemes");
         }
     }
 }

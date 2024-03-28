@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Flow.Server.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240208195558_AddServerFilePathColumnToImagesTable")]
-    partial class AddServerFilePathColumnToImagesTable
+    [Migration("20240328153531_InitialCreateForFinalDatabase")]
+    partial class InitialCreateForFinalDatabase
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -139,6 +139,113 @@ namespace Flow.Server.Migrations
                     b.ToTable("Threads");
                 });
 
+            modelBuilder.Entity("Flow.Server.Models.ColorScheme", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AccentsColor")
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar");
+
+                    b.Property<string>("ReceivedMsgBubbleColor")
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<string>("SelectedMessageColor")
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<string>("SentMsgBubbleColor")
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ColorSchemes");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            AccentsColor = "text-blue-700 bg-blue-600",
+                            Name = "Flow's Default",
+                            ReceivedMsgBubbleColor = "bg-gray-100 text-gray-600",
+                            SelectedMessageColor = "bg-red-500 text-white",
+                            SentMsgBubbleColor = "bg-blue-600 text-white"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            AccentsColor = "text-violet-500 bg-violet-500",
+                            Name = "Lavender Mist",
+                            ReceivedMsgBubbleColor = "bg-violet-100 text-gray-600",
+                            SelectedMessageColor = "bg-red-500 text-white",
+                            SentMsgBubbleColor = "bg-violet-500 text-white"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            AccentsColor = "text-black bg-black",
+                            Name = "Steel Tones",
+                            ReceivedMsgBubbleColor = "bg-gray-100 text-gray-600",
+                            SelectedMessageColor = "bg-red-500 text-white",
+                            SentMsgBubbleColor = "bg-black text-white"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            AccentsColor = "text-orange-400 bg-orange-400",
+                            Name = "Sunny Hues",
+                            ReceivedMsgBubbleColor = "bg-orange-100 text-gray-700",
+                            SelectedMessageColor = "bg-red-500 text-white",
+                            SentMsgBubbleColor = "bg-orange-400 text-white"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            AccentsColor = "text-green-500 bg-green-500",
+                            Name = "Fresh Leaves",
+                            ReceivedMsgBubbleColor = "bg-green-100 text-gray-700",
+                            SelectedMessageColor = "bg-red-500 text-white",
+                            SentMsgBubbleColor = "bg-green-500 text-white"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            AccentsColor = "text-lime-500 bg-lime-500",
+                            Name = "Lemon Lime",
+                            ReceivedMsgBubbleColor = "bg-lime-100 text-gray-700",
+                            SelectedMessageColor = "bg-red-500 text-white",
+                            SentMsgBubbleColor = "bg-lime-500 text-white"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            AccentsColor = "text-rose-500 bg-rose-500",
+                            Name = "Blossom Vibes",
+                            ReceivedMsgBubbleColor = "bg-rose-100 text-gray-700",
+                            SelectedMessageColor = "bg-red-500 text-white",
+                            SentMsgBubbleColor = "bg-rose-500 text-white"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            AccentsColor = "text-emerald-500 bg-emerald-500",
+                            Name = "Fresh Mint",
+                            ReceivedMsgBubbleColor = "bg-emerald-100 text-gray-700",
+                            SelectedMessageColor = "bg-red-500 text-white",
+                            SentMsgBubbleColor = "bg-emerald-500 text-white"
+                        });
+                });
+
             modelBuilder.Entity("Flow.Server.Models.ContactRequest", b =>
                 {
                     b.Property<Guid>("Id")
@@ -224,6 +331,9 @@ namespace Flow.Server.Migrations
                     b.Property<Guid>("ThreadId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("SenderId");
@@ -233,33 +343,65 @@ namespace Flow.Server.Migrations
                     b.ToTable("Messages");
                 });
 
-            modelBuilder.Entity("Flow.Server.Models.Notification", b =>
+            modelBuilder.Entity("Flow.Server.Models.PDF", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Content")
+                    b.Property<string>("AppUserId")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("IssuedOn")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("RecipientId")
+                    b.Property<string>("FilePath")
                         .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RelativeUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("PDFs");
+                });
+
+            modelBuilder.Entity("Flow.Server.Models.UserSettings", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("ActivityStatus")
+                        .HasColumnType("int");
+
+                    b.Property<string>("AppUserId")
+                        .IsRequired()
+                        .HasMaxLength(450)
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<bool>("Seen")
+                    b.Property<int>("ColorSchemeId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("EditedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("EnableNotificationSounds")
                         .HasColumnType("bit");
 
-                    b.Property<int>("Type")
+                    b.Property<bool>("EnableSentMessageSounds")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("Theme")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("RecipientId");
+                    b.HasIndex("AppUserId")
+                        .IsUnique();
 
-                    b.ToTable("Notifications");
+                    b.HasIndex("ColorSchemeId");
+
+                    b.ToTable("SettingsEntries");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -461,15 +603,23 @@ namespace Flow.Server.Migrations
                     b.Navigation("Thread");
                 });
 
-            modelBuilder.Entity("Flow.Server.Models.Notification", b =>
+            modelBuilder.Entity("Flow.Server.Models.UserSettings", b =>
                 {
-                    b.HasOne("Flow.Server.Models.AppUser", "Recipient")
-                        .WithMany()
-                        .HasForeignKey("RecipientId")
+                    b.HasOne("Flow.Server.Models.AppUser", "AppUser")
+                        .WithOne("Settings")
+                        .HasForeignKey("Flow.Server.Models.UserSettings", "AppUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Recipient");
+                    b.HasOne("Flow.Server.Models.ColorScheme", "ColorScheme")
+                        .WithMany()
+                        .HasForeignKey("ColorSchemeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AppUser");
+
+                    b.Navigation("ColorScheme");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -528,6 +678,8 @@ namespace Flow.Server.Migrations
                     b.Navigation("ContactRequests");
 
                     b.Navigation("ProfilePicture");
+
+                    b.Navigation("Settings");
                 });
 
             modelBuilder.Entity("Flow.Server.Models.ChatThread", b =>
