@@ -4,13 +4,21 @@ const requestArrivedSound = new Audio("../sounds/request-arrived-sound.mp3");
 
 function playMessageSound(isMessageSent) {
     if(isMessageSent) {
-        sentMessageSound.play();
+        playAndRelease(sentMessageSound);
     }
     else {
-        notificationSound.play();
+        playAndRelease(notificationSound)
     }
 }
 
 function playRequestSound() {
-    requestArrivedSound.play();
+    playAndRelease(requestArrivedSound);
+}
+
+function playAndRelease(audio) {
+    audio.play().onended.then(() => {
+        // Release the resources associated with the Audio object
+        audio.pause();
+        audio.currentTime = 0;
+    });
 }

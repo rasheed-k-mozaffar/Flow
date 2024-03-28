@@ -1,6 +1,7 @@
 ﻿@inject ApplicationState State
 
-<div @onclick="ItemClicked"
+<div data-drawer-target="default-sidebar" data-drawer-hide="default-sidebar" aria-controls="default-sidebar"
+    data-drawer-backdrop="false" @onclick="ItemClicked"
     class="py-2 px-4 flex justify-between items-center rounded-xl
     @(IsSelected ?  $"{State.UserSettings.ColorScheme?.AccentsColor?.BgColor} text-white" : "hover:bg-gray-100 text-gray-600 dark:text-gray-200 dark:hover:bg-gray-600") cursor-pointer transition-all">
 

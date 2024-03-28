@@ -1,7 +1,8 @@
 @inject NavigationManager Nav
 @inject ApplicationState State
 
-<div @onclick="ChatClicked"
+<div data-drawer-target="default-sidebar" data-drawer-hide="default-sidebar" aria-controls="default-sidebar"
+    data-drawer-backdrop="false" @onclick="ChatClicked"
     class="flex justify-between items-center p-2 cursor-pointer transition-all  border-b border-gray-100 dark:border-gray-700 @(State.SelectedThread?.UserId == ContactModel.UserId ? $"{State.UserSettings.ColorScheme?.AccentsColor?.BgColor} text-white" : "bg-white text-gray-600 dark:bg-gray-600 dark:text-gray-100" ) lg:flex-row lg:min-w-full md:flex-row md:max-w-xl">
     <div class="flex items-center gap-4">
         <div>
@@ -67,8 +68,9 @@
 
     <div></div>
 
-    <div class="text-sm font-medium text-gray-500 dark:text-gray-200">
-        @latestMessage?.SentOn.ToLocalTime().ToShortTimeString()
+    <div
+        class="text-sm font-light @(State.SelectedThreadId == ThreadId ? "text-gray-100" : "text-gray-500") dark:text-gray-200">
+        @latestMessageTimestampOutput
     </div>
 </div>
 
@@ -76,10 +78,16 @@
     [Parameter] public UserDetailsDto ContactModel { get; set; } = null!;
     [Parameter] public Guid ThreadId { get; set; }
     private MessageDto? latestMessage;
+    private string? latestMessageTimestampOutput;
 
     protected override void OnInitialized()
     {
         latestMessage = State.Threads[ThreadId].Messages.LastOrDefault();
+
+        if (latestMessage is not null)
+        {
+            latestMessageTimestampOutput = FormatLatestMessageTimestampOutput(latestMessage.SentOn);
+        }
         State.OnChange += StateHasChanged;
         base.OnInitialized();
     }
@@ -87,6 +95,11 @@
     protected override void OnAfterRender(bool firstRender)
     {
         latestMessage = State.Threads[ThreadId].Messages.LastOrDefault();
+
+        if (latestMessage is not null)
+        {
+            latestMessageTimestampOutput = FormatLatestMessageTimestampOutput(latestMessage.SentOn);
+        }
     }
     private void ChatClicked()
     {
@@ -94,5 +107,21 @@
         State.SelectedThread = ContactModel;
         State.NotifyStateChanged();
         Console.WriteLine($"The current thread id: {ThreadId}");
+    }
+
+    private string FormatLatestMessageTimestampOutput(DateTime timestamp)
+    {
+        DateTime today = DateTime.Now.ToLocalTime().Date;
+        DateTime messageDate = timestamp.ToLocalTime().Date;
+
+        int daysDiff = (today - messageDate).Days;
+
+        return daysDiff switch
+        {
+            0 => timestamp.ToLocalTime().ToString("h:mm tt").ToUpper(), // * the message was sent today
+            1 => "Yesterday", // * message sent yesterday,
+            <= 7 => "Last week", // * mesasage sent during last week
+            _ => timestamp.ToString("dd/MM/yyyy") // * message sent more than a week ago
+        };
     }
 }

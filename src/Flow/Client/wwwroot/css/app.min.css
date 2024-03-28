@@ -1412,11 +1412,6 @@ input:checked + .toggle-bg {
   margin-bottom: 0.5rem;
 }
 
-.my-3 {
-  margin-top: 0.75rem;
-  margin-bottom: 0.75rem;
-}
-
 .mb-1 {
   margin-bottom: 0.25rem;
 }
@@ -1558,6 +1553,10 @@ input:checked + .toggle-bg {
   height: 100vh;
 }
 
+.max-h-52 {
+  max-height: 13rem;
+}
+
 .max-h-\[150px\] {
   max-height: 150px;
 }
@@ -1598,10 +1597,6 @@ input:checked + .toggle-bg {
   width: 83.333333%;
 }
 
-.w-2\/12 {
-  width: 16.666667%;
-}
-
 .w-20 {
   width: 5rem;
 }
@@ -1632,10 +1627,6 @@ input:checked + .toggle-bg {
 
 .w-8\/12 {
   width: 66.666667%;
-}
-
-.w-80 {
-  width: 20rem;
 }
 
 .w-\[200px\] {
@@ -1677,6 +1668,10 @@ input:checked + .toggle-bg {
 
 .max-w-\[75\%\] {
   max-width: 75%;
+}
+
+.max-w-lg {
+  max-width: 32rem;
 }
 
 .max-w-md {
@@ -1815,10 +1810,6 @@ input:checked + .toggle-bg {
 
 .justify-between {
   justify-content: space-between;
-}
-
-.justify-items-center {
-  justify-items: center;
 }
 
 .gap-1 {
@@ -2386,6 +2377,11 @@ input:checked + .toggle-bg {
   color: rgb(35 56 118 / var(--tw-text-opacity));
 }
 
+.text-gray-100 {
+  --tw-text-opacity: 1;
+  color: rgb(243 244 246 / var(--tw-text-opacity));
+}
+
 .text-gray-200 {
   --tw-text-opacity: 1;
   color: rgb(229 231 235 / var(--tw-text-opacity));
@@ -2710,10 +2706,6 @@ h1:focus {
   color: rgb(255 255 255 / var(--tw-text-opacity));
 }
 
-.hover\:underline:hover {
-  text-decoration-line: underline;
-}
-
 .focus\:border-blue-500:focus {
   --tw-border-opacity: 1;
   border-color: rgb(63 131 248 / var(--tw-border-opacity));
@@ -2804,6 +2796,10 @@ h1:focus {
 :is(.dark .dark\:bg-gray-600) {
   --tw-bg-opacity: 1;
   background-color: rgb(75 85 99 / var(--tw-bg-opacity));
+}
+
+:is(.dark .dark\:bg-gray-600\/70) {
+  background-color: rgb(75 85 99 / 0.7);
 }
 
 :is(.dark .dark\:bg-gray-700) {
@@ -2899,6 +2895,11 @@ h1:focus {
   color: rgb(156 163 175 / var(--tw-placeholder-opacity));
 }
 
+:is(.dark .dark\:ring-gray-200) {
+  --tw-ring-opacity: 1;
+  --tw-ring-color: rgb(229 231 235 / var(--tw-ring-opacity));
+}
+
 :is(.dark .dark\:ring-offset-gray-800) {
   --tw-ring-offset-color: #1F2937;
 }
@@ -2943,6 +2944,11 @@ h1:focus {
   color: rgb(63 131 248 / var(--tw-text-opacity));
 }
 
+:is(.dark .dark\:hover\:text-gray-200:hover) {
+  --tw-text-opacity: 1;
+  color: rgb(229 231 235 / var(--tw-text-opacity));
+}
+
 :is(.dark .dark\:hover\:text-gray-300:hover) {
   --tw-text-opacity: 1;
   color: rgb(209 213 219 / var(--tw-text-opacity));
@@ -2973,11 +2979,6 @@ h1:focus {
   --tw-ring-color: rgb(30 66 159 / var(--tw-ring-opacity));
 }
 
-:is(.dark .dark\:focus\:ring-gray-600:focus) {
-  --tw-ring-opacity: 1;
-  --tw-ring-color: rgb(75 85 99 / var(--tw-ring-opacity));
-}
-
 :is(.dark .dark\:focus\:ring-offset-gray-800:focus) {
   --tw-ring-offset-color: #1F2937;
 }
@@ -2995,6 +2996,10 @@ h1:focus {
     width: 83.333333%;
   }
 
+  .sm\:w-80 {
+    width: 20rem;
+  }
+
   .sm\:translate-x-0 {
     --tw-translate-x: 0px;
     transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
@@ -3004,6 +3009,10 @@ h1:focus {
 @media (min-width: 768px) {
   .md\:w-4\/12 {
     width: 33.333333%;
+  }
+
+  .md\:w-5\/12 {
+    width: 41.666667%;
   }
 
   .md\:max-w-xl {
@@ -3020,6 +3029,10 @@ h1:focus {
 }
 
 @media (min-width: 1024px) {
+  .lg\:w-1\/2 {
+    width: 50%;
+  }
+
   .lg\:w-3\/12 {
     width: 25%;
   }
@@ -3034,6 +3047,10 @@ h1:focus {
 
   .lg\:flex-row {
     flex-direction: row;
+  }
+
+  .lg\:p-4 {
+    padding: 1rem;
   }
 }
 

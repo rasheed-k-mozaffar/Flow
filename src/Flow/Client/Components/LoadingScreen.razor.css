@@ -1,6 +1,6 @@
 .loader {
     display: block;
-    --height-of-loader: 5px;
+    --height-of-loader: 2.5px;
     --loader-color: #1d4ed8;
     width: 175px;
     height: var(--height-of-loader);

@@ -167,8 +167,6 @@ public partial class Conversation : ComponentBase
                         .InsertRange(0, apiResponse.Body!.Messages);
 
                 stillHasMessagesToLoad = apiResponse.Body.HasUnloadedMessages;
-
-                await Js.InvokeVoidAsync("scrollToLastMessage");
             }
         }
         catch (LoadingMessagesFailedException ex)

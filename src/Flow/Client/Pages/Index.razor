@@ -6,7 +6,7 @@
     @if (AppState.SelectedSettings is SettingsItemName.Appearance)
     {
         <div class="w-full h-screen flex justify-center bg-white dark:bg-gray-700">
-    <div class="w-1/2">
+    <div class="lg:w-1/2 w-screen lg:p-4">
         <AppearanceSettings />
     </div>
 </div>
@@ -14,7 +14,7 @@
     else if (AppState.SelectedSettings is SettingsItemName.Profile)
     {
         <div class="w-full h-screen flex justify-center bg-white dark:bg-gray-700">
-    <div class="w-1/2">
+    <div class="lg:w-1/2 w-screen lg:p-4">
         <ProfileSettings />
     </div>
 </div>
@@ -22,9 +22,20 @@
 }
 else if (AppState.SelectedThread is null)
 {
-    <div class="h-screen w-full flex justify-center items-center bg-white dark:bg-gray-700">
+    <div class="h-screen w-full flex justify-center items-center flex-col bg-white dark:bg-gray-700">
     <div class="py-2 px-6 bg-gray-100 text-gray-500 rounded-xl font-medium dark:bg-gray-500 dark:text-gray-200">
         Select a chat thread to begin texting
+    </div>
+    <div>
+        <button data-drawer-target="default-sidebar" data-drawer-show="default-sidebar" aria-controls="default-sidebar"
+        data-drawer-backdrop="false" type="button" class="sm:hidden flex justify-center items-center p-1">
+        <span class="sr-only">Open sidebar</span>
+        <svg class="w-8 h-8 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+            width="24" height="24" fill="none" viewBox="0 0 24 24">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 17h6l3 3v-3h2V9h-2M4 4h11v8H9l-3 3v-3H4V4Z" />
+        </svg>
+    </button>
     </div>
 </div>
 

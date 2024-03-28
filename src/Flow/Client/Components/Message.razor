@@ -16,7 +16,7 @@
     }
 
     <div class="text-xs text-gray-500 dark:text-gray-200 transition-all @(IsSelected ? "translate-x-4" : null)">
-        @MessageModel.SentOn.ToLocalTime().ToShortTimeString()
+        @MessageModel.SentOn.ToLocalTime().ToString("h:mm tt").ToUpper()
     </div>
 </div>
 

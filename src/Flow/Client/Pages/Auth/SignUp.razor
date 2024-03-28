@@ -3,6 +3,17 @@
 
 <PageTitle>Flow - Sign up</PageTitle>
 
+<AuthorizeView>
+    <Authorized>
+        @{
+            if (context.User.Identity is not null && context.User.Identity.IsAuthenticated)
+            {
+                Nav.NavigateTo("/");
+            }
+        }
+    </Authorized>
+</AuthorizeView>
+
 @if (wantsToCaptureProfilePicture)
 {
     <CameraView OnCapture="GetCapturedImageUri" Show="wantsToCaptureProfilePicture" OnCloseClicked="CloseCameraModal"
@@ -10,7 +21,7 @@
 }
 
 <div class="flex justify-center items-center min-h-screen">
-    <div class="w-10/12 sm:w-10/12 md:w-4/12 lg:w-4/12 xl:4/12">
+    <div class="w-10/12 sm:w-10/12 md:w-5/12 lg:w-4/12 xl:4/12">
         @if (!string.IsNullOrEmpty(errorMessage))
         {
             <ErrorAlert ErrorMessage="@errorMessage" OnCloseClicked="CloseErrorAlert" />
@@ -48,6 +59,10 @@
                         <ValidationMessage For="(() => requestModel.Email)" class="validation-message" />
                     </div>
                     <button @onclick="ValidateAndPlayAnimation" type="submit" class="primary-btn w-full">Next</button>
+
+                    <div class="flex justify-center mt-5">
+                        <p>Already have an account? <a href="/auth/signin" class="link">Sign in here</a></p>
+                    </div>
                 </EditForm>
             </Animate>
         }
@@ -89,7 +104,7 @@
                     </div>
 
                     <div class="flex justify-center mt-5">
-                        <p>Already have an account? <a href="/signin" class="link">Sign in here</a></p>
+                        <p>Already have an account? <a href="/auth/signin" class="link">Sign in here</a></p>
                     </div>
                 </EditForm>
             </Animate>
@@ -157,6 +172,10 @@
                                     </button>
                                     <button class="primary-btn" disabled="@isMakingRequest"
                                         @onclick="HandleUserRegistrationAsync">Complete Sign Up</button>
+                                </div>
+
+                                <div class="flex justify-center mt-5">
+                                    <p>Already have an account? <a href="/auth/signin" class="link">Sign in here</a></p>
                                 </div>
                             </div>
                         </div>
