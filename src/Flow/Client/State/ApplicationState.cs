@@ -1,5 +1,6 @@
 ﻿using System.Security.Claims;
 using Flow.Client.Enums;
+using Flow.Client.Settings;
 using Flow.Shared.DataTransferObjects;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.SignalR.Client;
@@ -9,10 +10,11 @@ namespace Flow.Client.State;
 
 public class ApplicationState
 {
-    public const string CHAT_HUB_URL = "https://localhost:7292/chat-threads-hub";
-    public const string CONTACTS_HUB_URL = "https://localhost:7292/contacts-hub";
+    public readonly string _chatHubUrl = "https://localhost:7292/chat-threads-hub";
+    public readonly string _contactsHubUrl = "https://localhost:7292/contacts-hub";
 
     private readonly IJSRuntime _js;
+    private readonly AppSettings _appSettings;
 
     /// <summary>
     /// Represents the user's current settings and color scheme
@@ -49,14 +51,22 @@ public class ApplicationState
 
     public string? UserJwt { get; set; }
 
-    public ApplicationState(IJSRuntime js)
+    public ApplicationState(IJSRuntime js, AppSettings appSettings)
     {
+        // * injected dependencies
+        _appSettings = appSettings;
         _js = js;
+
+
+        // * initializing properties
         IncomingContactRequests = new();
         SentContactRequests = new();
         Threads = new();
         Contacts = new();
         UserSettings = new();
+
+        _chatHubUrl = $"{_appSettings.ServerBaseUrl}/chat-threads-hub";
+        _contactsHubUrl = $"{_appSettings.ServerBaseUrl}/contacts-hub";
     }
 
     public void NotifyStateChanged() => OnChange?.Invoke();
@@ -73,7 +83,7 @@ public class ApplicationState
     {
         CurrentUserId = AuthState.User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
         ChatHubConnection = new HubConnectionBuilder()
-        .WithUrl(CHAT_HUB_URL, o =>
+        .WithUrl(_chatHubUrl, o =>
         {
             o.AccessTokenProvider = () => Task.FromResult<string?>(UserJwt);
         })
@@ -99,7 +109,7 @@ public class ApplicationState
     private async Task InitContactsHubConnection()
     {
         ContactsHubConnection = new HubConnectionBuilder()
-        .WithUrl(CONTACTS_HUB_URL, o =>
+        .WithUrl(_contactsHubUrl, o =>
         {
             o.AccessTokenProvider = () => Task.FromResult<string?>(UserJwt);
         }).Build();

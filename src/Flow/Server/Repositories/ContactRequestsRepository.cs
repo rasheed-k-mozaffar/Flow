@@ -223,6 +223,12 @@ public class ContactRequestsRepository : IContactRequestsRepository
                 );
 
                 await _db.SaveChangesAsync();
+
+                await _contactsHubContext
+                    .Clients
+                    .User(request.SenderId)
+                    .ReceiveCancelledRequestIdForSenderAsync(requestId);
+
                 return;
             }
         }

@@ -32,8 +32,12 @@ public partial class Index : ComponentBase, IAsyncDisposable
         var userJwt = await JwtsManager.GetJwtAsync();
         AppState.UserJwt = userJwt;
         // * set the selected thread to the most recent thread
-        AppState.SelectedThreadId = AppState.Threads.First().Key;
-        AppState.SelectedThread = AppState.Threads.First().Value.Contact;
+        if (AppState.Threads is not null && AppState.Threads.Any())
+        {
+            AppState.SelectedThreadId = AppState.Threads.First().Key;
+            AppState.SelectedThread = AppState.Threads.First().Value.Contact;
+        }
+
         AppState.AuthState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
 
         await AppState.InitializeHubsAsync();

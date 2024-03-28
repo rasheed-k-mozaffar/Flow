@@ -73,7 +73,8 @@
                     }
                     else
                     {
-                        <h1 class="font-semibold text-xl text-gray-400 dark:text-gray-200 mb-3">@apiResponse.Message
+                        <h1 class="font-semibold text-xl text-gray-400 dark:text-gray-200 mb-3">
+                            @($"Found {searchResults.Count} Results For \"{searchTerm}\"")
                         </h1>
 
                         <div class="flex flex-col space-y-4 max-h-52 overflow-y-auto px-2">
@@ -81,6 +82,14 @@
                             {
                                 <UserSearchResult User="result" OnAddClicked="(() => SendRequestToUserAsync(result.UserId!))"
                                     OnCancelRequestClicked="(() => CancelContactRequestAsync(result.ContactRequestId))" />
+                            }
+
+                            @if (hasUnloadedUsers)
+                            {
+                                <div class="text-center">
+                                    <div class="text-blue-500 font-light text-sm cursor-pointer
+                                    hover:underline @(isPerformingSearch? "cursor-not-allowed": null)"  @onclick="PerformSearchAsync">Load more...</div>
+                                </div>
                             }
                         </div>
                     }
@@ -105,6 +114,7 @@
     private void CloseModal()
     {
         Show = false;
+        searchTerm = string.Empty;
         OnCloseClicked.InvokeAsync();
     }
 }

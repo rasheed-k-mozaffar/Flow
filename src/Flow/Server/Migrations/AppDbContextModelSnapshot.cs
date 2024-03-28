@@ -172,11 +172,74 @@ namespace Flow.Server.Migrations
                         new
                         {
                             Id = 1,
-                            AccentsColor = "text-blue-500 bg-blue-600",
+                            AccentsColor = "text-blue-700 bg-blue-600",
                             Name = "Flow's Default",
                             ReceivedMsgBubbleColor = "bg-gray-100 text-gray-600",
                             SelectedMessageColor = "bg-red-500 text-white",
                             SentMsgBubbleColor = "bg-blue-600 text-white"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            AccentsColor = "text-violet-500 bg-violet-500",
+                            Name = "Lavender Mist",
+                            ReceivedMsgBubbleColor = "bg-violet-100 text-gray-600",
+                            SelectedMessageColor = "bg-red-500 text-white",
+                            SentMsgBubbleColor = "bg-violet-500 text-white"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            AccentsColor = "text-black bg-black",
+                            Name = "Steel Tones",
+                            ReceivedMsgBubbleColor = "bg-gray-100 text-gray-600",
+                            SelectedMessageColor = "bg-red-500 text-white",
+                            SentMsgBubbleColor = "bg-black text-white"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            AccentsColor = "text-orange-400 bg-orange-400",
+                            Name = "Sunny Hues",
+                            ReceivedMsgBubbleColor = "bg-orange-100 text-gray-700",
+                            SelectedMessageColor = "bg-red-500 text-white",
+                            SentMsgBubbleColor = "bg-orange-400 text-white"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            AccentsColor = "text-green-500 bg-green-500",
+                            Name = "Fresh Leaves",
+                            ReceivedMsgBubbleColor = "bg-green-100 text-gray-700",
+                            SelectedMessageColor = "bg-red-500 text-white",
+                            SentMsgBubbleColor = "bg-green-500 text-white"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            AccentsColor = "text-lime-500 bg-lime-500",
+                            Name = "Lemon Lime",
+                            ReceivedMsgBubbleColor = "bg-lime-100 text-gray-700",
+                            SelectedMessageColor = "bg-red-500 text-white",
+                            SentMsgBubbleColor = "bg-lime-500 text-white"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            AccentsColor = "text-rose-500 bg-rose-500",
+                            Name = "Blossom Vibes",
+                            ReceivedMsgBubbleColor = "bg-rose-100 text-gray-700",
+                            SelectedMessageColor = "bg-red-500 text-white",
+                            SentMsgBubbleColor = "bg-rose-500 text-white"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            AccentsColor = "text-emerald-500 bg-emerald-500",
+                            Name = "Fresh Mint",
+                            ReceivedMsgBubbleColor = "bg-emerald-100 text-gray-700",
+                            SelectedMessageColor = "bg-red-500 text-white",
+                            SentMsgBubbleColor = "bg-emerald-500 text-white"
                         });
                 });
 

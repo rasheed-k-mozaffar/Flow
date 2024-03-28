@@ -32,6 +32,13 @@
     </div>
 
     <div>
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="my-2">
+                <ErrorAlert ErrorMessage="@errorMessage" OnCloseClicked="(() => errorMessage = string.Empty)" />
+            </div>
+        }
+
         <h2 class="mb-3 text-md font-medium text-gray-700 dark:text-gray-200">Theme</h2>
 
         <div class="bg-gray-50 rounded-xl p-4 dark:bg-gray-600">
@@ -54,7 +61,7 @@
 
     <div>
         <h2 class="mb-3 text-md font-medium text-gray-700 dark:text-gray-200">Color Scheme</h2>
-        <div class="bg-gray-50 rounded-xl p-4 dark:bg-gray-600">
+        <div class="bg-gray-50 rounded-xl p-4 dark:bg-gray-600 max-h-80 overflow-y-auto">
             <div class="w-full space-y-2">
                 @if (State.ColorSchemes is not null)
                 {

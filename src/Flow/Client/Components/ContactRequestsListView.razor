@@ -10,17 +10,17 @@
         <h1 class="text-2xl font-medium dark:text-gray-100">Requests</h1>
     </div>
 
-    <div class="h-full w-full overflow-y-auto">
+    <div class="h-full w-full">
         @if (!DisplayRequests)
         {
             <DefaultSpinner />
         }
         else
         {
-            <ul class="mb-5 space-y-2 h-1/2">
-                <div class="font-medium dark:text-gray-200">Your connection requests</div>
-                <hr />
-                @if (AppState.SentContactRequests.Any())
+            <div class="font-medium dark:text-gray-200">Your connection requests</div>
+            <ul class="mb-5 space-y-2 max-h-52 overflow-y-auto px-2">
+            <hr />
+            @if (AppState.SentContactRequests.Any())
                 {
                     foreach (var r in AppState.SentContactRequests)
                     {
@@ -38,8 +38,8 @@
                 }
             </ul>
 
-            <ul class="mb-5 space-y-2 h-1/2">
             <div class="font-medium dark:text-gray-200">Sent to you</div>
+            <ul class="mb-5 space-y-2 max-h-52 overflow-y-auto px-2">
             <hr />
             @if (AppState.IncomingContactRequests.Any())
                 {
