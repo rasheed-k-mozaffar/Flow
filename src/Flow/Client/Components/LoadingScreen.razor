@@ -65,7 +65,9 @@
 
         if (apiResponse.IsSuccess)
         {
-            AppState.Threads = apiResponse.Body!;
+            AppState.Threads = apiResponse.Body!
+            .OrderByDescending(kv => kv.Value.Messages.Any() ? kv.Value.Messages?.Max(m => m.SentOn) : DateTime.MinValue)
+            .ToDictionary(kv => kv.Key, kv => kv.Value);
         }
     }
 
