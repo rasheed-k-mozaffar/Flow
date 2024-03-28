@@ -6,11 +6,6 @@
         <div class="text-2xl font-medium dark:text-gray-100">Chats</div>
     </div>
 
-    <div class="px-2">
-        <SearchBar /> @* Search Contacts *@ @* TODO Remove this component and replace it with a search form*@
-    </div>
-
-
     @if (IsLoadingContacts)
     {
         <div class="h-full w-full flex justify-center items-center">
@@ -19,15 +14,26 @@
     }
     else
     {
-        var sortedThreads = AppState.Threads
-        .OrderByDescending(kv => kv.Value.Messages.Any() ? kv.Value.Messages?.Max(m => m.SentOn) : DateTime.MinValue)
-        .ToDictionary(kv => kv.Key, kv => kv.Value);
-        <ul class="h-full overflow-y-auto">
-            @foreach (var contact in sortedThreads)
-            {
-                <Chat ContactModel="contact.Value.Contact" ThreadId="contact.Key" />
-            }
-        </ul>
+        if (AppState.Threads.Any())
+        {
+            var sortedThreads = AppState.Threads
+            .OrderByDescending(kv => kv.Value.Messages.Any() ? kv.Value.Messages?.Max(m => m.SentOn) : DateTime.MinValue)
+            .ToDictionary(kv => kv.Key, kv => kv.Value);
+            <ul class="h-full overflow-y-auto">
+                @foreach (var contact in sortedThreads)
+                {
+                    <Chat ContactModel="contact.Value.Contact" ThreadId="contact.Key" />
+                }
+            </ul>
+        }
+        else
+        {
+            <div class="flex justify-center items-center h-[200px]">
+                <div class="px-2 py-1 rounded-lg bg-neutral-300 text-gray-700 text-sm">
+                    No contacts here!
+                </div>
+            </div>
+        }
     }
 </div>
 
