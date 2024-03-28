@@ -62,7 +62,7 @@
                 }
             </div>
 
-            var groupedMessagesByDay = AppState.Threads[ThreadId].Messages.GroupBy(p => p.SentOn.Day);
+            var groupedMessagesByDay = AppState.Threads[ThreadId].Messages.GroupBy(p => p.SentOn.ToLocalTime().Day);
             foreach (var messageGroup in groupedMessagesByDay)
             {
                 var date = new DateTime(DateTime.Now.Year, DateTime.Now.Month, messageGroup.Key);
