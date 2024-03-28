@@ -3,7 +3,7 @@
 @inject ApplicationState State
 @inject NavigationManager Nav
 
-<SearchUsersModal Show="showSearchModal" OnCloseClicked="CloseSearchModal" />
+
 @if (!showUi)
 {
     <AuthorizeView>
@@ -21,6 +21,7 @@ else
 {
     <Animate Animation="Animations.FadeIn" DurationMs="500">
     <main class="h-screen overflow-hidden @(State.UserSettings.Theme == Theme.Dark ? "dark" : null)">
+        <SearchUsersModal Show="showSearchModal" OnCloseClicked="CloseSearchModal" />
         <SideBar OnSearchButtonClicked="OpenSearchModal" />
         <div class=" sm:ml-80 min-h-full">
             @Body

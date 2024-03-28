@@ -6,8 +6,8 @@
         </div>
 
         <div>
-            <p>@User.Name</p>
-            <p class="text-sm font-light text-gray-500">@User.Username</p>
+            <p class="text-gray-600 dark:text-gray-200">@User.Name</p>
+            <p class="text-sm font-light text-gray-600 dark:text-gray-200">@User.Username</p>
         </div>
     </div>
 
@@ -15,16 +15,16 @@
         @if (User.UserType is SearchedUserType.NonContact)
         {
             <button @onclick="AddClicked"
-                class="ring-1 ring-blue-500 text-blue-500 px-4 py-1 rounded-2xl hover:bg-blue-50 transition-colors">Add</button>
+                class="ring-1 ring-blue-500 text-blue-500 px-4 py-1 rounded-2xl hover:bg-blue-50 dark:hover:text-gray-200 dark:hover:bg-blue-500 transition-colors">Add</button>
         }
         else if (User.UserType is SearchedUserType.Contact)
         {
-            <div class="text-gray-400 font-semibold">Friend</div>
+            <div class="text-gray-400 font-semibold dark:text-gray-200">Friend</div>
         }
         else
         {
             <button @onclick="CancelRequestClicked"
-                class="ring-1 ring-gray-500 text-gray-500 px-4 py-1 rounded-2xl hover:bg-gray-100 transition-colors">Requested</button>
+                class="ring-1 ring-gray-500 text-gray-500 px-4 py-1 rounded-2xl hover:bg-gray-100 dark:ring-gray-200 dark:text-gray-200 dark:hover:bg-gray-600 transition-colors">Requested</button>
         }
     </div>
 </div>

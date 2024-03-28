@@ -7,15 +7,15 @@
 
 
     <div @onclick="CloseModal"
-        class="fixed inset-0 z-50 flex h-screen w-full items-center justify-center bg-gray-200/70  backdrop-blur-sm">
+        class="fixed inset-0 z-50 flex h-screen w-full items-center justify-center bg-gray-200/70 dark:bg-gray-600/70  backdrop-blur-sm">
         <div class="relative max-h-full w-full max-w-2xl p-4">
-            <div class="relative rounded-lg bg-white shadow-lg z-50" @onclick:stopPropagation>
+            <div class="relative rounded-lg bg-white dark:bg-gray-600 shadow-lg z-50" @onclick:stopPropagation>
 
                 <!-- Modal Header -->
                 <div class="flex min-h-12 w-full items-center">
                     <div class="flex w-1/12 items-center justify-center">
-                        <svg class="h-4 w-4 text-gray-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
-                            viewBox="0 0 24 24">
+                        <svg class="h-4 w-4 text-gray-800 dark:text-gray-200" aria-hidden="true"
+                            xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                             <path stroke="currentColor" stroke-linecap="round" stroke-width="2"
                                 d="m21 21-3.5-3.5M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z" />
                         </svg>
@@ -23,7 +23,7 @@
 
                     <div class="w-10/12">
                         <InputText @bind-Value="searchTerm" @oninput="HandlePerformingSearch"
-                            class="w-full border-0 bg-transparent text-gray-500 font-medium outline-none ring-0 placeholder:text-gray-400 focus:outline-none focus:ring-0 placeholder:font-medium"
+                            class="w-full border-0 bg-transparent text-gray-500 font-medium outline-none ring-0 placeholder:text-gray-400 dark:text-gray-200 dark:placeholder:text-gray-300 focus:outline-none focus:ring-0 placeholder:font-medium"
                             placeholder="Search users..." />
                     </div>
 
@@ -31,8 +31,8 @@
                         @if (!string.IsNullOrEmpty(searchTerm))
                         {
                             <button @onclick="(() => searchTerm = string.Empty)">
-                                <svg class="h-6 w-6 text-gray-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
-                                    fill="none" viewBox="0 0 24 24">
+                                <svg class="h-6 w-6 text-gray-800 dark:text-gray-200" aria-hidden="true"
+                                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M6 18 18 6m0 12L6 6" />
                                 </svg>
@@ -41,22 +41,22 @@
                     </div>
                 </div>
 
-                <hr class="h-[1px] bg-gray-300" />
+                <hr class="h-[1px] bg-gray-300 dark:bg-gray-500" />
 
                 <!-- Modal Body -->
 
                 @if (!string.IsNullOrEmpty(errorMessage))
                 {
-                    <div class="w-full my-2">
+                    <div class="w-full my-2 px-4">
                         <ErrorAlert ErrorMessage="@errorMessage" OnCloseClicked="(() => errorMessage = string.Empty)" />
                     </div>
                 }
 
-                <div class="px-6 py-4">
+                <div class="px-6 py-4 overflow-y-auto">
                     @if (string.IsNullOrEmpty(searchTerm))
                     {
                         <div class="h-[200px] flex justify-center items-center">
-                            <h1 class="font-medium text-gray-500">No search results</h1>
+                            <h1 class="font-medium text-gray-500 dark:text-gray-300">No search results</h1>
                         </div>
                     }
                     else if (!string.IsNullOrEmpty(searchTerm) && isPerformingSearch)
@@ -68,7 +68,7 @@
                     else if (!string.IsNullOrEmpty(searchTerm) && !searchResults.Any())
                     {
                         <div class="h-[200px] flex justify-center items-center">
-                            <h1 class="font-medium text-gray-500">@apiResponse.Message</h1>
+                            <h1 class="font-medium text-gray-500 dark:text-gray-300">@apiResponse.Message</h1>
                         </div>
                     }
                     else
@@ -76,7 +76,7 @@
                         <h1 class="font-semibold text-xl text-gray-400 dark:text-gray-200 mb-3">@apiResponse.Message
                         </h1>
 
-                        <div class="flex flex-col space-y-4">
+                        <div class="flex flex-col space-y-4 max-h-52 overflow-y-auto px-2">
                     @foreach (var result in searchResults)
                             {
                                 <UserSearchResult User="result" OnAddClicked="(() => SendRequestToUserAsync(result.UserId!))"
