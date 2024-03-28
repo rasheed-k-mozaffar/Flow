@@ -14,24 +14,31 @@ public partial class SearchUsersModal : ComponentBase
 
 
     private CancellationTokenSource cancellationTokenSource = new(TimeSpan.FromSeconds(7.5));
-    private ApiResponse<ICollection<UserSearchResultDto>> apiResponse = new();
-    private IList<UserSearchResultDto> searchResults = new List<UserSearchResultDto>();
+    private ApiResponse<UsersSearchResultsResponse> apiResponse = new();
+    private List<UserSearchResultDto> searchResults = new List<UserSearchResultDto>();
 
     private string searchTerm = string.Empty;
     private string errorMessage = string.Empty;
     private string successMessage = string.Empty;
     private bool isPerformingSearch = false;
 
+    private int loadNumber = 0;
+    private bool hasUnloadedUsers = false;
+
     private async Task PerformSearchAsync()
     {
         try
         {
             apiResponse = await UsersService
-                .SearchAsync(searchTerm, cancellationTokenSource.Token);
+                .SearchAsync(searchTerm, cancellationTokenSource.Token, loadNumber);
 
             if (apiResponse.IsSuccess)
             {
-                searchResults = apiResponse.Body!.ToList();
+
+                searchResults.InsertRange(searchResults.Count, apiResponse.Body!.SearchResults);
+                hasUnloadedUsers = apiResponse.Body.HasUnloadedUsers;
+                loadNumber++;
+                await InvokeAsync(StateHasChanged);
             }
         }
         catch (ApiGetRequestFailedException ex)
@@ -53,6 +60,7 @@ public partial class SearchUsersModal : ComponentBase
         if (e.Value is not null)
         {
             string? newValue = e.Value.ToString();
+            loadNumber = 0;
 
             if (string.IsNullOrEmpty(newValue))
             {
