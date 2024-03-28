@@ -1412,11 +1412,6 @@ input:checked + .toggle-bg {
   margin-bottom: 0.5rem;
 }
 
-.my-3 {
-  margin-top: 0.75rem;
-  margin-bottom: 0.75rem;
-}
-
 .mb-1 {
   margin-bottom: 0.25rem;
 }
@@ -1558,6 +1553,10 @@ input:checked + .toggle-bg {
   height: 100vh;
 }
 
+.max-h-52 {
+  max-height: 13rem;
+}
+
 .max-h-\[150px\] {
   max-height: 150px;
 }
@@ -1596,10 +1595,6 @@ input:checked + .toggle-bg {
 
 .w-10\/12 {
   width: 83.333333%;
-}
-
-.w-2\/12 {
-  width: 16.666667%;
 }
 
 .w-20 {
@@ -1673,6 +1668,10 @@ input:checked + .toggle-bg {
 
 .max-w-\[75\%\] {
   max-width: 75%;
+}
+
+.max-w-lg {
+  max-width: 32rem;
 }
 
 .max-w-md {
@@ -2378,6 +2377,11 @@ input:checked + .toggle-bg {
   color: rgb(35 56 118 / var(--tw-text-opacity));
 }
 
+.text-gray-100 {
+  --tw-text-opacity: 1;
+  color: rgb(243 244 246 / var(--tw-text-opacity));
+}
+
 .text-gray-200 {
   --tw-text-opacity: 1;
   color: rgb(229 231 235 / var(--tw-text-opacity));
@@ -2794,6 +2798,10 @@ h1:focus {
   background-color: rgb(75 85 99 / var(--tw-bg-opacity));
 }
 
+:is(.dark .dark\:bg-gray-600\/70) {
+  background-color: rgb(75 85 99 / 0.7);
+}
+
 :is(.dark .dark\:bg-gray-700) {
   --tw-bg-opacity: 1;
   background-color: rgb(55 65 81 / var(--tw-bg-opacity));
@@ -2887,6 +2895,11 @@ h1:focus {
   color: rgb(156 163 175 / var(--tw-placeholder-opacity));
 }
 
+:is(.dark .dark\:ring-gray-200) {
+  --tw-ring-opacity: 1;
+  --tw-ring-color: rgb(229 231 235 / var(--tw-ring-opacity));
+}
+
 :is(.dark .dark\:ring-offset-gray-800) {
   --tw-ring-offset-color: #1F2937;
 }
@@ -2929,6 +2942,11 @@ h1:focus {
 :is(.dark .dark\:hover\:text-blue-500:hover) {
   --tw-text-opacity: 1;
   color: rgb(63 131 248 / var(--tw-text-opacity));
+}
+
+:is(.dark .dark\:hover\:text-gray-200:hover) {
+  --tw-text-opacity: 1;
+  color: rgb(229 231 235 / var(--tw-text-opacity));
 }
 
 :is(.dark .dark\:hover\:text-gray-300:hover) {
@@ -2991,6 +3009,10 @@ h1:focus {
 @media (min-width: 768px) {
   .md\:w-4\/12 {
     width: 33.333333%;
+  }
+
+  .md\:w-5\/12 {
+    width: 41.666667%;
   }
 
   .md\:max-w-xl {
