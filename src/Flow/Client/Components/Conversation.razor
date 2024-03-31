@@ -65,7 +65,7 @@
             var groupedMessagesByDay = AppState.Threads[ThreadId].Messages.GroupBy(p => p.SentOn.ToLocalTime().Day);
             foreach (var messageGroup in groupedMessagesByDay)
             {
-                var date = new DateTime(DateTime.Now.Year, DateTime.Now.Month, messageGroup.Key);
+                var date = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, messageGroup.Key);
                 <div class="w-full flex items-center justify-center h-fit">
                     <div class="w-fit rounded-xl py-2 px-3 bg-gray-100 text-gray-500 font-light text-sm">
                         @date.ToString("dd MMMM")</div>
