@@ -30,11 +30,11 @@ builder.Services.AddDbContext<AppDbContext>(options =>
         action.CommandTimeout(databaseOptions.CommandTimeoutDuration); // Query will timeout in 30 seconds
     });
 
-    options.EnableDetailedErrors(databaseOptions.EnableDetailedErrors);
 
-    // enable sensetive logging in development env only
+    // enable detailed errors & sensetive logging in development env only
     if (builder.Environment.IsDevelopment())
     {
+        options.EnableDetailedErrors(databaseOptions.EnableDetailedErrors);
         options.EnableSensitiveDataLogging(databaseOptions.EnableSensetiveLogs);
     }
 });
@@ -138,16 +138,16 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseWebAssemblyDebugging();
-
-    // use Swagger UI in development
-    app.UseSwagger();
-    app.UseSwaggerUI();
 }
 else
 {
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+// use Swagger UI in development
+app.UseSwagger();
+app.UseSwaggerUI();
+
 app.UseHttpsRedirection();
 app.UseBlazorFrameworkFiles();
 app.UseStaticFiles();
