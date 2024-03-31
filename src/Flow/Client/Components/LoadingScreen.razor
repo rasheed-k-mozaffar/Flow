@@ -4,9 +4,14 @@
 
 <div
     class="fixed z-[10000] bg-white dark:bg-gray-800 h-screen w-screen flex justify-center items-center space-y-4 flex-col">
-    <div class="font-bold text-2xl text-gray-600">Flow</div>
+    <div>
+        <img src="/images/flow-logo.png" class="max-w-[75px] max-h-[75px]" alt="Flow's Logo" />
+    </div>
+    <div class="font-medium text-black text-2xl">Flow</div>
 
-    <div class="loader">
+    <div>
+        <div class="loader">
+        </div>
     </div>
 </div>
 
@@ -23,6 +28,13 @@
         var colorSchemeTask = LoadColorSchemesAsync();
 
         await Task.WhenAll(settingsTask, threadsTask, colorSchemeTask);
+
+        // * set the selected thread to the most recent thread
+        if (AppState.Threads is not null && AppState.Threads.Any())
+        {
+            AppState.SelectedThreadId = AppState.Threads.First().Key;
+            AppState.SelectedThread = AppState.Threads.First().Value.Contact;
+        }
         await OnSettingsLoaded.InvokeAsync();
     }
 
