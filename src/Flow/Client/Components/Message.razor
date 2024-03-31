@@ -6,6 +6,11 @@
             @(IsSelected && Sent ? "bg-red-500 text-gray-800 translate-x-4" : null) transition-all">
             <div>@MessageModel.Content</div>
         </div>
+
+
+        <div class="text-xs text-gray-500 dark:text-gray-200 transition-all @(IsSelected ? "translate-x-4" : null)">
+            @MessageModel.SentOn.ToLocalTime().ToString("h:mm tt").ToUpper()
+        </div>
     }
     else if (MessageModel.Type is MessageType.Image)
     {
