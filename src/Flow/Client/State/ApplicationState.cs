@@ -89,7 +89,6 @@ public class ApplicationState
         })
         .Build();
 
-
         ChatHubConnection.On<MessageDto>("ReceiveMessageAsync", async message =>
         {
             Threads[message.ThreadId].Messages.Add(message);
@@ -104,6 +103,7 @@ public class ApplicationState
         });
 
         await ChatHubConnection.StartAsync();
+        await ChatHubConnection.InvokeAsync("JoinThreadsAsync");
     }
 
     private async Task InitContactsHubConnection()

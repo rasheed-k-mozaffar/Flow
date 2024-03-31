@@ -28,12 +28,6 @@ public class ChatHub : Hub<IChatThreadsClient>
             "User {username} joined the Chat Hub",
             _userInfo.Name
         );
-
-        var contacts = await _contactsRepository.GetUserContactsAsync();
-
-        var threadsIds = contacts.Keys.ToList();
-
-        await JoinThreadsAsync(threadsIds);
     }
 
     public override async Task OnDisconnectedAsync(Exception? exception)
@@ -45,12 +39,6 @@ public class ChatHub : Hub<IChatThreadsClient>
             "User {username} left the Chat Hub",
             _userInfo.Name
         );
-
-        var contacts = await _contactsRepository.GetUserContactsAsync();
-
-        var threadsIds = contacts.Keys.ToList();
-
-        await LeaveThreadsAsync(threadsIds);
     }
 
     /// <summary>
@@ -81,20 +69,27 @@ public class ChatHub : Hub<IChatThreadsClient>
     #region On Connect Methods
     // * These two methods are going to only be used upon connecting to the hub
 
-    private async Task JoinThreadsAsync(IEnumerable<Guid> threads)
+    public async Task JoinThreadsAsync()
     {
+        var contacts = await _contactsRepository.GetUserContactsAsync();
+
+        var threadsIds = contacts.Keys.ToList();
+
         // Join the user to their chat threads 
-        foreach (var threadId in threads)
+        foreach (var threadId in threadsIds)
         {
             _logger.LogWarning("User {username} joined Chat Thread {threadId}", _userInfo.Name, threadId);
             await Groups.AddToGroupAsync(Context.ConnectionId, threadId.ToString()!);
         }
     }
 
-    private async Task LeaveThreadsAsync(IEnumerable<Guid> threads)
+    public async Task LeaveThreadsAsync()
     {
+        var contacts = await _contactsRepository.GetUserContactsAsync();
+
+        var threadsIds = contacts.Keys.ToList();
         // Remove the user from their chat threads 
-        foreach (var threadId in threads)
+        foreach (var threadId in threadsIds)
         {
             _logger.LogWarning("User {username} left Chat Thread {threadId}", _userInfo.Name, threadId);
             await Groups.RemoveFromGroupAsync(Context.User!.FindFirstValue(ClaimTypes.NameIdentifier)!, threadId.ToString()!);
@@ -111,4 +106,6 @@ public interface IChatThreadsClient
     Task ReceiveDeletedMessagesIdsAsync(DeleteMessagesRequest deletedMessagesIds);
     Task JoinThreadAsync(Guid threadId);
     Task LeaveThreasAsync(Guid threadId);
+    Task JoinThreadsAsync();
+    Task LeaveThreadsAsync();
 }
