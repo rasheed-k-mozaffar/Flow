@@ -17,7 +17,7 @@ public partial class Conversation : ComponentBase
     private const int MAX_ALLOWED_FILE_SIZE = 1024 * 1024 * 10; // 10 Migs
     private static readonly string[] _allowedExtensions = { ".jpeg", ".png", ".webp", ".jpg" };
 
-    private InputText? messageInput;
+    private InputTextArea? messageInput;
     private SendMessageDto messageModel = new();
 
     [Parameter]
@@ -48,6 +48,7 @@ public partial class Conversation : ComponentBase
 
     private ICollection<Guid> selectedMessages = new List<Guid>();
     private ICollection<IFormFile>? selectedImages;
+    private MessageDto? selectedImageMessage = null;
     private string? threadId;
     private string _errorMessage = string.Empty;
     private bool _isMakingNetworkRequest = false;
@@ -320,6 +321,11 @@ public partial class Conversation : ComponentBase
         {
             _errorMessage = ex.Message;
         }
+    }
+
+    private void OpenImageModal(MessageDto imageMessage)
+    {
+        selectedImageMessage = imageMessage;
     }
 
     private void OpenCameraView() => wantsToTakePicture = true;
