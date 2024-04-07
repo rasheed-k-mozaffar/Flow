@@ -15,9 +15,21 @@
     else if (MessageModel.Type is MessageType.Image)
     {
         <div class="flex-col space-y-2 @(Sent ? null : "text-end")">
-            <div @onclick="MessageClicked">
-                <img class="rounded-xl max-w-[350px] max-h-[350px] md:max-w-[500px] md:max-h-[500px] transition-all @(IsSelected && Sent ? "border-2 border-red-500 translate-x-4" : null)"
+            <div class="flex items-center space-x-2 @(Sent ? "justify-start" : "flex-row-reverse space-x-reverse")">
+                <img @onclick="MessageClicked"
+                    class="rounded-xl max-w-[350px] max-h-[350px] md:max-w-[500px] md:max-h-[500px] transition-all @(IsSelected && Sent ? "border-2 border-red-500 translate-x-4" : null)"
                     src="@MessageModel.Content" />
+
+                <div>
+                    <button @onclick="OpenImageClicked"
+                        class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-all @(IsSelected ? "translate-x-4" : null)">
+                        <svg class="w-6 h-6 text-gray-600 dark:text-gray-200" aria-hidden="true"
+                            xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
+                                d="M8 4H4m0 0v4m0-4 5 5m7-5h4m0 0v4m0-4-5 5M8 20H4m0 0v-4m0 4 5-5m7 5h4m0 0v-4m0 4-5-5" />
+                        </svg>
+                    </button>
+                </div>
             </div>
 
             <div class="text-xs text-gray-500 dark:text-gray-200 transition-all @(IsSelected ? "translate-x-4" : null)">
@@ -36,6 +48,7 @@
     [Parameter] public EventCallback OnMessageSelected { get; set; }
     [Parameter] public EventCallback OnMessageUnSelected { get; set; }
     [Parameter] public bool Sent { get; set; }
+    [Parameter] public EventCallback<MessageDto> OnOpenImageClicked { get; set; }
 
     private void MessageClicked()
     {
@@ -52,5 +65,10 @@
                 OnMessageUnSelected.InvokeAsync();
             }
         }
+    }
+
+    private void OpenImageClicked()
+    {
+        OnOpenImageClicked.InvokeAsync(MessageModel);
     }
 }
