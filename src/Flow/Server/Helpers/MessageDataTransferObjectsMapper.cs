@@ -2,11 +2,11 @@
 {
     public static class MessageDataTransferObjectsMapper
     {
-        public static Message ToMessage(this SendMessageDto message)
+        public static Message ToMessage(this MessageDto message)
         {
             return new()
             {
-                Id = message.MessageId,
+                Id = message.Id,
                 SenderId = message.SenderId,
                 ThreadId = message.ThreadId,
                 Content = message.Content,
@@ -30,11 +30,11 @@
             };
         }
 
-        public static MessageDto ToMessageReceivedDto(this SendMessageDto sentMessage)
+        public static MessageDto ToMessageReceivedDto(this MessageDto sentMessage)
         {
             return new()
             {
-                Id = sentMessage.MessageId,
+                Id = sentMessage.Id,
                 ThreadId = sentMessage.ThreadId,
                 Content = sentMessage.Content,
                 SenderId = sentMessage.SenderId,

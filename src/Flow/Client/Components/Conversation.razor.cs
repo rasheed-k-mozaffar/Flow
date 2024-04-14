@@ -17,8 +17,8 @@ public partial class Conversation : ComponentBase
     private const int MAX_ALLOWED_FILE_SIZE = 1024 * 1024 * 10; // 10 Migs
     private static readonly string[] _allowedExtensions = { ".jpeg", ".png", ".webp", ".jpg" };
 
-    private InputTextArea? messageInput;
-    private SendMessageDto messageModel = new();
+    private InputText? messageInput;
+    private MessageDto messageModel = new();
 
     [Parameter]
     public UserDetailsDto ContactModel { get; set; } = null!;
@@ -124,19 +124,31 @@ public partial class Conversation : ComponentBase
         if (string.IsNullOrEmpty(messageModel.Content))
             return;
 
-        messageModel.MessageId = Guid.NewGuid();
+        messageModel.Id = Guid.NewGuid();
         messageModel.ThreadId = ThreadId!;
         messageModel.SenderId = currentUserId;
+
+        AppState.Threads[Guid.Parse(threadId!)].Messages.Add(new MessageDto
+        {
+            Id = messageModel.Id,
+            ThreadId = messageModel.ThreadId,
+            Content = messageModel.Content,
+            Status = MessageStatus.Sending,
+            SenderId = currentUserId,
+            SentOn = DateTime.UtcNow,
+            Type = messageModel.Type,
+        });
+
+        AppState.NotifyStateChanged();
+
         if (AppState.ChatHubConnection is not null)
         {
             await AppState.ChatHubConnection.InvokeAsync("SendMessageAsync", messageModel);
-            await ScrollToBottom(toBottom: true);
 
-            AppState.NotifyStateChanged();
-
-            messageModel = new();
             UpdateSendButtonVisibility(new ChangeEventArgs());
         }
+
+        messageModel = new();
     }
 
     [JSInvokable]

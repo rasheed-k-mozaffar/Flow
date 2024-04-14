@@ -3,5 +3,6 @@
 public enum MessageStatus
 {
     Delivered,
+    Sending,
     Seen
 }

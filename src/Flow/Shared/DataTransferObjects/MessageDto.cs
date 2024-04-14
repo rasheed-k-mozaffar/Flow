@@ -4,10 +4,10 @@ namespace Flow.Shared.DataTransferObjects;
 
 public class MessageDto
 {
-    public required Guid Id { get; set; }
-    public required Guid ThreadId { get; set; }
-    public required string SenderId { get; set; }
-    public required string Content { get; set; }
+    public Guid Id { get; set; }
+    public Guid ThreadId { get; set; }
+    public string SenderId { get; set; } = string.Empty;
+    public string Content { get; set; } = string.Empty;
     public DateTime SentOn { get; set; }
     public MessageStatus Status { get; set; }
     public MessageType Type { get; set; }

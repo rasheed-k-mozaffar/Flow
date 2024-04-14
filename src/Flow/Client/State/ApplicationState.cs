@@ -91,7 +91,19 @@ public class ApplicationState
 
         ChatHubConnection.On<MessageDto>("ReceiveMessageAsync", async message =>
         {
-            Threads[message.ThreadId].Messages.Add(message);
+            var sentMessage = Threads[message.ThreadId]
+                                .Messages
+                                .FirstOrDefault(m => m.Id == message.Id);
+
+            if (sentMessage is not null)
+            {
+                sentMessage.Status = MessageStatus.Delivered;
+            }
+            else
+            {
+                Threads[message.ThreadId].Messages.Add(message);
+            }
+
             NotifyStateChanged();
             await _js.InvokeVoidAsync("playMessageSound", message.SenderId == CurrentUserId);
         });

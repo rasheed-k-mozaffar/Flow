@@ -45,12 +45,12 @@ public class ChatHub : Hub<IChatThreadsClient>
     /// This method will be invoked whenever a user types and sends a message, the invocation of this method 
     /// causes the propagation of the sent message to be received on the other end of the chat thread
     /// </summary>
-    /// <param name="message"></param>
+    /// <param name="messageDto"></param>
     /// <returns></returns>
-    public async Task SendMessageAsync(SendMessageDto message)
+    public async Task SendMessageAsync(MessageDto messageDto)
     {
-        await _messagesRepository.SaveMessageAsync(message.ToMessage());
-        await Clients.Group(message.ThreadId.ToString()).ReceiveMessageAsync(message.ToMessageReceivedDto());
+        await _messagesRepository.SaveMessageAsync(messageDto.ToMessage());
+        await Clients.Group(messageDto.ThreadId.ToString()).ReceiveMessageAsync(messageDto.ToMessageReceivedDto());
     }
 
     public async Task JoinThreadAsync(Guid threadId)
