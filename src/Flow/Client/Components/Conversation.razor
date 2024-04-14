@@ -123,8 +123,8 @@
                     </svg>
                 </button>
             </div>
-            <InputTextArea placeholder="Type your message..." @bind-Value="messageModel.Content" @ref="messageInput"
-                @oninput="UpdateSendButtonVisibility" rows="2" disabled="@_isMakingNetworkRequest" class="w-full text-wrap h-auto py-3 rounded-lg 
+            <InputText placeholder="Type your message..." @bind-Value="messageModel.Content" @ref="messageInput"
+                disabled="@_isMakingNetworkRequest" class="w-full text-wrap h-auto py-3 rounded-lg 
                 text-gray-800  pl-[1rem] pr-[3rem] border-0 bg-gray-200 ring-1 ring-slate-900/5 
                 focus:ring-0 focus:outline-none dark:bg-gray-500 dark:text-gray-200 dark:placeholder:text-gray-300" />
 
