@@ -124,6 +124,9 @@ public partial class Conversation : ComponentBase
         if (string.IsNullOrEmpty(messageModel.Content))
             return;
 
+        var msgContent = messageModel.Content;
+        messageModel.Content = string.Empty;
+
         messageModel.Id = Guid.NewGuid();
         messageModel.ThreadId = ThreadId!;
         messageModel.SenderId = currentUserId;
@@ -132,7 +135,7 @@ public partial class Conversation : ComponentBase
         {
             Id = messageModel.Id,
             ThreadId = messageModel.ThreadId,
-            Content = messageModel.Content,
+            Content = msgContent,
             Status = MessageStatus.Sending,
             SenderId = currentUserId,
             SentOn = DateTime.UtcNow,
