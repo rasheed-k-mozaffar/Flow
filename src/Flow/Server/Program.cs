@@ -129,6 +129,7 @@ builder.Services.AddScoped<IContactRequestsRepository, ContactRequestsRepository
 builder.Services.AddScoped<IFilesRepository, FilesRepository>();
 builder.Services.AddScoped<IThreadRepository, ThreadRepository>();
 builder.Services.AddScoped<IMessagesRepository, MessagesRepository>();
+builder.Services.AddScoped<IGroupsRepository, GroupsRepository>();
 
 #endregion
 
