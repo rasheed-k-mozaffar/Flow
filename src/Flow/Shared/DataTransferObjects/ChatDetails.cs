@@ -4,5 +4,5 @@ public class ChatDetails
 {
     public Guid ChatThreadId { get; set; }
     public List<MessageDto> Messages { get; set; } = new();
-    public UserDetailsDto Contact { get; set; } = null!;
+    public List<ContactDto> Participants { get; set; } = null!;
 }
