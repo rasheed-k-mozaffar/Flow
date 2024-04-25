@@ -1526,6 +1526,10 @@ input:checked + .toggle-bg {
   height: 2.25rem;
 }
 
+.h-\[150px\] {
+  height: 150px;
+}
+
 .h-\[1px\] {
   height: 1px;
 }
@@ -2349,10 +2353,6 @@ input:checked + .toggle-bg {
 .text-4xl {
   font-size: 2.25rem;
   line-height: 2.5rem;
-}
-
-.text-\[0\.5rem\] {
-  font-size: 0.5rem;
 }
 
 .text-\[10px\] {
