@@ -10,14 +10,17 @@
 
 @if (selectedImageMessage is not null)
 {
-    var senderDetails = AppState.Threads[Guid.Parse(threadId!)].Contact;
+    var senderDetails = ChatThread
+    .Participants
+    .First(u => u.UserId == selectedImageMessage.SenderId);
+
     var imageDetails = new SentImageDetails
                 {
                     UserName = senderDetails.Name!,
                     UserProfilePictureUrl = senderDetails.ProfilePictureUrl,
                     ImageUrl = selectedImageMessage.Content,
                     Timestamp = selectedImageMessage.SentOn,
-                    IsSentByCurrentUser = selectedImageMessage.SenderId == currentUser.FindFirst(ClaimTypes.NameIdentifier).Value
+                    IsSentByCurrentUser = selectedImageMessage.SenderId == currentUser.FindFirst(ClaimTypes.NameIdentifier)!.Value
                 };
 
     <ImageModal OnCloseClicked="(() => selectedImageMessage = null)" ImageDetails="imageDetails" />
@@ -27,7 +30,8 @@
 {
     <div class="fixed z-50 top-0 right-0 w-full h-full flex items-center justify-center bg-gray-700/80 backdrop-blur-lg ">
     <CameraView Show="wantsToTakePicture" OnCloseClicked="CloseCameraView" typeOfImage="ImageType.NormalImage"
-        Title="@($"Send image to {ContactModel.Name}")" OnSendImageClicked="HandleSendingPictureAsync" />
+        Title="@($"Send image to {(contact is null ? ChatThread.GroupName : contact.Name)}")"
+        OnSendImageClicked="HandleSendingPictureAsync" />
 </div>
 }
 
@@ -48,15 +52,31 @@
 
             </button>
             <div class="flex items-center gap-4">
-                <div>
-                    <img class="h-[50px] w-[50px] rounded-full object-cover"
-                        src="@(ContactModel.ProfilePictureUrl ?? "/images/avatar.png")" alt="@ContactModel.Name" />
-                </div>
+                @if (ChatThread.Type is ThreadType.Normal)
+                {
+                    <div>
+                        <img class="h-[50px] w-[50px] rounded-full object-cover"
+                            src="@(contact?.ProfilePictureUrl ?? "/images/avatar.png")" alt="@contact?.Name" />
+                    </div>
 
-                <div class="font-medium dark:text-white">
-                    <div class="text-xl">@ContactModel.Name</div>
-                    <div class="text-sm text-gray-500 dark:text-gray-200">@ContactModel.Username</div>
+                    <div class="font-medium dark:text-white">
+                    <div class="text-xl">@contact?.Name</div>
+                    <div class="text-sm text-gray-500 dark:text-gray-200">@contact?.Username</div>
                 </div>
+                }
+                else
+                {
+                    <div>
+                        <img class="h-[50px] w-[50px] rounded-full object-cover" src="@("/images/group.png")"
+                            alt="@ChatThread?.GroupName" />
+                    </div>
+
+                    <div class="font-medium dark:text-white">
+                    <div class="text-xl">@ChatThread?.GroupName</div>
+                    <div class="text-sm text-gray-500 dark:text-gray-200">@ChatThread?.GroupDescription?.Substring(0,
+                        15)</div>
+                </div>
+                }
             </div>
         </div>
     </div>
@@ -91,7 +111,7 @@
                     bool isSent = message.SenderId == currentUser.FindFirst(ClaimTypes.NameIdentifier)!.Value;
                     <Message id="@message.Id" MessageModel="message" Sent="@isSent"
                         IsSelected="@(selectedMessages.Contains(message.Id))" OnMessageSelected="(() => SelectMessage(message.Id))"
-                        OnMessageUnSelected="(() => UnSelectMessage(message.Id))"
+                        OnMessageUnSelected="(() => UnselectMessage(message.Id))"
                         BackgroundColor="@(isSent ? AppState.UserSettings.ColorScheme?.SentMsgBubbleColor : AppState.UserSettings.ColorScheme?.ReceivedMsgBubbleColor)"
                         OnOpenImageClicked="((imageMsg) => OpenImageModal(imageMsg))" />
                 }
@@ -124,7 +144,7 @@
                 </button>
             </div>
             <InputText placeholder="Type your message..." @bind-Value="messageModel.Content" @ref="messageInput"
-                disabled="@_isMakingNetworkRequest" class="w-full text-wrap h-auto py-3 rounded-lg 
+                disabled="@_isMakingNetworkRequest" onchange="UpdateSendButtonVisibility" class="w-full text-wrap h-auto py-3 rounded-lg 
                 text-gray-800  pl-[1rem] pr-[3rem] border-0 bg-gray-200 ring-1 ring-slate-900/5 
                 focus:ring-0 focus:outline-none dark:bg-gray-500 dark:text-gray-200 dark:placeholder:text-gray-300" />
 

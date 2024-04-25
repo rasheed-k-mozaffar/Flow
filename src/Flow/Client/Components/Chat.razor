@@ -3,35 +3,44 @@
 
 <div data-drawer-target="default-sidebar" data-drawer-hide="default-sidebar" aria-controls="default-sidebar"
     data-drawer-backdrop="false" @onclick="ChatClicked"
-    class="flex justify-between items-center p-2 cursor-pointer transition-all  border-b border-gray-100 dark:border-gray-700 @(State.SelectedThread?.UserId == ContactModel.UserId ? $"{State.UserSettings.ColorScheme?.AccentsColor?.BgColor} text-white" : "bg-white text-gray-600 dark:bg-gray-600 dark:text-gray-100" ) lg:flex-row lg:min-w-full md:flex-row md:max-w-xl">
+    class="flex justify-between items-center p-2 cursor-pointer transition-all  border-b border-gray-100 dark:border-gray-700 @(State.SelectedThreadId == ChatDetails.ChatThreadId ? $"{State.UserSettings.ColorScheme?.AccentsColor?.BgColor} text-white" : "bg-white text-gray-600 dark:bg-gray-600 dark:text-gray-100" ) lg:flex-row lg:min-w-full md:flex-row md:max-w-xl">
     <div class="flex items-center gap-4">
-        <div>
-            <img class="h-[50px] w-[50px] rounded-full object-cover"
-                src="@(ContactModel.ProfilePictureUrl ?? "/images/avatar.png")" alt="@ContactModel.Name" />
-        </div>
+        @if (ChatDetails.Type is ThreadType.Normal)
+        {
+            <div>
+                <img class="h-[50px] w-[50px] rounded-full object-cover"
+                    src="@(Contact?.ProfilePictureUrl ?? "/images/avatar.png")" alt="@Contact?.Name" />
+            </div>
+        }
+        else
+        {
+            <div>
+                <img class="h-[50px] w-[50px] rounded-full object-cover" src="/images/Group.png" alt="group-picture" />
+            </div>
+        }
 
         <div class="font-medium dark:text-white">
-            <div class="font-light">@ContactModel.Name</div>
+            <div class="font-light">@Contact?.Name</div>
             @if (latestMessage is not null)
             {
                 <div class="text-sm font-light">
-                    @if (latestMessage?.SenderId ==
-                   ContactModel.UserId)
+                    @if (latestMessage?.SenderId !=
+                   State.CurrentUserId)
                     {
                         if (latestMessage?.Type is MessageType.Image)
                         {
-                            <span>@ContactModel.Name!.Split(' ')[0]: Sent an image</span>
+                            <span>@lastMessageSender?.Name!.Split(' ')[0]: Sent an image</span>
                         }
                         else
                         {
                             if (latestMessage?.Content.Length <= 15)
                             {
-                                <span>@ContactModel.Name!.Split(' ')[0]:
+                                <span>@lastMessageSender?.Name!.Split(' ')[0]:
                                     @latestMessage?.Content</span>
                             }
                             else
                             {
-                                <span>@ContactModel.Name!.Split(' ')[0]:
+                                <span>@lastMessageSender?.Name!.Split(' ')[0]:
                                     @latestMessage?.Content.Substring(0, 15)...</span>
                             }
                         }
@@ -75,14 +84,21 @@
 </div>
 
 @code {
-    [Parameter] public UserDetailsDto ContactModel { get; set; } = null!;
+    [Parameter] public ChatDetails ChatDetails { get; set; } = null!;
     [Parameter] public Guid ThreadId { get; set; }
+    [Parameter] public UserDetailsDto? Contact { get; set; }
     private MessageDto? latestMessage;
     private string? latestMessageTimestampOutput;
+    private UserDetailsDto? lastMessageSender;
 
     protected override void OnInitialized()
     {
         latestMessage = State.Threads[ThreadId].Messages.LastOrDefault();
+
+        if (latestMessage is not null)
+        {
+            lastMessageSender = State.Threads[ThreadId].Participants.First(p => p.UserId == latestMessage.SenderId);
+        }
 
         if (latestMessage is not null)
         {
@@ -95,6 +111,7 @@
     protected override void OnAfterRender(bool firstRender)
     {
         latestMessage = State.Threads[ThreadId].Messages.LastOrDefault();
+        lastMessageSender = State.Threads[ThreadId].Participants.First(p => p.UserId == latestMessage?.SenderId);
 
         if (latestMessage is not null)
         {
@@ -104,7 +121,7 @@
     private void ChatClicked()
     {
         State.SelectedThreadId = ThreadId;
-        State.SelectedThread = ContactModel;
+        State.SelectedThread = ChatDetails;
         State.NotifyStateChanged();
     }
 
