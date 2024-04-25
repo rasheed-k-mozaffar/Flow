@@ -175,27 +175,20 @@ public class ContactRequestsRepository : IContactRequestsRepository
 
             await _db.SaveChangesAsync();
 
-            var notifyRecipientTask = _contactsHubContext
+            var notifyPartcipants = _contactsHubContext
                                         .Clients
-                                        .User(request.RecipientId)
-                                        .ReceiveNewContactAsync
+                                        .Users(request.RecipientId, request.SenderId)
+                                        .ReceiveNewChatAsync
                                         (
-                                            new NewContactDto
+                                            new ChatDetails()
                                             {
-                                                ThreadId = thread.Id,
-                                                Contact = request.Sender.ToUserDetailsDto()
-                                            }
-                                        );
-
-            var notifySenderTask = _contactsHubContext
-                                        .Clients
-                                        .User(request.SenderId)
-                                        .ReceiveNewContactAsync
-                                        (
-                                            new NewContactDto
-                                            {
-                                                ThreadId = thread.Id,
-                                                Contact = request.Recipient.ToUserDetailsDto()
+                                                ChatThreadId = thread.Id,
+                                                Participants = new()
+                                                {
+                                                     request.Sender.ToUserDetailsDto(),
+                                                    request.Recipient.ToUserDetailsDto()
+                                                },
+                                                Type = ThreadType.Normal
                                             }
                                         );
 
@@ -204,7 +197,7 @@ public class ContactRequestsRepository : IContactRequestsRepository
                                         .User(request.SenderId)
                                         .ReceiveAcceptedRequestId(requestId);
 
-            await Task.WhenAll(notifyRecipientTask, notifySenderTask);
+            await Task.WhenAll(notifyPartcipants, notifySenderAboutAcceptedReqTask);
 
             return;
         }

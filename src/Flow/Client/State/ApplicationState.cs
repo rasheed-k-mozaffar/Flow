@@ -29,14 +29,14 @@ public class ApplicationState
     /// </summary>
 
     public Guid SelectedThreadId { get; set; }
-    public UserDetailsDto? SelectedThread { get; set; }
+    public ChatDetails? SelectedThread { get; set; }
 
     /// <summary>
     /// This dictionary will store the ids of each thread the user is part of
     /// and the last 15 messages sent in each thread, this will be used when the app first loads to populate the contacts and t
     /// </summary>
     public Dictionary<Guid, ChatDetails> Threads { get; set; }
-    public Dictionary<Guid, UserDetailsDto> Contacts { get; set; }
+
     public IEnumerable<ColorSchemeDto>? ColorSchemes { get; set; }
 
     public List<PendingRequestIncomingDto> IncomingContactRequests { get; set; }
@@ -62,7 +62,6 @@ public class ApplicationState
         IncomingContactRequests = new();
         SentContactRequests = new();
         Threads = new();
-        Contacts = new();
         UserSettings = new();
 
         _chatHubUrl = $"{_appSettings.ServerBaseUrl}/chat-threads-hub";
@@ -155,18 +154,12 @@ public class ApplicationState
             NotifyStateChanged();
         });
 
-        ContactsHubConnection.On<NewContactDto>("ReceiveNewContactAsync", async newContact =>
+        ContactsHubConnection.On<ChatDetails>("ReceiveNewChatAsync", async newChat =>
         {
-            Contacts.Add(newContact.ThreadId, newContact.Contact);
-            Threads?.Add(newContact.ThreadId, new ChatDetails
-            {
-                ChatThreadId = newContact.ThreadId,
-                Messages = new(),
-                Contact = newContact.Contact
-            });
+            Threads?.Add(newChat.ChatThreadId, newChat);
 
             // * Join the participants to the Hub groupd
-            await ChatHubConnection.InvokeAsync("JoinThreadAsync", newContact.ThreadId);
+            await ChatHubConnection.InvokeAsync("JoinThreadAsync", newChat.ChatThreadId);
 
             NotifyStateChanged();
         });

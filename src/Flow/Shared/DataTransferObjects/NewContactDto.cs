@@ -1,7 +1,7 @@
 ﻿namespace Flow.Shared.DataTransferObjects;
 
-public class NewContactDto
+public class NewChatDto
 {
     public Guid ThreadId { get; set; }
-    public UserDetailsDto Contact { get; set; } = null!;
+    public List<UserDetailsDto> Participants { get; set; } = null!;
 }
