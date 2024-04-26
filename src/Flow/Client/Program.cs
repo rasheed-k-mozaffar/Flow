@@ -26,6 +26,7 @@ builder.Services.AddScoped<IThreadsService, ThreadsService>();
 builder.Services.AddScoped<IMessagesService, MessagesService>();
 builder.Services.AddScoped<IFilesService, FilesService>();
 builder.Services.AddScoped<ISettingsService, SettingsService>();
+builder.Services.AddScoped<IGroupsService, GroupsService>();
 
 builder.Services.AddSingleton<AppSettings>(sp =>
 {
