@@ -19,6 +19,7 @@ public partial class SideBar : ComponentBase
 
     [Parameter] public EventCallback OnSearchButtonClicked { get; set; }
     [Parameter] public EventCallback OnContactsButtonClicked { get; set; }
+    [Parameter] public EventCallback OnCreateGroupClickEventPropagated { get; set; }
 
     private List<PendingRequestIncomingDto> incomingContactRequests = new();
     private List<PendingRequestSentDto> sentContactRequests = new();
