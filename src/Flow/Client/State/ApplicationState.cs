@@ -175,4 +175,10 @@ public class ApplicationState
 
         await ContactsHubConnection.StartAsync();
     }
+
+    public void ResetThreadToDefault()
+    {
+        SelectedThread = null;
+        SelectedThreadId = default;
+    }
 }
