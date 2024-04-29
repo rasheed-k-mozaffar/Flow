@@ -3,7 +3,7 @@
     <TargetFramework>net7.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <LangVersion>11.0</LangVersion>
+    <LangVersion>12.0</LangVersion>
     <UserSecretsId>bd1cae7c-c683-4cfb-a5de-779a2c1b09fc</UserSecretsId>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(RunConfiguration)' == 'https' " />
