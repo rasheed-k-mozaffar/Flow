@@ -51,7 +51,8 @@ public class ThreadRepository : IThreadRepository
                 Messages = threadMessages,
                 Participants = chatThread.Participants.Select(u => u.ToUserDetailsDto()).ToList(),
                 GroupName = chatThread.Name,
-                GroupDescription = chatThread.Description
+                GroupDescription = chatThread.Description,
+                Type = chatThread.Type
             });
         }
 
