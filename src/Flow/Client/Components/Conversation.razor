@@ -73,8 +73,6 @@
 
                     <div class="font-medium dark:text-white">
                     <div class="text-xl">@ChatThread?.GroupName</div>
-                    <div class="text-sm text-gray-500 dark:text-gray-200">@ChatThread?.GroupDescription?.Substring(0,
-                        15)</div>
                 </div>
                 }
             </div>
@@ -97,23 +95,62 @@
                 }
             </div>
 
-            var groupedMessagesByDay = AppState.Threads[ThreadId].Messages.GroupBy(p =>
+            var groupedMessagesByDayAndSender = AppState.Threads[ThreadId].Messages.GroupBy(p =>
             p.SentOn.ToLocalTime().Date);
-            foreach (var messageGroup in groupedMessagesByDay)
+
+            foreach (var messageGroup in groupedMessagesByDayAndSender)
             {
                 var date = new DateTime(messageGroup.Key.Year, messageGroup.Key.Month, messageGroup.Key.Day);
                 <div class="w-full flex items-center justify-center h-fit">
                     <div class="w-fit rounded-xl py-2 px-3 bg-gray-100 text-gray-500 font-light text-sm">
                         @date.ToString("dd MMMM")</div>
                 </div>
+
+                groupedMessages = new List<List<MessageDto>>();
+                currentGroup = new List<MessageDto>();
+
                 foreach (var message in messageGroup)
                 {
-                    bool isSent = message.SenderId == currentUser.FindFirst(ClaimTypes.NameIdentifier)!.Value;
-                    <Message id="@message.Id" MessageModel="message" Sent="@isSent"
-                        IsSelected="@(selectedMessages.Contains(message.Id))" OnMessageSelected="(() => SelectMessage(message.Id))"
-                        OnMessageUnSelected="(() => UnselectMessage(message.Id))"
-                        BackgroundColor="@(isSent ? AppState.UserSettings.ColorScheme?.SentMsgBubbleColor : AppState.UserSettings.ColorScheme?.ReceivedMsgBubbleColor)"
-                        OnOpenImageClicked="((imageMsg) => OpenImageModal(imageMsg))" />
+                    if (currentGroup.Count == 0 || currentGroup.Last().SenderId == message.SenderId)
+                    {
+                        // Add the message to the current group to form a consecutive list
+                        currentGroup.Add(message);
+                    }
+                    else
+                    {
+                        // Start a new grop starting with the last message
+                        groupedMessages.Add(currentGroup);
+                        currentGroup = new() { message };
+                    }
+                }
+
+                if (currentGroup.Count > 0)
+                {
+                    groupedMessages.Add(currentGroup);
+                }
+
+                foreach (var group in groupedMessages)
+                {
+                    if (ChatThread!.Type is ThreadType.Group)
+                    {
+                        if (!string.IsNullOrEmpty(GetSenderName(group.Last().SenderId)))
+                        {
+                            <div class="flex justify-end my-2">
+                                <div class="w-fit bg-rose-200 text-gray-700 rounded-xl px-2 py-0.5 text-xs">
+                                    @GetSenderName(group.First().SenderId)</div>
+                            </div>
+                        }
+                    }
+                    foreach (var message in group)
+                    {
+                        bool isSent = message.SenderId == currentUser.FindFirst(ClaimTypes.NameIdentifier)!.Value;
+
+                        <Message id="@message.Id" MessageModel="message" Sent="@isSent"
+                            IsSelected="@(selectedMessages.Contains(message.Id))" OnMessageSelected="(() => SelectMessage(message.Id))"
+                            OnMessageUnSelected="(() => UnselectMessage(message.Id))"
+                            BackgroundColor="@(isSent ? AppState.UserSettings.ColorScheme?.SentMsgBubbleColor : AppState.UserSettings.ColorScheme?.ReceivedMsgBubbleColor)"
+                            OnOpenImageClicked="((imageMsg) => OpenImageModal(imageMsg))" />
+                    }
                 }
             }
         }

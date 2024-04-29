@@ -15,12 +15,12 @@
         else
         {
             <div>
-                <img class="h-[50px] w-[50px] rounded-full object-cover" src="/images/Group.png" alt="group-picture" />
+                <img class="h-[50px] w-[50px] rounded-full object-cover" src="/images/Group.jpeg" alt="group-picture" />
             </div>
         }
 
         <div class="font-medium dark:text-white">
-            <div class="font-light">@Contact?.Name</div>
+            <div class="font-light">@(Contact is null ? ChatDetails.GroupName : Contact.Name)</div>
             @if (latestMessage is not null)
             {
                 <div class="text-sm font-light">
@@ -111,15 +111,17 @@
     protected override void OnAfterRender(bool firstRender)
     {
         latestMessage = State.Threads[ThreadId].Messages.LastOrDefault();
-        lastMessageSender = State.Threads[ThreadId].Participants.First(p => p.UserId == latestMessage?.SenderId);
 
         if (latestMessage is not null)
         {
+            lastMessageSender = State.Threads[ThreadId].Participants.First(p => p.UserId == latestMessage?.SenderId);
             latestMessageTimestampOutput = FormatLatestMessageTimestampOutput(latestMessage.SentOn);
         }
     }
     private void ChatClicked()
     {
+        State.ResetThreadToDefault();
+
         State.SelectedThreadId = ThreadId;
         State.SelectedThread = ChatDetails;
         State.NotifyStateChanged();
