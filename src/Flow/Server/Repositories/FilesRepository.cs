@@ -30,13 +30,18 @@ public class FilesRepository : IFilesRepository
         return image;
     }
 
-    public async Task<Image> PersistImageAsync(Image image, ImageType imageType)
+    public async Task<Image> PersistImageAsync(Image image, ImageType imageType, Guid? threadId = null)
     {
         if (imageType is ImageType.ProfilePicture) // give the AppUserId property a value before persisting the image
         {
             image.AppUserId = _userInfo.UserId;
         }
+        else if (imageType is ImageType.GroupPicture)
+        {
+            image.ChatThreadId = threadId;
+        }
 
+        image.Type = imageType;
         var entityEntry = await _db
                                 .Images
                                 .AddAsync(image);
