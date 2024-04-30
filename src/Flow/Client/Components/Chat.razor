@@ -15,7 +15,9 @@
         else
         {
             <div>
-                <img class="h-[50px] w-[50px] rounded-full object-cover" src="/images/Group.jpeg" alt="group-picture" />
+                <img class="h-[50px] w-[50px] rounded-full object-cover"
+                     src="@(string.IsNullOrEmpty(ChatDetails.GroupImageUrl) ? "/images/group.jpeg" : ChatDetails.GroupImageUrl)"
+                     alt="group-picture" />
             </div>
         }
 

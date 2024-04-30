@@ -35,20 +35,50 @@
                 </div>
             }
 
-            <EditForm Model="request" OnValidSubmit="HandleCreatingGroupAsync">
+            <EditForm Model="_request" OnValidSubmit="HandleCreatingGroupAsync">
                 <DataAnnotationsValidator />
                 <div class="w-full">
-                    <div class="space-y-2">
-
+                    <div class="space-y-2 flex items-center justify-between gap-4">
                         <div>
-                            <InputText @bind-Value="request.GroupName" class="input-field" placeholder="Group Name" />
-                            <ValidationMessage For="(() => request.GroupName)" class="validation-message" />
+                            <div class="relative">
+                                <img src="@(string.IsNullOrEmpty(_groupPictureTempUrl) ? "/images/avatar.png" : _groupPictureTempUrl)"
+                                     class="w-[150px] h-[150px] max-w-[150px] max-h-[150px] rounded-full object-cover" alt="group image"/>
+                                
+                                <div class="absolute top-0 right-0">
+                                    <label class="p-2 bg-white rounded-full flex items-center justify-center border border-gray-300 hover:bg-gray-100 dark:bg-gray-600 dark:border-gray-500 dark:hover:bg-gray-700">
+                                        <InputFile class="hidden" OnChange="SelectGroupPicture"/>
+
+                                        <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.5 8H4m0-2v13a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V9a1 1 0 0 0-1-1h-5.032a1 1 0 0 1-.768-.36l-1.9-2.28a1 1 0 0 0-.768-.36H5a1 1 0 0 0-1 1Z"/>
+                                        </svg>
+                                    </label>
+                                </div>
+                                
+                                @if (!string.IsNullOrEmpty(_groupPictureTempUrl))
+                                {
+                                    <div class="absolute top-0 left-0">
+                                        <div @onclick="RemoveGroupPicture"
+                                            class="cursor-pointer p-2 bg-white rounded-full flex items-center justify-center border border-gray-300 hover:bg-gray-100 dark:bg-gray-600 dark:border-gray-500 dark:hover:bg-gray-700">
+                                            <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 7h14m-9 3v8m4-8v8M10 3h4a1 1 0 0 1 1 1v3H9V4a1 1 0 0 1 1-1ZM6 7h12v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7Z"/>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
                         </div>
 
-                        <div>
-                            <InputTextArea @bind-Value="request.Description" class="input-field resize-none"
-                                placeholder="Group Description (optional)" draggable="false" rows="3" />
-                            <ValidationMessage For="(() => request.Description)" class="validation-message" />
+                        <div class="flex flex-grow flex-col space-y-2">
+                            <div>
+                                <InputText @bind-Value="_request.GroupName" class="input-field" placeholder="Group Name" />
+                                <ValidationMessage For="(() => _request.GroupName)" class="validation-message" />
+                            </div>
+
+                            <div>
+                                <InputTextArea @bind-Value="_request.Description" class="input-field resize-none"
+                                               placeholder="Group Description (optional)" draggable="false" rows="3" />
+                                <ValidationMessage For="(() => _request.Description)" class="validation-message" />
+                            </div>
                         </div>
                     </div>
 
@@ -75,9 +105,9 @@
                         <div class="space-y-1 max-h-[250px] overflow-y-auto">
                             @if (AppState.Threads.Any())
                                 {
-                                    if(fliteredContacts.Any())
+                                    if(_filteredContacts.Any())
                                     {
-                                        foreach (var c in fliteredContacts)
+                                        foreach (var c in _filteredContacts)
                                         {
                                             <div @onclick="(() => OnContactClicked(c.UserId!))"
                                                 class="flex items-center justify-between rounded-lg max-h-[150px] px-3 py-2 cursor-pointer">
@@ -94,7 +124,7 @@
                                                 </div>
 
                                                 <div>
-                                                    @if (selectedContacts.Contains(c.UserId!))
+                                                    @if (_selectedContacts.Contains(c.UserId!))
                                                     {
                                                         <svg class="w-[25px] h-[25px] text-blue-600 dark:text-white" aria-hidden="true" 
                                                             xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" 
