@@ -61,6 +61,10 @@ public class AppDbContext : IdentityDbContext<AppUser>
 		builder.Entity<UserSettings>()
 				.HasOne(p => p.ColorScheme);
 
+		builder.Entity<ChatThread>()
+			.HasOne(p => p.GroupImage)
+			.WithOne();
+
 
 		builder.Entity<ColorScheme>()
 				.HasData(
