@@ -1697,6 +1697,10 @@ input:checked + .toggle-bg {
   width: 100vw;
 }
 
+.w-\[150px\] {
+  width: 150px;
+}
+
 .min-w-\[50px\] {
   min-width: 50px;
 }
@@ -1731,6 +1735,10 @@ input:checked + .toggle-bg {
 
 .max-w-md {
   max-width: 28rem;
+}
+
+.max-w-\[150px\] {
+  max-width: 150px;
 }
 
 .flex-1 {
@@ -1881,6 +1889,10 @@ input:checked + .toggle-bg {
 
 .gap-4 {
   gap: 1rem;
+}
+
+.gap-3 {
+  gap: 0.75rem;
 }
 
 .gap-y-4 {
@@ -2928,6 +2940,11 @@ h1:focus {
 
 :is(.dark .dark\:border-transparent) {
   border-color: transparent;
+}
+
+:is(.dark .dark\:border-gray-500) {
+  --tw-border-opacity: 1;
+  border-color: rgb(107 114 128 / var(--tw-border-opacity));
 }
 
 :is(.dark .dark\:bg-blue-600) {
