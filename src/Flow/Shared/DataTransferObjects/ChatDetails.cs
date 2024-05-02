@@ -10,4 +10,5 @@ public class ChatDetails
     public ThreadType Type { get; set; }
     public string? GroupName { get; set; }
     public string? GroupDescription { get; set; }
+    public string? GroupImageUrl { get; set; }
 }

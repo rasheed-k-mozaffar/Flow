@@ -29,13 +29,18 @@ public class FilesService : IFilesService
         throw new NotImplementedException();
     }
 
-    public async Task<ApiResponse<ImageDto>> UploadImageAsync(IFormFile image, ImageType imageType)
+    public async Task<ApiResponse<ImageDto>> UploadImageAsync(IFormFile image, ImageType imageType, Guid? threadId = null)
     {
         var formData = new MultipartFormDataContent();
         var streamContent = new StreamContent(image.OpenReadStream());
         formData.Add(streamContent, "file", image.FileName);
 
         string requestUrl = $"{UPLOAD_IMAGE_URL}?imageType={imageType}";
+
+        if (imageType == ImageType.GroupPicture)
+        {
+            requestUrl += $"&threadId={threadId}";
+        }
         HttpResponseMessage response = await _httpClient.PostAsync(requestUrl, formData);
 
         if (!response.IsSuccessStatusCode)

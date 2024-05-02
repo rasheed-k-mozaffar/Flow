@@ -45,6 +45,9 @@ public partial class Conversation : ComponentBase
     [Inject]
     public IThreadsService ThreadsService { get; set; } = default!;
 
+    List<List<MessageDto>> groupedMessages = new List<List<MessageDto>>();
+    List<MessageDto> currentGroup = new List<MessageDto>();
+
     private bool wantsToDeleteMessages = false;
 
     private ICollection<Guid> selectedMessages = new List<Guid>();
@@ -76,6 +79,7 @@ public partial class Conversation : ComponentBase
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        await base.OnAfterRenderAsync(firstRender);
         if (firstRender)
         {
             await Js.InvokeVoidAsync("addScrollListener", DotNetObjectReference.Create(this), "messages-area");
@@ -99,12 +103,16 @@ public partial class Conversation : ComponentBase
 
     protected override async Task OnParametersSetAsync()
     {
+        await base.OnParametersSetAsync();
+
         if (ChatThread.Type is ThreadType.Normal)
         {
             contact = ChatThread.Participants.FirstOrDefault(p => p is not null && p.UserId != currentUserId);
         }
+        else {
+            contact = null;
+        }
         isChatRendered = false;
-        await base.OnParametersSetAsync();
         threadId = ThreadId.ToString();
         selectedMessages?.Clear();
         wantsToDeleteMessages = false;
@@ -330,6 +338,23 @@ public partial class Conversation : ComponentBase
         catch (FileUploadFailedException ex)
         {
             _errorMessage = ex.Message;
+        }
+    }
+
+    private string? GetSenderName(string senderId)
+    {
+        if (senderId == AppState.CurrentUserId)
+        {
+            return null;
+        }
+
+        if (contact is null)
+        {
+            return ChatThread.Participants.FirstOrDefault(p => p.UserId == senderId)!.Name;
+        }
+        else
+        {
+            return contact.Name;
         }
     }
 

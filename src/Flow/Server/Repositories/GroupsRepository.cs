@@ -9,31 +9,31 @@ namespace Flow.Server.Repositories;
 public class GroupsRepository : IGroupsRepository
 {
     private readonly AppDbContext _db;
-    private readonly IHubContext<ChatHub, IChatThreadsClient> _chatHubContext;
     private readonly UserManager<AppUser> _userManager;
+    private readonly IHubContext<ContactRequestsHub, IContactsClient> _contactsHubContext;
 
-    public GroupsRepository(AppDbContext db, IHubContext<ChatHub, IChatThreadsClient> chatHubContext, UserManager<AppUser> userManager)
+    public GroupsRepository(AppDbContext db, UserManager<AppUser> userManager, IHubContext<ContactRequestsHub, IContactsClient> contactsHubContext)
     {
         _db = db;
-        _chatHubContext = chatHubContext;
         _userManager = userManager;
+        _contactsHubContext = contactsHubContext;
     }
 
-    public async Task<ChatThread> CreateGroupAsync(ChatThread groupDetails, ICollection<string> participants)
+    public async Task<ChatThread> CreateGroupAsync(ChatThread groupDetails, ICollection<string> participants, string? groupPictureUrl = null)
     {
-        var groupPartcipants = await _userManager
+        var groupParticipants = await _userManager
                                         .Users
                                         .Where(u => participants.Contains(u.Id))
                                         .ToListAsync();
 
         var group = new ChatThread
         {
-            Id = Guid.NewGuid(),
+            Id = groupDetails.Id,
             Name = groupDetails.Name,
             Description = groupDetails.Description,
             Type = Shared.Enums.ThreadType.Group,
             CreatedAt = DateTime.UtcNow,
-            Participants = groupPartcipants,
+            Participants = groupParticipants,
         };
 
         var creationResult = _db
@@ -44,7 +44,21 @@ public class GroupsRepository : IGroupsRepository
         {
             await _db.SaveChangesAsync();
 
-            // TODO: Notify participants about the new group chat
+            await _contactsHubContext
+                    .Clients
+                    .Users(participants)
+                    .ReceiveNewChatAsync(new ChatDetails
+                    {
+                        ChatThreadId = group.Id,
+                        GroupName = group.Name,
+                        GroupDescription = group.Description,
+                        Participants = groupParticipants
+                                            .Select(user => user.ToUserDetailsDto())
+                                            .ToList(),
+                        Type = group.Type,
+                        Messages = new List<MessageDto>(),
+                        GroupImageUrl = groupPictureUrl
+                    });
 
             return group;
         }
@@ -125,7 +139,7 @@ public class GroupsRepository : IGroupsRepository
 
         return new GroupDetailsResponse
         {
-            GroupdThreadId = group.Id,
+            GroupThreadId = group.Id,
             GroupName = group.Name ?? "Nameless Group",
             Description = group.Description ?? "No description available",
             GroupParticipants = group.Participants.Select(u => u.ToUserDetailsDto()).ToList(),

@@ -55,6 +55,7 @@ public class GroupsController : ControllerBase
     {
         var group = new ChatThread()
         {
+            Id = request.GroupThreadId,
             Name = request.GroupName,
             Description = request.Description,
         };
@@ -62,21 +63,22 @@ public class GroupsController : ControllerBase
         try
         {
             var groupDetails = await _groupsRepository
-                                                .CreateGroupAsync(group, request.Participants);
+                                                .CreateGroupAsync(group, request.Participants, request.GroupPictureUrl);
 
             return Ok(new ApiResponse<GroupDetailsResponse>
             {
                 Message = "Group created successfully",
                 Body = new GroupDetailsResponse
                 {
-                    GroupdThreadId = groupDetails.Id,
+                    GroupThreadId = groupDetails.Id,
                     GroupName = groupDetails.Name ?? "Nameless Group",
                     Description = groupDetails.Description ?? "No description available",
                     CreatedAt = groupDetails.CreatedAt,
                     GroupParticipants = groupDetails
                                         .Participants
                                         .Select(p => p.ToUserDetailsDto())
-                                        .ToList()
+                                        .ToList(),
+                    GroupPictureUrl = request.GroupPictureUrl
                 },
                 IsSuccess = true
             });

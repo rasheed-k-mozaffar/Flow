@@ -3,5 +3,6 @@
 public enum ImageType
 {
     ProfilePicture,
-    NormalImage
+    NormalImage,
+    GroupPicture
 }

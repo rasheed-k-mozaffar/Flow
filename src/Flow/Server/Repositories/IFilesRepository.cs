@@ -5,13 +5,14 @@ namespace Flow.Server.Repositories;
 public interface IFilesRepository
 {
     /// <summary>
-    /// Saves an uploaded image to the database (Id, URL, and UserId) after the image gets uploaded to 
+    /// Saves an uploaded image to the database (Id, URL, and UserId) after the image gets uploaded to
     /// the server, and the uploaded image is returned in case of success
     /// </summary>
     /// <param name="image">The uploaded image</param>
     /// <param name="imageType">Determine whether to link the app user id if the image is a profile picture</param>
+    /// <param name="threadId">The ID of the thread (Used for creating group chats) to associate the image with</param>
     /// <returns>Image details (ID, URL)</returns>
-    Task<Image> PersistImageAsync(Image image, ImageType imageType);
+    Task<Image> PersistImageAsync(Image image, ImageType imageType, Guid? threadId = null);
 
 
     /// <summary>

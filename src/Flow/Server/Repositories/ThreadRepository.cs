@@ -26,6 +26,7 @@ public class ThreadRepository : IThreadRepository
         var userChatThreads = await _db
                                     .Threads
                                     .Include(p => p.Participants)
+                                    .Include(p => p.GroupImage)
                                     .Where
                                     (
                                         t => t.Participants
@@ -51,7 +52,9 @@ public class ThreadRepository : IThreadRepository
                 Messages = threadMessages,
                 Participants = chatThread.Participants.Select(u => u.ToUserDetailsDto()).ToList(),
                 GroupName = chatThread.Name,
-                GroupDescription = chatThread.Description
+                GroupDescription = chatThread.Description,
+                Type = chatThread.Type,
+                GroupImageUrl = chatThread.GroupImage?.RelativeUrl
             });
         }
 
