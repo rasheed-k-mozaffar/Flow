@@ -397,3 +397,4 @@ FodyWeavers.xsd
 # JetBrains Rider
 *.sln.iml
 src/Flow/Server/wwwroot/images
+src/Flow/.idea/.idea.Flow/.idea/
