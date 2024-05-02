@@ -46,7 +46,8 @@
 
             <Animate Animation="Animations.FadeIn" DurationMs="500" @ref="chatsTabAnimation">
                 <div class="h-full w-full">
-                    <ThreadsListView IsLoadingContacts="@isLoadingContacts" />
+                    <ThreadsListView IsLoadingThreadsData="@isLoadingThreads"
+                        OnCreateGroupClicked="(() => OnCreateGroupClickEventPropagated.InvokeAsync())" />
                 </div>
             </Animate>
 

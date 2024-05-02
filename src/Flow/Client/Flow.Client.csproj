@@ -24,7 +24,4 @@
   <ItemGroup>
     <ProjectReference Include="..\Shared\Flow.Shared.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Layout/" />
-  </ItemGroup>
 </Project>

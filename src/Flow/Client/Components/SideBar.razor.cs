@@ -14,15 +14,19 @@ public partial class SideBar : ComponentBase
     [Inject]
     public ApplicationState AppState { get; set; } = default!;
 
+    [Inject]
+    public IThreadsService ThreadsService { get; set; } = default!;
+
     [Parameter] public EventCallback OnSearchButtonClicked { get; set; }
     [Parameter] public EventCallback OnContactsButtonClicked { get; set; }
+    [Parameter] public EventCallback OnCreateGroupClickEventPropagated { get; set; }
 
     private List<PendingRequestIncomingDto> incomingContactRequests = new();
     private List<PendingRequestSentDto> sentContactRequests = new();
 
     private string errorMessage = string.Empty;
-    private bool isLoadingContacts = true;
     private bool isDoneLoadingContactRequests = false;
+    private bool isLoadingThreads = true;
 
     // * these variables will be used to determine which tab to display
     private bool displayChatsTab = true;
@@ -39,26 +43,15 @@ public partial class SideBar : ComponentBase
     {
         chatsTabAnimation.Run();
 
-        var contactsTask = LoadContactsAsync();
+        var threadsTask = LoadThreadsAndMessagesAsync();
         var incomingReqsTask = LoadIncomingPendingContactRequestsAsync();
         var sentReqsTask = LoadSentPendingContactRequestsAsync();
 
-        await Task.WhenAll(contactsTask, incomingReqsTask, sentReqsTask);
+        await Task.WhenAll(threadsTask, incomingReqsTask, sentReqsTask);
 
         isDoneLoadingContactRequests = true;
     }
 
-    private async Task LoadContactsAsync()
-    {
-        var apiResponse = await ContactsService.GetContactsAsync();
-
-        if (apiResponse.IsSuccess)
-        {
-            AppState.Contacts = apiResponse.Body!;
-        }
-
-        isLoadingContacts = false;
-    }
 
     private async Task LoadSentPendingContactRequestsAsync()
     {
@@ -75,6 +68,24 @@ public partial class SideBar : ComponentBase
         {
             errorMessage = ex.Message;
         }
+    }
+
+    private async Task LoadThreadsAndMessagesAsync()
+    {
+        var apiResponse = await ThreadsService.GetChatsAsync();
+
+        if (apiResponse.IsSuccess)
+        {
+            AppState.Threads = apiResponse.Body!
+            .OrderByDescending(kv => kv.Value.Messages.Any() ? kv.Value.Messages?.Max(m => m.SentOn) : DateTime.MinValue)
+            .ToDictionary(kv => kv.Key, kv => kv.Value);
+
+            AppState.SelectedThreadId = AppState.Threads.First().Key;
+            AppState.SelectedThread = AppState.Threads.First().Value;
+            AppState.NotifyStateChanged();
+        }
+
+        isLoadingThreads = false;
     }
 
     private async Task LoadIncomingPendingContactRequestsAsync()

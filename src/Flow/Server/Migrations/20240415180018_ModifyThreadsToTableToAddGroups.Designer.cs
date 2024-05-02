@@ -4,6 +4,7 @@ using Flow.Server.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Flow.Server.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240415180018_ModifyThreadsToTableToAddGroups")]
+    partial class ModifyThreadsToTableToAddGroups
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -294,9 +297,6 @@ namespace Flow.Server.Migrations
                     b.Property<string>("AppUserId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<Guid?>("ChatThreadId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<string>("FilePath")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -313,10 +313,6 @@ namespace Flow.Server.Migrations
                     b.HasIndex("AppUserId")
                         .IsUnique()
                         .HasFilter("[AppUserId] IS NOT NULL");
-
-                    b.HasIndex("ChatThreadId")
-                        .IsUnique()
-                        .HasFilter("[ChatThreadId] IS NOT NULL");
 
                     b.ToTable("Images");
                 });
@@ -595,10 +591,6 @@ namespace Flow.Server.Migrations
                     b.HasOne("Flow.Server.Models.AppUser", null)
                         .WithOne("ProfilePicture")
                         .HasForeignKey("Flow.Server.Models.Image", "AppUserId");
-
-                    b.HasOne("Flow.Server.Models.ChatThread", null)
-                        .WithOne("GroupImage")
-                        .HasForeignKey("Flow.Server.Models.Image", "ChatThreadId");
                 });
 
             modelBuilder.Entity("Flow.Server.Models.Message", b =>
@@ -701,8 +693,6 @@ namespace Flow.Server.Migrations
 
             modelBuilder.Entity("Flow.Server.Models.ChatThread", b =>
                 {
-                    b.Navigation("GroupImage");
-
                     b.Navigation("Messages");
                 });
 #pragma warning restore 612, 618

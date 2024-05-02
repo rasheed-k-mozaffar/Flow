@@ -8,36 +8,53 @@ public class ThreadRepository : IThreadRepository
     private int messageLoadSize = 20;
     private readonly AppDbContext _db;
     private readonly IContactRequestsRepository _contactsRepository;
+    private readonly UserInfo _userInfo;
 
-    public ThreadRepository(AppDbContext db, IContactRequestsRepository contactsRepository)
+    public ThreadRepository(AppDbContext db, IContactRequestsRepository contactsRepository, UserInfo userInfo)
     {
         _db = db;
         _contactsRepository = contactsRepository;
+        _userInfo = userInfo;
     }
 
     public async Task<Dictionary<Guid, ChatDetails>> GetChatThreadsAsync()
     {
         var threadsAndInitialMessages = new Dictionary<Guid, ChatDetails>();
 
-        var userContacts = await _contactsRepository.GetUserContactsAsync();
+        // var userContacts = await _contactsRepository.GetUserContactsAsync();
 
-        foreach (var contact in userContacts)
+        var userChatThreads = await _db
+                                    .Threads
+                                    .Include(p => p.Participants)
+                                    .Include(p => p.GroupImage)
+                                    .Where
+                                    (
+                                        t => t.Participants
+                                        .Select(p => p.Id)
+                                        .Contains(_userInfo.UserId)
+                                    )
+                                    .ToListAsync();
+
+        foreach (var chatThread in userChatThreads)
         {
-
             var threadMessages = await _db
                                     .Messages
-                                    .Where(message => message.ThreadId == contact.Key)
+                                    .Where(message => message.ThreadId == chatThread.Id)
                                     .OrderByDescending(message => message.SentOn)
                                     .Take(DEFAULT_MESSAGES_LOAD_SIZE)
                                     .Select(msg => msg.ToMessageDto())
                                     .ToListAsync();
             threadMessages.Reverse();
 
-            threadsAndInitialMessages.Add(contact.Key, new ChatDetails
+            threadsAndInitialMessages.Add(chatThread.Id, new ChatDetails
             {
-                ChatThreadId = contact.Key,
+                ChatThreadId = chatThread.Id,
                 Messages = threadMessages,
-                Contact = contact.Value.ToUserDetailsDto()
+                Participants = chatThread.Participants.Select(u => u.ToUserDetailsDto()).ToList(),
+                GroupName = chatThread.Name,
+                GroupDescription = chatThread.Description,
+                Type = chatThread.Type,
+                GroupImageUrl = chatThread.GroupImage?.RelativeUrl
             });
         }
 

@@ -1,7 +1,6 @@
 ﻿@inject ISettingsService SettingsService
 @inject ApplicationState AppState
-@inject IThreadsService ThreadsService
-
+@inject AuthenticationStateProvider AuthStateProvider
 <div
     class="fixed z-[10000] bg-white dark:bg-gray-800 h-screen w-screen flex justify-center items-center space-y-4 flex-col">
     <div>
@@ -19,21 +18,21 @@
 
 @code {
     [Parameter] public EventCallback OnSettingsLoaded { get; set; }
+    private AuthenticationState? authState;
 
     private string _errorMessage = string.Empty;
     protected override async Task OnInitializedAsync()
     {
         var settingsTask = LoadUserSettingsAsync();
-        var threadsTask = LoadThreadsAndMessagesAsync();
         var colorSchemeTask = LoadColorSchemesAsync();
+        var authStateTask = AuthStateProvider.GetAuthenticationStateAsync();
 
-        await Task.WhenAll(settingsTask, threadsTask, colorSchemeTask);
+        await Task.WhenAll(authStateTask, settingsTask, colorSchemeTask);
 
-        // * set the selected thread to the most recent thread
+        // * Set the current USER ID in App State
         if (AppState.Threads is not null && AppState.Threads.Any())
         {
-            AppState.SelectedThreadId = AppState.Threads.First().Key;
-            AppState.SelectedThread = AppState.Threads.First().Value.Contact;
+            AppState.CurrentUserId = authState?.User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
         }
         await OnSettingsLoaded.InvokeAsync();
     }
@@ -68,18 +67,6 @@
             }
         }
         while (retryCount <= 3);
-    }
-
-    private async Task LoadThreadsAndMessagesAsync()
-    {
-        var apiResponse = await ThreadsService.GetChatsAsync();
-
-        if (apiResponse.IsSuccess)
-        {
-            AppState.Threads = apiResponse.Body!
-            .OrderByDescending(kv => kv.Value.Messages.Any() ? kv.Value.Messages?.Max(m => m.SentOn) : DateTime.MinValue)
-            .ToDictionary(kv => kv.Key, kv => kv.Value);
-        }
     }
 
     private async Task LoadColorSchemesAsync()

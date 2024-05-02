@@ -14,6 +14,7 @@ namespace Flow.Client.Components;
 
 public partial class Conversation : ComponentBase
 {
+    private UserDetailsDto? contact;
     private const int MAX_ALLOWED_FILE_SIZE = 1024 * 1024 * 10; // 10 Migs
     private static readonly string[] _allowedExtensions = { ".jpeg", ".png", ".webp", ".jpg" };
 
@@ -21,7 +22,7 @@ public partial class Conversation : ComponentBase
     private MessageDto messageModel = new();
 
     [Parameter]
-    public UserDetailsDto ContactModel { get; set; } = null!;
+    public ChatDetails ChatThread { get; set; } = null!;
 
     [Parameter]
     public Guid ThreadId { get; set; }
@@ -43,6 +44,9 @@ public partial class Conversation : ComponentBase
 
     [Inject]
     public IThreadsService ThreadsService { get; set; } = default!;
+
+    List<List<MessageDto>> groupedMessages = new List<List<MessageDto>>();
+    List<MessageDto> currentGroup = new List<MessageDto>();
 
     private bool wantsToDeleteMessages = false;
 
@@ -72,8 +76,10 @@ public partial class Conversation : ComponentBase
         currentUserId = authState.User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
     }
 
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        await base.OnAfterRenderAsync(firstRender);
         if (firstRender)
         {
             await Js.InvokeVoidAsync("addScrollListener", DotNetObjectReference.Create(this), "messages-area");
@@ -97,21 +103,19 @@ public partial class Conversation : ComponentBase
 
     protected override async Task OnParametersSetAsync()
     {
-        isChatRendered = false;
         await base.OnParametersSetAsync();
+
+        if (ChatThread.Type is ThreadType.Normal)
+        {
+            contact = ChatThread.Participants.FirstOrDefault(p => p is not null && p.UserId != currentUserId);
+        }
+        else {
+            contact = null;
+        }
+        isChatRendered = false;
         threadId = ThreadId.ToString();
         selectedMessages?.Clear();
         wantsToDeleteMessages = false;
-    }
-
-    private void SelectMessage(Guid messageId)
-    {
-        selectedMessages.Add(messageId);
-    }
-
-    private void UnSelectMessage(Guid messageId)
-    {
-        selectedMessages.Remove(messageId);
     }
 
     private void UpdateSendButtonVisibility(ChangeEventArgs eventArgs)
@@ -125,7 +129,6 @@ public partial class Conversation : ComponentBase
             return;
 
         var msgContent = messageModel.Content;
-        messageModel.Content = string.Empty;
 
         messageModel.Id = Guid.NewGuid();
         messageModel.ThreadId = ThreadId!;
@@ -135,8 +138,8 @@ public partial class Conversation : ComponentBase
         {
             Id = messageModel.Id,
             ThreadId = messageModel.ThreadId,
-            Content = msgContent,
             Status = MessageStatus.Sending,
+            Content = msgContent,
             SenderId = currentUserId,
             SentOn = DateTime.UtcNow,
             Type = messageModel.Type,
@@ -336,6 +339,33 @@ public partial class Conversation : ComponentBase
         {
             _errorMessage = ex.Message;
         }
+    }
+
+    private string? GetSenderName(string senderId)
+    {
+        if (senderId == AppState.CurrentUserId)
+        {
+            return null;
+        }
+
+        if (contact is null)
+        {
+            return ChatThread.Participants.FirstOrDefault(p => p.UserId == senderId)!.Name;
+        }
+        else
+        {
+            return contact.Name;
+        }
+    }
+
+    private void SelectMessage(Guid messageId)
+    {
+        selectedMessages.Add(messageId);
+    }
+
+    private void UnselectMessage(Guid messageId)
+    {
+        selectedMessages.Remove(messageId);
     }
 
     private void OpenImageModal(MessageDto imageMessage)

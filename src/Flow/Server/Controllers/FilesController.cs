@@ -38,7 +38,7 @@ public class FilesController : ControllerBase
     [ProducesResponseType(statusCode: StatusCodes.Status400BadRequest, type: typeof(ApiErrorResponse))]
     [ProducesResponseType(statusCode: StatusCodes.Status401Unauthorized, type: typeof(EmptyResult))]
 
-    public async Task<IActionResult> UploadPicture([FromForm] IFormFile file, [FromQuery] ImageType imageType)
+    public async Task<IActionResult> UploadPicture([FromForm] IFormFile file, [FromQuery] ImageType imageType, [FromQuery] Guid? threadId = null)
     {
         if (file is null)
         {
@@ -79,7 +79,8 @@ public class FilesController : ControllerBase
                                 .PersistImageAsync
                                 (
                                     new Image { RelativeUrl = url, FilePath = filePath },
-                                    imageType
+                                    imageType,
+                                    threadId
                                 );
 
             _logger.LogInformation
