@@ -1,35 +1,43 @@
-﻿@if (wantsToDeleteMessages)
+﻿@if (_wantsToDeleteMessages)
 {
-    <ConfirmMessageDeletesModal Show="wantsToDeleteMessages" OnCancelClicked="CloseConfirmMessageDeletesModal"
+    <ConfirmMessageDeletesModal Show="_wantsToDeleteMessages" OnCancelClicked="CloseConfirmMessageDeletesModal"
     OnDeleteClicked="HandleSendingDeleteMessagesRequestAsync" />
+}
+
+@if (_wantsToViewChatDetails)
+{
+    <ChatDetailsModal Chat="ChatThread"
+                      Show="_wantsToViewChatDetails"
+                      OnImageClicked="((img) => OpenImageModal(img))"
+                      OnClose="(() => _wantsToViewChatDetails = false)" />
 }
 
 <ErrorToast Message="@_errorMessage" DisplayToast="@(!string.IsNullOrEmpty(_errorMessage))"
     DisplayFor="TimeSpan.FromSeconds(5)" OnCloseClicked="(() => _errorMessage = string.Empty)"
     TimerElapsed="(() => _errorMessage = string.Empty)" />
 
-@if (selectedImageMessage is not null)
+@if (_selectedImageMessage is not null)
 {
     var senderDetails = ChatThread
     .Participants
-    .First(u => u.UserId == selectedImageMessage.SenderId);
+    .First(u => u.UserId == _selectedImageMessage.SenderId);
 
     var imageDetails = new SentImageDetails
                 {
                     UserName = senderDetails.Name!,
                     UserProfilePictureUrl = senderDetails.ProfilePictureUrl,
-                    ImageUrl = selectedImageMessage.Content,
-                    Timestamp = selectedImageMessage.SentOn,
-                    IsSentByCurrentUser = selectedImageMessage.SenderId == currentUser.FindFirst(ClaimTypes.NameIdentifier)!.Value
+                    ImageUrl = _selectedImageMessage.Content,
+                    Timestamp = _selectedImageMessage.SentOn,
+                    IsSentByCurrentUser = _selectedImageMessage.SenderId == _currentUser.FindFirst(ClaimTypes.NameIdentifier)!.Value
                 };
 
-    <ImageModal OnCloseClicked="(() => selectedImageMessage = null)" ImageDetails="imageDetails" />
+    <ImageModal OnCloseClicked="(() => _selectedImageMessage = null)" ImageDetails="imageDetails" />
 }
 
-@if (wantsToTakePicture)
+@if (_wantsToTakePicture)
 {
     <div class="fixed z-50 top-0 right-0 w-full h-full flex items-center justify-center bg-gray-700/80 backdrop-blur-lg ">
-    <CameraView Show="wantsToTakePicture" OnCloseClicked="CloseCameraView" typeOfImage="ImageType.NormalImage"
+    <CameraView Show="_wantsToTakePicture" OnCloseClicked="CloseCameraView" typeOfImage="ImageType.NormalImage"
         Title="@($"Send image to {(contact is null ? ChatThread.GroupName : contact.Name)}")"
         OnSendImageClicked="HandleSendingPictureAsync" />
 </div>
@@ -38,16 +46,16 @@
 
 <div class="flex justify-center items-center flex-col min-h-screen max-h-screen w-full relative">
     @* TOP BAR *@
-    <div class="w-full h-fit p-1.5 bg-white  border-slate-900/5 border-b dark:bg-gray-700 dark:border-gray-600">
+    <div class="w-full h-fit p-1.5 bg-white flex items-center justify-between  border-slate-900/5 border-b dark:bg-gray-700 dark:border-gray-600">
         <div class="flex items-center gap-2">
             <button data-drawer-target="default-sidebar" data-drawer-toggle="default-sidebar"
-                aria-controls="default-sidebar" data-drawer-backdrop="false" type="button"
-                class="sm:hidden flex justify-center items-center p-1">
+                    aria-controls="default-sidebar" data-drawer-backdrop="false" type="button"
+                    class="sm:hidden flex justify-center items-center p-1">
                 <span class="sr-only">Open sidebar</span>
                 <svg class="w-8 h-8 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
-                    width="24" height="24" fill="none" viewBox="0 0 24 24">
+                     width="24" height="24" fill="none" viewBox="0 0 24 24">
                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="m15 19-7-7 7-7" />
+                          d="m15 19-7-7 7-7" />
                 </svg>
 
             </button>
@@ -56,34 +64,43 @@
                 {
                     <div>
                         <img class="h-[50px] w-[50px] rounded-full object-cover"
-                            src="@(contact?.ProfilePictureUrl ?? "/images/avatar.png")" alt="@contact?.Name" />
+                             src="@(contact?.ProfilePictureUrl ?? "/images/avatar.png")" alt="@contact?.Name" />
                     </div>
 
                     <div class="font-medium dark:text-white">
-                    <div class="text-xl">@contact?.Name</div>
-                    <div class="text-sm text-gray-500 dark:text-gray-200">@contact?.Username</div>
-                </div>
+                        <div class="text-xl">@contact?.Name</div>
+                        <div class="text-sm text-gray-500 dark:text-gray-200">@contact?.Username</div>
+                    </div>
                 }
                 else
                 {
                     <div>
                         <img class="h-[50px] w-[50px] rounded-full object-cover"
                              src="@(string.IsNullOrEmpty(ChatThread.GroupImageUrl) ? "/images/group.png" : ChatThread.GroupImageUrl)"
-                            alt="@ChatThread?.GroupName" />
+                             alt="@ChatThread?.GroupName" />
                     </div>
 
                     <div class="font-medium dark:text-white">
-                    <div class="text-xl">@ChatThread?.GroupName</div>
-                </div>
+                        <div class="text-xl">@ChatThread?.GroupName</div>
+                    </div>
                 }
             </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+            <button @onclick="OpenChatDetailsModal"
+                class="flex items-center justify-center cursor-pointer">
+                <svg class="w-6 h-6 @AppState.UserSettings.ColorScheme?.AccentsColor?.TextColor" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                    <path fill-rule="evenodd" d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm9.408-5.5a1 1 0 1 0 0 2h.01a1 1 0 1 0 0-2h-.01ZM10 10a1 1 0 1 0 0 2h1v3h-1a1 1 0 1 0 0 2h4a1 1 0 1 0 0-2h-1v-4a1 1 0 0 0-1-1h-2Z" clip-rule="evenodd"/>
+                </svg>
+            </button>
         </div>
     </div>
 
     @* MESSAGES AREA*@
     <div id="messages-area"
         class="flex-grow h-full w-full p-2 space-y-1 overflow-y-scroll overflow-x-hidden dark:bg-gray-700 dark:border-gray-600">
-        @if (string.IsNullOrEmpty(threadId))
+        @if (string.IsNullOrEmpty(_threadId))
         {
             <DefaultSpinner />
         }
@@ -107,30 +124,30 @@
                         @date.ToString("dd MMMM")</div>
                 </div>
 
-                groupedMessages = new List<List<MessageDto>>();
-                currentGroup = new List<MessageDto>();
+                _groupedMessages = new List<List<MessageDto>>();
+                _currentGroup = new List<MessageDto>();
 
                 foreach (var message in messageGroup)
                 {
-                    if (currentGroup.Count == 0 || currentGroup.Last().SenderId == message.SenderId)
+                    if (_currentGroup.Count == 0 || _currentGroup.Last().SenderId == message.SenderId)
                     {
                         // Add the message to the current group to form a consecutive list
-                        currentGroup.Add(message);
+                        _currentGroup.Add(message);
                     }
                     else
                     {
                         // Start a new grop starting with the last message
-                        groupedMessages.Add(currentGroup);
-                        currentGroup = new() { message };
+                        _groupedMessages.Add(_currentGroup);
+                        _currentGroup = new() { message };
                     }
                 }
 
-                if (currentGroup.Count > 0)
+                if (_currentGroup.Count > 0)
                 {
-                    groupedMessages.Add(currentGroup);
+                    _groupedMessages.Add(_currentGroup);
                 }
 
-                foreach (var group in groupedMessages)
+                foreach (var group in _groupedMessages)
                 {
                     if (ChatThread!.Type is ThreadType.Group)
                     {
@@ -144,10 +161,10 @@
                     }
                     foreach (var message in group)
                     {
-                        bool isSent = message.SenderId == currentUser.FindFirst(ClaimTypes.NameIdentifier)!.Value;
+                        bool isSent = message.SenderId == _currentUser.FindFirst(ClaimTypes.NameIdentifier)!.Value;
 
                         <Message id="@message.Id" MessageModel="message" Sent="@isSent"
-                            IsSelected="@(selectedMessages.Contains(message.Id))" OnMessageSelected="(() => SelectMessage(message.Id))"
+                            IsSelected="@(_selectedMessages.Contains(message.Id))" OnMessageSelected="(() => SelectMessage(message.Id))"
                             OnMessageUnSelected="(() => UnselectMessage(message.Id))"
                             BackgroundColor="@(isSent ? AppState.UserSettings.ColorScheme?.SentMsgBubbleColor : AppState.UserSettings.ColorScheme?.ReceivedMsgBubbleColor)"
                             OnOpenImageClicked="((imageMsg) => OpenImageModal(imageMsg))" />
@@ -162,7 +179,7 @@
     <EditForm Model="messageModel" class="bottom-0 h-fit w-full relative px-2 dark:bg-gray-700 dark:border-gray-600">
         <div class="w-full relative">
             <div tabindex="-1"
-                class="flex justify-center items-center w-full h-0 bg-transparent absolute bottom-[5rem] z-10 gap-2 @(selectedMessages.Any() ? "functions-buttons-strip-show" : "functions-buttons-strip-hidden")">
+                class="flex justify-center items-center w-full h-0 bg-transparent absolute bottom-[5rem] z-10 gap-2 @(_selectedMessages.Any() ? "functions-buttons-strip-show" : "functions-buttons-strip-hidden")">
                 <button type="button" @onclick="OpenConfirmMessageDeletesModal"
                     class="p-4 bg-red-600 rounded-full z-40 cursor-pointer transition-all hover:bg-red-700">
                     <svg class="w-6 h-6 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
@@ -172,7 +189,7 @@
                     </svg>
                 </button>
 
-                <button type="button" @onclick="(() => selectedMessages.Clear())"
+                <button type="button" @onclick="(() => _selectedMessages.Clear())"
                     class="p-4 bg-gray-100 rounded-full z-40 cursor-pointer transition-all hover:bg-gray-300">
                     <svg class="w-6 h-6 text-gray-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
                         viewBox="0 0 24 24">
@@ -190,7 +207,7 @@
 
             <button @onclick="HandleSendingMessageAsync" type="submit"
                 class="flex items-center justify-center p-2 absolute right-0 top-0 transition-all ">
-                <svg class="w-8 h-8 rotate-90 transition-all @(isSendButtonEnabled ? AppState.UserSettings.ColorScheme?.AccentsColor?.TextColor : "text-gray-50")"
+                <svg class="w-8 h-8 rotate-90 transition-all @(_isSendButtonEnabled ? AppState.UserSettings.ColorScheme?.AccentsColor?.TextColor : "text-gray-50")"
                     aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
                     <path fill-rule="evenodd"
                         d="M12 2c.4 0 .8.3 1 .6l7 18a1 1 0 0 1-1.4 1.3L13 19.5V13a1 1 0 1 0-2 0v6.5L5.4 22A1 1 0 0 1 4 20.6l7-18a1 1 0 0 1 1-.6Z"

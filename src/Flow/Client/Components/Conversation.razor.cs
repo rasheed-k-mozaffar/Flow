@@ -45,24 +45,25 @@ public partial class Conversation : ComponentBase
     [Inject]
     public IThreadsService ThreadsService { get; set; } = default!;
 
-    List<List<MessageDto>> groupedMessages = new List<List<MessageDto>>();
-    List<MessageDto> currentGroup = new List<MessageDto>();
+    List<List<MessageDto>> _groupedMessages = new List<List<MessageDto>>();
+    List<MessageDto> _currentGroup = new List<MessageDto>();
 
-    private bool wantsToDeleteMessages = false;
+    private bool _wantsToDeleteMessages = false;
+    private bool _wantsToViewChatDetails = false;
 
-    private ICollection<Guid> selectedMessages = new List<Guid>();
-    private ICollection<IFormFile>? selectedImages;
-    private MessageDto? selectedImageMessage = null;
-    private string? threadId;
+    private ICollection<Guid> _selectedMessages = new List<Guid>();
+    private ICollection<IFormFile>? _selectedImages;
+    private MessageDto? _selectedImageMessage = null;
+    private string? _threadId;
     private string _errorMessage = string.Empty;
     private bool _isMakingNetworkRequest = false;
-    public AuthenticationState? authState;
-    private ClaimsPrincipal currentUser = new();
-    private string currentUserId = string.Empty;
-    private bool isSendButtonEnabled = false;
-    private bool isChatRendered = false;
-    private bool wantsToTakePicture = false;
-    private bool stillHasMessagesToLoad = true;
+    private AuthenticationState? _authState;
+    private ClaimsPrincipal _currentUser = new();
+    private string _currentUserId = string.Empty;
+    private bool _isSendButtonEnabled = false;
+    private bool _isChatRendered = false;
+    private bool _wantsToTakePicture = false;
+    private bool _stillHasMessagesToLoad = true;
 
     private async Task ScrollToBottom(bool toBottom)
     {
@@ -71,9 +72,9 @@ public partial class Conversation : ComponentBase
 
     protected override async Task OnInitializedAsync()
     {
-        authState = await AuthStateProvider.GetAuthenticationStateAsync();
-        currentUser = authState.User;
-        currentUserId = authState.User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
+        _authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        _currentUser = _authState.User;
+        _currentUserId = _authState.User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
     }
 
 
@@ -85,10 +86,10 @@ public partial class Conversation : ComponentBase
             await Js.InvokeVoidAsync("addScrollListener", DotNetObjectReference.Create(this), "messages-area");
         }
 
-        if (!isChatRendered)
+        if (!_isChatRendered)
         {
             await Js.InvokeVoidAsync("scrollToBottom", "messages-area");
-            isChatRendered = true;
+            _isChatRendered = true;
         }
 
         try
@@ -107,20 +108,21 @@ public partial class Conversation : ComponentBase
 
         if (ChatThread.Type is ThreadType.Normal)
         {
-            contact = ChatThread.Participants.FirstOrDefault(p => p is not null && p.UserId != currentUserId);
+            contact = ChatThread.Participants.FirstOrDefault(p => p is not null && p.UserId != _currentUserId);
         }
         else {
             contact = null;
         }
-        isChatRendered = false;
-        threadId = ThreadId.ToString();
-        selectedMessages?.Clear();
-        wantsToDeleteMessages = false;
+        _isChatRendered = false;
+        _threadId = ThreadId.ToString();
+        _selectedMessages?.Clear();
+        _wantsToDeleteMessages = false;
+        _wantsToViewChatDetails = false;
     }
 
     private void UpdateSendButtonVisibility(ChangeEventArgs eventArgs)
     {
-        isSendButtonEnabled = !string.IsNullOrEmpty(eventArgs.Value?.ToString());
+        _isSendButtonEnabled = !string.IsNullOrEmpty(eventArgs.Value?.ToString());
     }
 
     private async Task HandleSendingMessageAsync()
@@ -132,15 +134,15 @@ public partial class Conversation : ComponentBase
 
         messageModel.Id = Guid.NewGuid();
         messageModel.ThreadId = ThreadId!;
-        messageModel.SenderId = currentUserId;
+        messageModel.SenderId = _currentUserId;
 
-        AppState.Threads[Guid.Parse(threadId!)].Messages.Add(new MessageDto
+        AppState.Threads[Guid.Parse(_threadId!)].Messages.Add(new MessageDto
         {
             Id = messageModel.Id,
             ThreadId = messageModel.ThreadId,
             Status = MessageStatus.Sending,
             Content = msgContent,
-            SenderId = currentUserId,
+            SenderId = _currentUserId,
             SentOn = DateTime.UtcNow,
             Type = messageModel.Type,
         });
@@ -160,7 +162,7 @@ public partial class Conversation : ComponentBase
     [JSInvokable]
     public async Task HandleLoadingPreviousMessagesAsync()
     {
-        if (!stillHasMessagesToLoad)
+        if (!_stillHasMessagesToLoad)
             return;
 
         _isMakingNetworkRequest = true;
@@ -174,7 +176,7 @@ public partial class Conversation : ComponentBase
             (
                 new LoadPreviousMessagesRequest
                 {
-                    ThreadId = Guid.Parse(threadId!),
+                    ThreadId = Guid.Parse(_threadId!),
                     LastMessageDate = (DateTime)(lastMessage!.SentOn)
                 }
             );
@@ -185,7 +187,7 @@ public partial class Conversation : ComponentBase
                         .Messages
                         .InsertRange(0, apiResponse.Body!.Messages);
 
-                stillHasMessagesToLoad = apiResponse.Body.HasUnloadedMessages;
+                _stillHasMessagesToLoad = apiResponse.Body.HasUnloadedMessages;
             }
         }
         catch (LoadingMessagesFailedException ex)
@@ -205,12 +207,12 @@ public partial class Conversation : ComponentBase
         {
             DeleteMessagesRequest request = new()
             {
-                ThreadId = Guid.Parse(threadId!),
-                MessagesIds = selectedMessages
+                ThreadId = Guid.Parse(_threadId!),
+                MessagesIds = _selectedMessages
             };
 
             await MessagesService.SendDeleteMessagesRequestAsync(request);
-            selectedMessages.Clear();
+            _selectedMessages.Clear();
         }
         catch (OperationFailureException ex)
         {
@@ -228,10 +230,10 @@ public partial class Conversation : ComponentBase
         _errorMessage = string.Empty;
         try
         {
-            if (selectedImages is not null && selectedImages.Any())
+            if (_selectedImages is not null && _selectedImages.Any())
             {
                 // perform the upload for each image
-                foreach (var image in selectedImages)
+                foreach (var image in _selectedImages)
                 {
                     var apiResponse = await FilesService.UploadImageAsync(image, ImageType.NormalImage);
 
@@ -260,7 +262,7 @@ public partial class Conversation : ComponentBase
         finally
         {
             _isMakingNetworkRequest = false;
-            selectedImages?.Clear();
+            _selectedImages?.Clear();
         }
     }
 
@@ -269,7 +271,7 @@ public partial class Conversation : ComponentBase
         _errorMessage = string.Empty;
 
         var files = eventArgs.GetMultipleFiles();
-        selectedImages = new List<IFormFile>();
+        _selectedImages = new List<IFormFile>();
 
         foreach (var file in files)
         {
@@ -309,7 +311,7 @@ public partial class Conversation : ComponentBase
                 var base64String = Convert.ToBase64String(buffer);
                 var tempUrl = $"data:{imageFile.ContentType};base64,{base64String}";
 
-                selectedImages.Add(FileConverter.ConvertToIFromFileFromBase64ImageString(tempUrl));
+                _selectedImages.Add(FileConverter.ConvertToIFromFileFromBase64ImageString(tempUrl));
             }
         }
 
@@ -341,6 +343,11 @@ public partial class Conversation : ComponentBase
         }
     }
 
+    private void OpenChatDetailsModal()
+    {
+        _wantsToViewChatDetails = true;
+    }
+
     private string? GetSenderName(string senderId)
     {
         if (senderId == AppState.CurrentUserId)
@@ -360,24 +367,24 @@ public partial class Conversation : ComponentBase
 
     private void SelectMessage(Guid messageId)
     {
-        selectedMessages.Add(messageId);
+        _selectedMessages.Add(messageId);
     }
 
     private void UnselectMessage(Guid messageId)
     {
-        selectedMessages.Remove(messageId);
+        _selectedMessages.Remove(messageId);
     }
 
     private void OpenImageModal(MessageDto imageMessage)
     {
-        selectedImageMessage = imageMessage;
+        _selectedImageMessage = imageMessage;
     }
 
-    private void OpenCameraView() => wantsToTakePicture = true;
+    private void OpenCameraView() => _wantsToTakePicture = true;
 
-    private void CloseCameraView() => wantsToTakePicture = false;
+    private void CloseCameraView() => _wantsToTakePicture = false;
 
-    private void OpenConfirmMessageDeletesModal() => wantsToDeleteMessages = true;
+    private void OpenConfirmMessageDeletesModal() => _wantsToDeleteMessages = true;
 
-    private void CloseConfirmMessageDeletesModal() => wantsToDeleteMessages = false;
+    private void CloseConfirmMessageDeletesModal() => _wantsToDeleteMessages = false;
 }
