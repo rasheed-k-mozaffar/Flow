@@ -8,9 +8,10 @@ namespace Flow.Client.Services;
 
 public class ThreadsService : IThreadsService
 {
-    private const string BASE_URL = "api/threads";
-    private const string GET_LATEST_MESSAGES_URL = $"{BASE_URL}/get-latest-messages";
-    private const string GET_PREVIOUS_MESSAGES_URL = $"{BASE_URL}/get-previous-messages";
+    private const string BaseUrl = "api/threads";
+    private const string GetLatestMessagesUrl = $"{BaseUrl}/get-latest-messages";
+    private const string GetPreviousMessagesUrl = $"{BaseUrl}/get-previous-messages";
+    private const string GetChatMediaUrl = $"{BaseUrl}/get-media";
     private readonly HttpClient _httpClient;
 
     public ThreadsService(HttpClient httpClient)
@@ -20,7 +21,7 @@ public class ThreadsService : IThreadsService
 
     public async Task<ApiResponse<Dictionary<Guid, ChatDetails>>> GetChatsAsync()
     {
-        HttpResponseMessage response = await _httpClient.GetAsync(GET_LATEST_MESSAGES_URL);
+        HttpResponseMessage response = await _httpClient.GetAsync(GetLatestMessagesUrl);
 
         var results = await response
                             .Content
@@ -37,7 +38,7 @@ public class ThreadsService : IThreadsService
         HttpResponseMessage response = await _httpClient
                                         .PostAsync
                                         (
-                                            GET_PREVIOUS_MESSAGES_URL,
+                                            GetPreviousMessagesUrl,
                                             content
                                         );
 
@@ -47,6 +48,21 @@ public class ThreadsService : IThreadsService
         }
 
         var data = await response.Content.ReadFromJsonAsync<ApiResponse<PreviousMessagesResponse>>();
+        return data!;
+    }
+
+    public async Task<ApiResponse<IEnumerable<MessageDto>>> GetChatMediaAsync(LoadChatMediaRequest request, CancellationToken cancellationToken)
+    {
+        HttpResponseMessage response = await _httpClient
+                .PostAsJsonAsync(GetChatMediaUrl, request, cancellationToken);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            ApiErrorResponse? errorResponse = await response.Content.ReadFromJsonAsync<ApiErrorResponse>(cancellationToken: cancellationToken);
+            throw new ApiGetRequestFailedException(errorResponse!.ErrorMessage);
+        }
+
+        var data = await response.Content.ReadFromJsonAsync<ApiResponse<IEnumerable<MessageDto>>>(cancellationToken: cancellationToken);
         return data!;
     }
 }

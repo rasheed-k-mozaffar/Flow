@@ -4,8 +4,8 @@ namespace Flow.Server.Repositories;
 
 public class ThreadRepository : IThreadRepository
 {
-    private const int DEFAULT_MESSAGES_LOAD_SIZE = 20;
-    private int messageLoadSize = 20;
+    private const int DefaultMessagesLoadSize = 20;
+    private int _messageLoadSize = 20;
     private readonly AppDbContext _db;
     private readonly IContactRequestsRepository _contactsRepository;
     private readonly UserInfo _userInfo;
@@ -41,7 +41,7 @@ public class ThreadRepository : IThreadRepository
                                     .Messages
                                     .Where(message => message.ThreadId == chatThread.Id)
                                     .OrderByDescending(message => message.SentOn)
-                                    .Take(DEFAULT_MESSAGES_LOAD_SIZE)
+                                    .Take(DefaultMessagesLoadSize)
                                     .Select(msg => msg.ToMessageDto())
                                     .ToListAsync();
             threadMessages.Reverse();
@@ -63,14 +63,14 @@ public class ThreadRepository : IThreadRepository
     public async Task<PreviousMessagesResponse> GetPreviousMessagesByDateAsync(LoadPreviousMessagesRequest request)
     {
         int unloadedMessagesCount = await GetUnloadedMessagesCount(request.ThreadId, request.LastMessageDate);
-        messageLoadSize = CalculateMessagesLoadSize(unloadedMessagesCount);
+        _messageLoadSize = CalculateMessagesLoadSize(unloadedMessagesCount);
 
         var olderMessages = await _db
                                     .Messages
                                     .Where(m => m.ThreadId == request.ThreadId && request.LastMessageDate > m.SentOn)
                                     .AsSplitQuery()
                                     .OrderByDescending(m => m.SentOn)
-                                    .Take(messageLoadSize)
+                                    .Take(_messageLoadSize)
                                     .ToListAsync();
 
         var messageDtos = olderMessages
@@ -81,9 +81,36 @@ public class ThreadRepository : IThreadRepository
         return new PreviousMessagesResponse
         {
             Messages = messageDtos,
-            HasUnloadedMessages = unloadedMessagesCount >= messageLoadSize,
-            UnloadedMessageCount = unloadedMessagesCount - messageLoadSize
+            HasUnloadedMessages = unloadedMessagesCount >= _messageLoadSize,
+            UnloadedMessageCount = unloadedMessagesCount - _messageLoadSize
         };
+    }
+
+    public async Task<IEnumerable<Message>> GetChatMediaAsync(LoadChatMediaRequest request, CancellationToken cancellationToken)
+    {
+        var chatThread = await _db
+            .Threads
+            .AsNoTracking()
+            .FirstOrDefaultAsync
+            (
+                chat => chat.Id == request.ChatThreadId,
+                cancellationToken
+            );
+
+        if (chatThread is null)
+        {
+            throw new ResourceNotFoundException("Chat was not found");
+        }
+
+        var chatMedia = await _db
+            .Messages
+            .Where(m => (m.Type == MessageType.Image && m.ThreadId == chatThread.Id))
+            .OrderByDescending(p => p.SentOn)
+            .Skip(request.LoadNumber * request.LoadSize)
+            .Take(request.LoadSize)
+            .ToListAsync(cancellationToken);
+
+        return chatMedia;
     }
 
     private async Task<int> GetUnloadedMessagesCount(Guid threadId, DateTime lastMessageDate)
