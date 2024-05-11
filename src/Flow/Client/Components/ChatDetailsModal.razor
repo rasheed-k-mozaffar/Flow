@@ -1,0 +1,168 @@
+@if (Show)
+{
+    <div @onclick="CloseModal"
+    class="fixed inset-0 h-screen w-screen flex justify-center items-center z-50 bg-gray-200/70 dark:bg-gray-700/80 backdrop-blur-lg">
+    <div class="relative max-h-full w-full max-w-3xl p-4">
+        <div class="relative rounded-lg bg-white dark:bg-gray-600 shadow-lg z-50 space-y-4 p-6"
+             @onclick:stopPropagation>
+
+            @* MODAL HEADER*@
+            <div class="flex items-center justify-center flex-col space-y-2">
+                @if (Chat.Type is ThreadType.Group)
+                {
+                    <div>
+                        <img src="@(string.IsNullOrEmpty(Chat.GroupImageUrl) ? "/images/avatar.png" : Chat.GroupImageUrl)"
+                             class="w-[200px] h-[200px] max-w-[250px] max-h-[250px] rounded-full object-cover" alt="group image"/>
+                    </div>
+
+                    <div class="text-center">
+                        <h1 class="text-xl font-bold dark:text-gray-200">@Chat.GroupName</h1>
+                            @{
+                                string membersCountText = $"{@Chat.Participants.Count()} Members in this Group";
+                                 <h5 class="text-md font-light text-gray-600 dark:text-gray-200">
+                                    @membersCountText
+                                </h5>
+                            }
+                    </div>
+
+                    <div class="text-center">
+                        <p class="text-sm text-gray-500 dark:text-gray-200">@Chat.GroupDescription</p>
+                    </div>
+                }
+                else
+                {
+                    <div>
+                        <img src="@(string.IsNullOrEmpty(_contact?.ProfilePictureUrl) ? "/images/avatar.png" : _contact.ProfilePictureUrl)"
+                             class="w-[200px] h-[200px] max-w-[250px] max-h-[250px] rounded-full object-cover" alt="group image"/>
+                    </div>
+
+                    <div class="text-center">
+                        <h1 class="text-2xl font-bold dark:text-gray-200">@_contact?.Name</h1>
+                        <p class="text-sm text-gray-500 dark:text-gray-200">@_contact?.Username</p>
+                    </div>
+                }
+            </div>
+            @* MODAL BODY *@
+
+            <div>
+                <div class="space-y-2">
+                    @if (Chat.Type is ThreadType.Group)
+                    {
+                        <h2 class="text-xl font-bold dark:text-gray-200">Group Members</h2>
+
+                        <div class="max-h-[200px] overflow-y-auto">
+                            @{
+                                var orderedMembers = Chat
+                                    .Participants
+                                    .OrderBy(p => p.Name)
+                                    .ToList();
+
+                                foreach (var member in orderedMembers)
+                                {
+                                    <div
+                                        class="flex items-center justify-between rounded-lg max-h-[150px] px-3 py-2">
+                                        <div class="flex items-center gap-2">
+                                            <div>
+                                                <img class="h-[50px] w-[50px] rounded-full object-cover"
+                                                     src="@(member.ProfilePictureUrl ?? "/images/avatar.png")" alt="@member.Name"/>
+                                            </div>
+
+                                            <div>
+                                                <p class="text-gray-600 dark:text-gray-200">@member.Name</p>
+                                                <p class="text-sm font-light text-gray-600 dark:text-gray-200">@member.Username</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            }
+                        </div>
+                    }
+
+
+                    <div class="space-y-2">
+                        <div>
+                            <div class="text-xl font-semibold">Media</div>
+                        </div>
+
+                        @if (_media is not null)
+                        {
+                            <div class="max-h-[300px] overflow-y-auto">
+                                @{
+                                    if (_media.Any())
+                                    {
+                                        var groupedMediaByMonth = _media
+                                            .GroupBy(p => p.SentOn.ToLocalTime().Date);
+
+                                        foreach (var group in groupedMediaByMonth)
+                                        {
+                                            DateTime dateOfEachGroup = new DateTime(group.Key.Year, group.Key.Month, group.Key.Day);
+
+                                            <div class="p-2 rounded-lg bg-gray-100 dark:bg-gray-500 space-y-2 my-2">
+                                                <h3 class="text-md font-light text-gray-600 dark:text-gray-200">
+                                                    @dateOfEachGroup.ToString("D")
+                                                </h3>
+
+                                                <div class="flex gap-2 flex-wrap">
+                                                    @foreach (var img in group)
+                                                    {
+                                                        <img @onclick="(() => ImageClicked(img))"
+                                                             class="max-w-[200px] max-h-[200px] rounded-md cursor-pointer object-cover"
+                                                             src="@img.Content" alt="media" />
+                                                    }
+                                                </div>
+                                            </div>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <div class="h-[150px] w-full flex items-center justify-center flex-col space-y-2">
+
+                                            <svg class="w-[75px] h-[75px] text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="m3 16 5-7 6 6.5m6.5 2.5L16 13l-4.286 6M14 10h.01M4 19h16a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1Z"/>
+                                            </svg>
+
+
+                                            <p class="dark:text-gray-200">No photos were shared! Try sending some images</p>
+
+                                        </div>
+                                    }
+
+                                    @if (_displayLoadMoreButton)
+                                    {
+                                        <div class="text-center">
+                                            <button @onclick="LoadChatMedia"
+                                                    class="text-blue-500 hover:underline text-sm font-light">
+                                                Load more
+                                            </button>
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="h-[150px] w-full flex items-center justify-center flex-col space-y-2">
+                                <p class="dark:text-gray-200">Click to load the media sent in this chat</p>
+
+                                @if (_isMakingApiCall)
+                                {
+                                    <DefaultSpinner />
+                                }
+                                else
+                                {
+                                    <button class="primary-btn" @onclick="LoadChatMedia">
+                                        Load Media
+                                    </button>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            @* MODAL FOOTER*@
+
+        </div>
+    </div>
+</div>
+}

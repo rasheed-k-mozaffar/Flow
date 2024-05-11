@@ -14,12 +14,13 @@ namespace Flow.Client.Components;
 
 public partial class Conversation : ComponentBase
 {
-    private UserDetailsDto? contact;
-    private const int MAX_ALLOWED_FILE_SIZE = 1024 * 1024 * 10; // 10 Migs
-    private static readonly string[] _allowedExtensions = { ".jpeg", ".png", ".webp", ".jpg" };
+    private UserDetailsDto? _contact;
+    private const int MaxAllowedFileSize = 1024 * 1024 * 10; // 10 Migs
+    private static readonly string[] AllowedExtensions = { ".jpeg", ".png", ".webp", ".jpg" };
 
-    private InputText? messageInput;
-    private MessageDto messageModel = new();
+    private InputText? _messageInput;
+    private MessageDto _messageModel = new();
+    private string? _messageContent;
 
     [Parameter]
     public ChatDetails ChatThread { get; set; } = null!;
@@ -45,24 +46,25 @@ public partial class Conversation : ComponentBase
     [Inject]
     public IThreadsService ThreadsService { get; set; } = default!;
 
-    List<List<MessageDto>> groupedMessages = new List<List<MessageDto>>();
-    List<MessageDto> currentGroup = new List<MessageDto>();
+    List<List<MessageDto>> _groupedMessages = new List<List<MessageDto>>();
+    List<MessageDto> _currentGroup = new List<MessageDto>();
 
-    private bool wantsToDeleteMessages = false;
+    private bool _wantsToDeleteMessages = false;
+    private bool _wantsToViewChatDetails = false;
 
-    private ICollection<Guid> selectedMessages = new List<Guid>();
-    private ICollection<IFormFile>? selectedImages;
-    private MessageDto? selectedImageMessage = null;
-    private string? threadId;
+    private ICollection<Guid> _selectedMessages = new List<Guid>();
+    private ICollection<IFormFile>? _selectedImages;
+    private MessageDto? _selectedImageMessage = null;
+    private string? _threadId;
     private string _errorMessage = string.Empty;
     private bool _isMakingNetworkRequest = false;
-    public AuthenticationState? authState;
-    private ClaimsPrincipal currentUser = new();
-    private string currentUserId = string.Empty;
-    private bool isSendButtonEnabled = false;
-    private bool isChatRendered = false;
-    private bool wantsToTakePicture = false;
-    private bool stillHasMessagesToLoad = true;
+    private AuthenticationState? _authState;
+    private ClaimsPrincipal _currentUser = new();
+    private string _currentUserId = string.Empty;
+    private bool _isSendButtonEnabled = false;
+    private bool _isChatRendered = false;
+    private bool _wantsToTakePicture = false;
+    private bool _stillHasMessagesToLoad = true;
 
     private async Task ScrollToBottom(bool toBottom)
     {
@@ -71,9 +73,9 @@ public partial class Conversation : ComponentBase
 
     protected override async Task OnInitializedAsync()
     {
-        authState = await AuthStateProvider.GetAuthenticationStateAsync();
-        currentUser = authState.User;
-        currentUserId = authState.User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
+        _authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        _currentUser = _authState.User;
+        _currentUserId = _authState.User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
     }
 
 
@@ -85,17 +87,17 @@ public partial class Conversation : ComponentBase
             await Js.InvokeVoidAsync("addScrollListener", DotNetObjectReference.Create(this), "messages-area");
         }
 
-        if (!isChatRendered)
+        if (!_isChatRendered)
         {
             await Js.InvokeVoidAsync("scrollToBottom", "messages-area");
-            isChatRendered = true;
+            _isChatRendered = true;
         }
 
         try
         {
-            if (messageInput?.Element != null && messageInput.Element.HasValue)
+            if (_messageInput?.Element != null && _messageInput.Element.HasValue)
             {
-                await messageInput.Element.Value.FocusAsync();
+                await _messageInput.Element.Value.FocusAsync();
             }
         }
         catch (JSException) { }
@@ -107,60 +109,60 @@ public partial class Conversation : ComponentBase
 
         if (ChatThread.Type is ThreadType.Normal)
         {
-            contact = ChatThread.Participants.FirstOrDefault(p => p is not null && p.UserId != currentUserId);
+            _contact = ChatThread.Participants.FirstOrDefault(p => p is not null && p.UserId != _currentUserId);
         }
         else {
-            contact = null;
+            _contact = null;
         }
-        isChatRendered = false;
-        threadId = ThreadId.ToString();
-        selectedMessages?.Clear();
-        wantsToDeleteMessages = false;
+        _isChatRendered = false;
+        _threadId = ThreadId.ToString();
+        _selectedMessages?.Clear();
+        _wantsToDeleteMessages = false;
+        _wantsToViewChatDetails = false;
     }
 
     private void UpdateSendButtonVisibility(ChangeEventArgs eventArgs)
     {
-        isSendButtonEnabled = !string.IsNullOrEmpty(eventArgs.Value?.ToString());
+        _isSendButtonEnabled = !string.IsNullOrEmpty(eventArgs.Value?.ToString());
     }
 
     private async Task HandleSendingMessageAsync()
     {
-        if (string.IsNullOrEmpty(messageModel.Content))
+        if (string.IsNullOrEmpty(_messageContent))
             return;
 
-        var msgContent = messageModel.Content;
+        _messageModel.Content = new string(_messageContent);
+        _messageContent = string.Empty;
+        _messageModel.Id = Guid.NewGuid();
+        _messageModel.ThreadId = ThreadId!;
+        _messageModel.SenderId = _currentUserId;
 
-        messageModel.Id = Guid.NewGuid();
-        messageModel.ThreadId = ThreadId!;
-        messageModel.SenderId = currentUserId;
-
-        AppState.Threads[Guid.Parse(threadId!)].Messages.Add(new MessageDto
+        AppState.Threads[Guid.Parse(_threadId!)].Messages.Add(new MessageDto
         {
-            Id = messageModel.Id,
-            ThreadId = messageModel.ThreadId,
+            Id = _messageModel.Id,
+            ThreadId = _messageModel.ThreadId,
             Status = MessageStatus.Sending,
-            Content = msgContent,
-            SenderId = currentUserId,
+
+            Content = _messageModel.Content,
+            SenderId = _currentUserId,
             SentOn = DateTime.UtcNow,
-            Type = messageModel.Type,
+            Type = _messageModel.Type,
         });
 
         AppState.NotifyStateChanged();
 
         if (AppState.ChatHubConnection is not null)
         {
-            await AppState.ChatHubConnection.InvokeAsync("SendMessageAsync", messageModel);
+            await AppState.ChatHubConnection.InvokeAsync("SendMessageAsync", _messageModel);
 
             UpdateSendButtonVisibility(new ChangeEventArgs());
         }
-
-        messageModel = new();
     }
 
     [JSInvokable]
     public async Task HandleLoadingPreviousMessagesAsync()
     {
-        if (!stillHasMessagesToLoad)
+        if (!_stillHasMessagesToLoad)
             return;
 
         _isMakingNetworkRequest = true;
@@ -174,7 +176,7 @@ public partial class Conversation : ComponentBase
             (
                 new LoadPreviousMessagesRequest
                 {
-                    ThreadId = Guid.Parse(threadId!),
+                    ThreadId = Guid.Parse(_threadId!),
                     LastMessageDate = (DateTime)(lastMessage!.SentOn)
                 }
             );
@@ -185,7 +187,7 @@ public partial class Conversation : ComponentBase
                         .Messages
                         .InsertRange(0, apiResponse.Body!.Messages);
 
-                stillHasMessagesToLoad = apiResponse.Body.HasUnloadedMessages;
+                _stillHasMessagesToLoad = apiResponse.Body.HasUnloadedMessages;
             }
         }
         catch (LoadingMessagesFailedException ex)
@@ -205,12 +207,12 @@ public partial class Conversation : ComponentBase
         {
             DeleteMessagesRequest request = new()
             {
-                ThreadId = Guid.Parse(threadId!),
-                MessagesIds = selectedMessages
+                ThreadId = Guid.Parse(_threadId!),
+                MessagesIds = _selectedMessages
             };
 
             await MessagesService.SendDeleteMessagesRequestAsync(request);
-            selectedMessages.Clear();
+            _selectedMessages.Clear();
         }
         catch (OperationFailureException ex)
         {
@@ -228,16 +230,16 @@ public partial class Conversation : ComponentBase
         _errorMessage = string.Empty;
         try
         {
-            if (selectedImages is not null && selectedImages.Any())
+            if (_selectedImages is not null && _selectedImages.Any())
             {
                 // perform the upload for each image
-                foreach (var image in selectedImages)
+                foreach (var image in _selectedImages)
                 {
                     var apiResponse = await FilesService.UploadImageAsync(image, ImageType.NormalImage);
 
                     if (apiResponse.IsSuccess)
                     {
-                        messageModel = new()
+                        _messageModel = new()
                         {
                             Type = MessageType.Image,
                             Content = apiResponse.Body!.RelativeUrl!
@@ -260,7 +262,7 @@ public partial class Conversation : ComponentBase
         finally
         {
             _isMakingNetworkRequest = false;
-            selectedImages?.Clear();
+            _selectedImages?.Clear();
         }
     }
 
@@ -269,7 +271,7 @@ public partial class Conversation : ComponentBase
         _errorMessage = string.Empty;
 
         var files = eventArgs.GetMultipleFiles();
-        selectedImages = new List<IFormFile>();
+        _selectedImages = new List<IFormFile>();
 
         foreach (var file in files)
         {
@@ -277,7 +279,7 @@ public partial class Conversation : ComponentBase
             {
                 var extension = Path.GetExtension(file.Name);
 
-                if (!_allowedExtensions.Contains(extension))
+                if (!AllowedExtensions.Contains(extension))
                 {
                     _errorMessage = "File format ({extension}) is not allowed";
                     continue;
@@ -293,7 +295,7 @@ public partial class Conversation : ComponentBase
                 imageFile = file;
 
 
-                if (imageFile.Size > MAX_ALLOWED_FILE_SIZE)
+                if (imageFile.Size > MaxAllowedFileSize)
                 {
                     _errorMessage = $"{file.Name}: File size is too large";
                     continue;
@@ -303,13 +305,13 @@ public partial class Conversation : ComponentBase
 
                 // read the file data
                 var buffer = new byte[imageFile.Size];
-                await imageFile.OpenReadStream(MAX_ALLOWED_FILE_SIZE).ReadAsync(buffer);
+                await imageFile.OpenReadStream(MaxAllowedFileSize).ReadAsync(buffer);
 
                 // Convert to base64-encoded data URL
                 var base64String = Convert.ToBase64String(buffer);
                 var tempUrl = $"data:{imageFile.ContentType};base64,{base64String}";
 
-                selectedImages.Add(FileConverter.ConvertToIFromFileFromBase64ImageString(tempUrl));
+                _selectedImages.Add(FileConverter.ConvertToIFromFileFromBase64ImageString(tempUrl));
             }
         }
 
@@ -326,7 +328,7 @@ public partial class Conversation : ComponentBase
 
             if (apiResponse.IsSuccess)
             {
-                messageModel = new()
+                _messageModel = new()
                 {
                     Type = MessageType.Image,
                     Content = apiResponse.Body!.RelativeUrl!
@@ -341,6 +343,11 @@ public partial class Conversation : ComponentBase
         }
     }
 
+    private void OpenChatDetailsModal()
+    {
+        _wantsToViewChatDetails = true;
+    }
+
     private string? GetSenderName(string senderId)
     {
         if (senderId == AppState.CurrentUserId)
@@ -348,36 +355,36 @@ public partial class Conversation : ComponentBase
             return null;
         }
 
-        if (contact is null)
+        if (_contact is null)
         {
             return ChatThread.Participants.FirstOrDefault(p => p.UserId == senderId)!.Name;
         }
         else
         {
-            return contact.Name;
+            return _contact.Name;
         }
     }
 
     private void SelectMessage(Guid messageId)
     {
-        selectedMessages.Add(messageId);
+        _selectedMessages.Add(messageId);
     }
 
     private void UnselectMessage(Guid messageId)
     {
-        selectedMessages.Remove(messageId);
+        _selectedMessages.Remove(messageId);
     }
 
     private void OpenImageModal(MessageDto imageMessage)
     {
-        selectedImageMessage = imageMessage;
+        _selectedImageMessage = imageMessage;
     }
 
-    private void OpenCameraView() => wantsToTakePicture = true;
+    private void OpenCameraView() => _wantsToTakePicture = true;
 
-    private void CloseCameraView() => wantsToTakePicture = false;
+    private void CloseCameraView() => _wantsToTakePicture = false;
 
-    private void OpenConfirmMessageDeletesModal() => wantsToDeleteMessages = true;
+    private void OpenConfirmMessageDeletesModal() => _wantsToDeleteMessages = true;
 
-    private void CloseConfirmMessageDeletesModal() => wantsToDeleteMessages = false;
+    private void CloseConfirmMessageDeletesModal() => _wantsToDeleteMessages = false;
 }

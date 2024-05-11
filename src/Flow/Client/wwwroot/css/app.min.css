@@ -1555,6 +1555,10 @@ input:checked + .toggle-bg {
   height: 60px;
 }
 
+.h-\[75px\] {
+  height: 75px;
+}
+
 .h-auto {
   height: auto;
 }
@@ -1584,8 +1588,16 @@ input:checked + .toggle-bg {
   max-height: 150px;
 }
 
+.max-h-\[200px\] {
+  max-height: 200px;
+}
+
 .max-h-\[250px\] {
   max-height: 250px;
+}
+
+.max-h-\[300px\] {
+  max-height: 300px;
 }
 
 .max-h-\[350px\] {
@@ -1664,6 +1676,10 @@ input:checked + .toggle-bg {
   width: 66.666667%;
 }
 
+.w-\[150px\] {
+  width: 150px;
+}
+
 .w-\[200px\] {
   width: 200px;
 }
@@ -1684,6 +1700,10 @@ input:checked + .toggle-bg {
   width: 60px;
 }
 
+.w-\[75px\] {
+  width: 75px;
+}
+
 .w-fit {
   width: -moz-fit-content;
   width: fit-content;
@@ -1697,10 +1717,6 @@ input:checked + .toggle-bg {
   width: 100vw;
 }
 
-.w-\[150px\] {
-  width: 150px;
-}
-
 .min-w-\[50px\] {
   min-width: 50px;
 }
@@ -1709,8 +1725,24 @@ input:checked + .toggle-bg {
   max-width: 42rem;
 }
 
+.max-w-3xl {
+  max-width: 48rem;
+}
+
 .max-w-\[125px\] {
   max-width: 125px;
+}
+
+.max-w-\[150px\] {
+  max-width: 150px;
+}
+
+.max-w-\[200px\] {
+  max-width: 200px;
+}
+
+.max-w-\[250px\] {
+  max-width: 250px;
 }
 
 .max-w-\[350px\] {
@@ -1735,10 +1767,6 @@ input:checked + .toggle-bg {
 
 .max-w-md {
   max-width: 28rem;
-}
-
-.max-w-\[150px\] {
-  max-width: 150px;
 }
 
 .flex-1 {
@@ -1851,6 +1879,10 @@ input:checked + .toggle-bg {
   flex-direction: column;
 }
 
+.flex-wrap {
+  flex-wrap: wrap;
+}
+
 .items-start {
   align-items: flex-start;
 }
@@ -1889,10 +1921,6 @@ input:checked + .toggle-bg {
 
 .gap-4 {
   gap: 1rem;
-}
-
-.gap-3 {
-  gap: 0.75rem;
 }
 
 .gap-y-4 {
@@ -2923,6 +2951,11 @@ h1:focus {
   border-color: rgb(63 131 248 / var(--tw-border-opacity));
 }
 
+:is(.dark .dark\:border-gray-500) {
+  --tw-border-opacity: 1;
+  border-color: rgb(107 114 128 / var(--tw-border-opacity));
+}
+
 :is(.dark .dark\:border-gray-600) {
   --tw-border-opacity: 1;
   border-color: rgb(75 85 99 / var(--tw-border-opacity));
@@ -2940,11 +2973,6 @@ h1:focus {
 
 :is(.dark .dark\:border-transparent) {
   border-color: transparent;
-}
-
-:is(.dark .dark\:border-gray-500) {
-  --tw-border-opacity: 1;
-  border-color: rgb(107 114 128 / var(--tw-border-opacity));
 }
 
 :is(.dark .dark\:bg-blue-600) {
