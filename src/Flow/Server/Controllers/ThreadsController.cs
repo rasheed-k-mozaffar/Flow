@@ -119,20 +119,20 @@ public class ThreadsController : ControllerBase
 
     [HttpPost]
     [Route("get-media")]
-    [ProducesResponseType(statusCode: StatusCodes.Status200OK, type: typeof(ApiResponse<IEnumerable<MessageDto>>))]
+    [ProducesResponseType(statusCode: StatusCodes.Status200OK, type: typeof(ApiResponse<LoadChatMediaResponse>))]
     [ProducesResponseType(statusCode: StatusCodes.Status400BadRequest, type: typeof(ApiErrorResponse))]
     [ProducesResponseType(statusCode: StatusCodes.Status404NotFound, type: typeof(ApiErrorResponse))]
     public async Task<IActionResult> GetChatMedia([FromBody] LoadChatMediaRequest request, CancellationToken cancellationToken)
     {
         try
         {
-            var media = await _threadsRepository
+            var mediaResponse = await _threadsRepository
                     .GetChatMediaAsync(request, cancellationToken);
 
-            return Ok(new ApiResponse<IEnumerable<MessageDto>>
+            return Ok(new ApiResponse<LoadChatMediaResponse>
             {
                 Message = "Media loaded successfully",
-                Body = media.Select(m => m.ToMessageDto()),
+                Body = mediaResponse,
                 IsSuccess = true
             });
         }

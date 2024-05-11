@@ -51,7 +51,7 @@ public class ThreadsService : IThreadsService
         return data!;
     }
 
-    public async Task<ApiResponse<IEnumerable<MessageDto>>> GetChatMediaAsync(LoadChatMediaRequest request, CancellationToken cancellationToken)
+    public async Task<ApiResponse<LoadChatMediaResponse>> GetChatMediaAsync(LoadChatMediaRequest request, CancellationToken cancellationToken)
     {
         HttpResponseMessage response = await _httpClient
                 .PostAsJsonAsync(GetChatMediaUrl, request, cancellationToken);
@@ -62,7 +62,7 @@ public class ThreadsService : IThreadsService
             throw new ApiGetRequestFailedException(errorResponse!.ErrorMessage);
         }
 
-        var data = await response.Content.ReadFromJsonAsync<ApiResponse<IEnumerable<MessageDto>>>(cancellationToken: cancellationToken);
+        var data = await response.Content.ReadFromJsonAsync<ApiResponse<LoadChatMediaResponse>>(cancellationToken: cancellationToken);
         return data!;
     }
 }

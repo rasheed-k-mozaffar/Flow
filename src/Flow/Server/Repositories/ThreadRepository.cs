@@ -86,7 +86,7 @@ public class ThreadRepository : IThreadRepository
         };
     }
 
-    public async Task<IEnumerable<Message>> GetChatMediaAsync(LoadChatMediaRequest request, CancellationToken cancellationToken)
+    public async Task<LoadChatMediaResponse> GetChatMediaAsync(LoadChatMediaRequest request, CancellationToken cancellationToken)
     {
         var chatThread = await _db
             .Threads
@@ -108,9 +108,34 @@ public class ThreadRepository : IThreadRepository
             .OrderByDescending(p => p.SentOn)
             .Skip(request.LoadNumber * request.LoadSize)
             .Take(request.LoadSize)
+            .Select(m => m.ToMessageDto())
             .ToListAsync(cancellationToken);
 
-        return chatMedia;
+        var totalMediaCount = await _db
+            .Messages
+            .CountAsync
+                (
+                    m => (m.Type == MessageType.Image && m.ThreadId == chatThread.Id),
+                    cancellationToken
+                );
+
+        int remainingItems = 0;
+
+        if (request.LoadNumber == 0)
+        {
+            remainingItems = totalMediaCount - request.LoadSize;
+        }
+        else
+        {
+            remainingItems = totalMediaCount - (request.LoadSize * request.LoadNumber + request.LoadSize);
+        }
+
+        return new LoadChatMediaResponse()
+        {
+            Media = chatMedia,
+            TotalItems = totalMediaCount,
+            RemainingItems = remainingItems
+        };
     }
 
     private async Task<int> GetUnloadedMessagesCount(Guid threadId, DateTime lastMessageDate)
