@@ -16,9 +16,22 @@ public partial class ChatDetailsModal : ComponentBase
     private UserDetailsDto? _contact; // used in case the chat type is Normal
     private List<MessageDto>? _media;
 
+    private LoadChatMediaRequest? _loadMediaRequest;
+
     private string _errorMessage = string.Empty;
     private bool _isMakingApiCall = false;
+    private bool _displayLoadMoreButton = false;
 
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        _loadMediaRequest = new LoadChatMediaRequest()
+        {
+            ChatThreadId = Chat.ChatThreadId,
+            LoadNumber = 0,
+            LoadSize = 2
+        };
+    }
 
     protected override async Task OnParametersSetAsync()
     {
@@ -43,19 +56,21 @@ public partial class ChatDetailsModal : ComponentBase
         try
         {
             var apiResponse = await ThreadsService
-                .GetChatMediaAsync(new()
-                    {
-                        ChatThreadId = Chat.ChatThreadId,
-                        LoadNumber = 0,
-                        LoadSize = 15
-                    }
-                    ,
+                .GetChatMediaAsync(
+                    _loadMediaRequest!,
                     _cts.Token
                 );
 
             if (apiResponse.IsSuccess)
             {
-                _media = apiResponse.Body!.ToList();
+                if (_media is null)
+                {
+                    _media = new List<MessageDto>();
+                }
+
+                _media.AddRange(apiResponse.Body!.Media);
+                _displayLoadMoreButton = !(apiResponse.Body!.HasLoadedAll);
+                _loadMediaRequest!.LoadNumber++;
                 StateHasChanged();
             }
         }

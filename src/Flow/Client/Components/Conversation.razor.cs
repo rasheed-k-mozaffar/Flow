@@ -14,12 +14,13 @@ namespace Flow.Client.Components;
 
 public partial class Conversation : ComponentBase
 {
-    private UserDetailsDto? contact;
-    private const int MAX_ALLOWED_FILE_SIZE = 1024 * 1024 * 10; // 10 Migs
-    private static readonly string[] _allowedExtensions = { ".jpeg", ".png", ".webp", ".jpg" };
+    private UserDetailsDto? _contact;
+    private const int MaxAllowedFileSize = 1024 * 1024 * 10; // 10 Migs
+    private static readonly string[] AllowedExtensions = { ".jpeg", ".png", ".webp", ".jpg" };
 
-    private InputText? messageInput;
-    private MessageDto messageModel = new();
+    private InputText? _messageInput;
+    private MessageDto _messageModel = new();
+    private string? _messageContent;
 
     [Parameter]
     public ChatDetails ChatThread { get; set; } = null!;
@@ -94,9 +95,9 @@ public partial class Conversation : ComponentBase
 
         try
         {
-            if (messageInput?.Element != null && messageInput.Element.HasValue)
+            if (_messageInput?.Element != null && _messageInput.Element.HasValue)
             {
-                await messageInput.Element.Value.FocusAsync();
+                await _messageInput.Element.Value.FocusAsync();
             }
         }
         catch (JSException) { }
@@ -108,10 +109,10 @@ public partial class Conversation : ComponentBase
 
         if (ChatThread.Type is ThreadType.Normal)
         {
-            contact = ChatThread.Participants.FirstOrDefault(p => p is not null && p.UserId != _currentUserId);
+            _contact = ChatThread.Participants.FirstOrDefault(p => p is not null && p.UserId != _currentUserId);
         }
         else {
-            contact = null;
+            _contact = null;
         }
         _isChatRendered = false;
         _threadId = ThreadId.ToString();
@@ -127,36 +128,35 @@ public partial class Conversation : ComponentBase
 
     private async Task HandleSendingMessageAsync()
     {
-        if (string.IsNullOrEmpty(messageModel.Content))
+        if (string.IsNullOrEmpty(_messageContent))
             return;
 
-        var msgContent = messageModel.Content;
-
-        messageModel.Id = Guid.NewGuid();
-        messageModel.ThreadId = ThreadId!;
-        messageModel.SenderId = _currentUserId;
+        _messageModel.Content = new string(_messageContent);
+        _messageContent = string.Empty;
+        _messageModel.Id = Guid.NewGuid();
+        _messageModel.ThreadId = ThreadId!;
+        _messageModel.SenderId = _currentUserId;
 
         AppState.Threads[Guid.Parse(_threadId!)].Messages.Add(new MessageDto
         {
-            Id = messageModel.Id,
-            ThreadId = messageModel.ThreadId,
+            Id = _messageModel.Id,
+            ThreadId = _messageModel.ThreadId,
             Status = MessageStatus.Sending,
-            Content = msgContent,
+
+            Content = _messageModel.Content,
             SenderId = _currentUserId,
             SentOn = DateTime.UtcNow,
-            Type = messageModel.Type,
+            Type = _messageModel.Type,
         });
 
         AppState.NotifyStateChanged();
 
         if (AppState.ChatHubConnection is not null)
         {
-            await AppState.ChatHubConnection.InvokeAsync("SendMessageAsync", messageModel);
+            await AppState.ChatHubConnection.InvokeAsync("SendMessageAsync", _messageModel);
 
             UpdateSendButtonVisibility(new ChangeEventArgs());
         }
-
-        messageModel = new();
     }
 
     [JSInvokable]
@@ -239,7 +239,7 @@ public partial class Conversation : ComponentBase
 
                     if (apiResponse.IsSuccess)
                     {
-                        messageModel = new()
+                        _messageModel = new()
                         {
                             Type = MessageType.Image,
                             Content = apiResponse.Body!.RelativeUrl!
@@ -279,7 +279,7 @@ public partial class Conversation : ComponentBase
             {
                 var extension = Path.GetExtension(file.Name);
 
-                if (!_allowedExtensions.Contains(extension))
+                if (!AllowedExtensions.Contains(extension))
                 {
                     _errorMessage = "File format ({extension}) is not allowed";
                     continue;
@@ -295,7 +295,7 @@ public partial class Conversation : ComponentBase
                 imageFile = file;
 
 
-                if (imageFile.Size > MAX_ALLOWED_FILE_SIZE)
+                if (imageFile.Size > MaxAllowedFileSize)
                 {
                     _errorMessage = $"{file.Name}: File size is too large";
                     continue;
@@ -305,7 +305,7 @@ public partial class Conversation : ComponentBase
 
                 // read the file data
                 var buffer = new byte[imageFile.Size];
-                await imageFile.OpenReadStream(MAX_ALLOWED_FILE_SIZE).ReadAsync(buffer);
+                await imageFile.OpenReadStream(MaxAllowedFileSize).ReadAsync(buffer);
 
                 // Convert to base64-encoded data URL
                 var base64String = Convert.ToBase64String(buffer);
@@ -328,7 +328,7 @@ public partial class Conversation : ComponentBase
 
             if (apiResponse.IsSuccess)
             {
-                messageModel = new()
+                _messageModel = new()
                 {
                     Type = MessageType.Image,
                     Content = apiResponse.Body!.RelativeUrl!
@@ -355,13 +355,13 @@ public partial class Conversation : ComponentBase
             return null;
         }
 
-        if (contact is null)
+        if (_contact is null)
         {
             return ChatThread.Participants.FirstOrDefault(p => p.UserId == senderId)!.Name;
         }
         else
         {
-            return contact.Name;
+            return _contact.Name;
         }
     }
 

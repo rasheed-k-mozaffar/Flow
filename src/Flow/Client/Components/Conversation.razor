@@ -38,7 +38,7 @@
 {
     <div class="fixed z-50 top-0 right-0 w-full h-full flex items-center justify-center bg-gray-700/80 backdrop-blur-lg ">
     <CameraView Show="_wantsToTakePicture" OnCloseClicked="CloseCameraView" typeOfImage="ImageType.NormalImage"
-        Title="@($"Send image to {(contact is null ? ChatThread.GroupName : contact.Name)}")"
+        Title="@($"Send image to {(_contact is null ? ChatThread.GroupName : _contact.Name)}")"
         OnSendImageClicked="HandleSendingPictureAsync" />
 </div>
 }
@@ -64,12 +64,12 @@
                 {
                     <div>
                         <img class="h-[50px] w-[50px] rounded-full object-cover"
-                             src="@(contact?.ProfilePictureUrl ?? "/images/avatar.png")" alt="@contact?.Name" />
+                             src="@(_contact?.ProfilePictureUrl ?? "/images/avatar.png")" alt="@_contact?.Name" />
                     </div>
 
                     <div class="font-medium dark:text-white">
-                        <div class="text-xl">@contact?.Name</div>
-                        <div class="text-sm text-gray-500 dark:text-gray-200">@contact?.Username</div>
+                        <div class="text-xl">@_contact?.Name</div>
+                        <div class="text-sm text-gray-500 dark:text-gray-200">@_contact?.Username</div>
                     </div>
                 }
                 else
@@ -176,7 +176,7 @@
 
 
 
-    <EditForm Model="messageModel" class="bottom-0 h-fit w-full relative px-2 dark:bg-gray-700 dark:border-gray-600">
+    <EditForm Model="_messageModel" class="bottom-0 h-fit w-full relative px-2 dark:bg-gray-700 dark:border-gray-600">
         <div class="w-full relative">
             <div tabindex="-1"
                 class="flex justify-center items-center w-full h-0 bg-transparent absolute bottom-[5rem] z-10 gap-2 @(_selectedMessages.Any() ? "functions-buttons-strip-show" : "functions-buttons-strip-hidden")">
@@ -198,8 +198,8 @@
                     </svg>
                 </button>
             </div>
-            <InputText placeholder="Type your message..." @bind-Value="messageModel.Content" @ref="messageInput"
-                disabled="@_isMakingNetworkRequest" onchange="UpdateSendButtonVisibility" class="w-full text-wrap h-auto py-3 rounded-lg
+            <InputText placeholder="Type your message..." @bind-Value="_messageContent" @ref="_messageInput"
+                disabled="@_isMakingNetworkRequest" @oninput="UpdateSendButtonVisibility" class="w-full text-wrap h-auto py-3 rounded-lg
                 text-gray-800  pl-[1rem] pr-[3rem] border-0 bg-gray-200 ring-1 ring-slate-900/5
                 focus:ring-0 focus:outline-none dark:bg-gray-500 dark:text-gray-200 dark:placeholder:text-gray-300" />
 
