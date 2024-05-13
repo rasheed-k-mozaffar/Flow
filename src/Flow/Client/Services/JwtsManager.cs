@@ -1,5 +1,7 @@
-﻿using Blazored.LocalStorage;
+﻿using System.IdentityModel.Tokens.Jwt;
+using Blazored.LocalStorage;
 using Blazored.SessionStorage;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Flow.Client.Services;
 
@@ -28,6 +30,27 @@ public class JwtsManager : IJwtsManager
         return await _localStorage.ContainKeyAsync(_accessTokenKey) ||
                await _sessionStorage.ContainKeyAsync(_accessTokenKey);
 
+    }
+
+    public async Task RemoveJwtAsync()
+    {
+        if (await _localStorage.ContainKeyAsync(_accessTokenKey))
+        {
+            await _localStorage.RemoveItemAsync(_accessTokenKey);
+        }
+    }
+
+    public bool JwtIsStillValid(string tokeString)
+    {
+        JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
+        SecurityToken jwt = handler.ReadToken(tokeString);
+
+        if (jwt.ValidTo < DateTime.UtcNow)
+        {
+            return false;
+        }
+
+        return true;
     }
 
     public async Task<string?> GetJwtAsync()

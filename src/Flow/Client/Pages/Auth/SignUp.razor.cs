@@ -9,26 +9,27 @@ namespace Flow.Client.Pages.Auth;
 
 public partial class SignUp : ComponentBase
 {
-    private const int MAX_ALLOWED_FILE_SIZE = 1024 * 1024 * 5; // 5 Migs
-    private static readonly string[] _allowedExtensions = { ".jpeg", ".png", ".webp", ".jpg" };
-    private bool isMakingRequest = false;
-    private string errorMessage = string.Empty;
+    private const int MaxAllowedFileSize = 1024 * 1024 * 5; // 5 Migs
+    private static readonly string[] AllowedExtensions = { ".jpeg", ".png", ".webp", ".jpg" };
+    private bool _isMakingRequest = false;
+    private string _errorMessage = string.Empty;
+    private List<string>? _errors;
 
-    private Animate? firstFormAnimation;
-    private Animate? secondFormFadeIn;
-    private Animate? finalFormAnimation;
-    bool firstFormValid = false;
+    private Animate? _firstFormAnimation;
+    private Animate? _secondFormFadeIn;
+    private Animate? _finalFormAnimation;
+    private bool _firstFormValid = false;
 
-    private bool displayFirstForm = true;
-    private bool displaySecondForm = false;
-    private bool displayFinalForm = false;
-    private bool wantsToCaptureProfilePicture = false;
+    private bool _displayFirstForm = true;
+    private bool _displaySecondForm = false;
+    private bool _displayFinalForm = false;
+    private bool _wantsToCaptureProfilePicture = false;
 
-    protected EditContext? EC { get; set; }
-    private IFormFile? profilePictureFile;
-    private string? profilePictureTempUrl;
+    private EditContext? Ec { get; set; }
+    private IFormFile? _profilePictureFile;
+    private string? _profilePictureTempUrl;
 
-    private RegisterRequest requestModel = new();
+    private readonly RegisterRequest _requestModel = new();
 
     #region Dependencies
 
@@ -51,17 +52,16 @@ public partial class SignUp : ComponentBase
 
     protected override void OnInitialized()
     {
-        EC = new EditContext(requestModel);
-        //EC.OnFieldChanged += EditContext_OnFieldChanged!;
-        firstFormAnimation?.Run();
+        Ec = new EditContext(_requestModel);
+        _firstFormAnimation?.Run();
         base.OnInitialized();
     }
 
     private void MoveToFinalForm()
     {
-        displayFinalForm = true;
-        finalFormAnimation?.Run();
-        displaySecondForm = false;
+        _displayFinalForm = true;
+        _finalFormAnimation?.Run();
+        _displaySecondForm = false;
     }
 
     private async Task HandleUserRegistrationAsync()
@@ -70,7 +70,7 @@ public partial class SignUp : ComponentBase
 
         try
         {
-            var registrationResult = await AuthService.RegisterUserAsync(requestModel);
+            var registrationResult = await AuthService.RegisterUserAsync(_requestModel);
 
             if (registrationResult.IsSuccess)
             {
@@ -78,23 +78,22 @@ public partial class SignUp : ComponentBase
 
                 await AuthenticationStateProvider.GetAuthenticationStateAsync();
 
-                if (profilePictureFile is not null)
+                if (_profilePictureFile is not null)
                 {
                     await UploadProfilePictureAsync();
                 }
 
                 Nav.NavigateTo("/");
             }
-
-
         }
         catch (AuthFailedException ex)
         {
-            errorMessage = ex.Message;
+            _errorMessage = ex.Message;
+            _errors = ex.Errors;
         }
         finally
         {
-            isMakingRequest = false;
+            _isMakingRequest = false;
         }
     }
 
@@ -103,31 +102,31 @@ public partial class SignUp : ComponentBase
         try
         {
             var apiResponse = await FilesService
-                .UploadImageAsync(profilePictureFile!, ImageType.ProfilePicture);
+                .UploadImageAsync(_profilePictureFile!, ImageType.ProfilePicture);
 
             if (apiResponse.IsSuccess)
             {
-                requestModel.ProfilePictureUrl = apiResponse.Body!.RelativeUrl;
+                _requestModel.ProfilePictureUrl = apiResponse.Body!.RelativeUrl;
             }
         }
         catch (FileUploadFailedException ex)
         {
-            errorMessage = ex.Message;
+            _errorMessage = ex.Message;
         }
     }
 
     private async Task SelectProfilePicture(InputFileChangeEventArgs eventArgs)
     {
-        errorMessage = string.Empty;
+        _errorMessage = string.Empty;
         var file = eventArgs.File;
 
         if (file is not null) // validate and process the image
         {
             var extension = Path.GetExtension(file.Name);
 
-            if (!_allowedExtensions.Contains(extension))
+            if (!AllowedExtensions.Contains(extension))
             {
-                errorMessage = "File format is not allowed";
+                _errorMessage = "File format is not allowed";
                 return;
             }
 
@@ -141,9 +140,9 @@ public partial class SignUp : ComponentBase
             imageFile = eventArgs.File;
 
 
-            if (imageFile.Size > MAX_ALLOWED_FILE_SIZE)
+            if (imageFile.Size > MaxAllowedFileSize)
             {
-                errorMessage = "File size is too large";
+                _errorMessage = "File size is too large";
                 return;
             }
 
@@ -151,24 +150,24 @@ public partial class SignUp : ComponentBase
 
             // read the file data
             var buffer = new byte[file.Size];
-            await imageFile.OpenReadStream(MAX_ALLOWED_FILE_SIZE).ReadAsync(buffer);
+            await imageFile.OpenReadStream(MaxAllowedFileSize).ReadAsync(buffer);
 
             // Convert to base64-encoded data URL
             var base64String = Convert.ToBase64String(buffer);
-            profilePictureTempUrl = $"data:{imageFile.ContentType};base64,{base64String}";
-            profilePictureFile = FileConverter.ConvertToIFromFileFromBase64ImageString(profilePictureTempUrl);
+            _profilePictureTempUrl = $"data:{imageFile.ContentType};base64,{base64String}";
+            _profilePictureFile = FileConverter.ConvertToIFromFileFromBase64ImageString(_profilePictureTempUrl);
         }
     }
 
-    private void OpenCameraModal() => wantsToCaptureProfilePicture = true;
-    private void CloseCameraModal() => wantsToCaptureProfilePicture = false;
-    private void GetCapturedImageUri(string capturedFrame) => profilePictureTempUrl = capturedFrame;
+    private void OpenCameraModal() => _wantsToCaptureProfilePicture = true;
+    private void CloseCameraModal() => _wantsToCaptureProfilePicture = false;
+    private void GetCapturedImageUri(string capturedFrame) => _profilePictureTempUrl = capturedFrame;
 
 
     /// <summary>
     /// Gets called when the close button on the error alert
     /// </summary>
-    private void CloseErrorAlert() => errorMessage = string.Empty;
+    private void CloseErrorAlert() => _errorMessage = string.Empty;
 
     /// <summary>
     /// Sets isMakingRequest to true to disable form buttons
@@ -176,47 +175,47 @@ public partial class SignUp : ComponentBase
     /// </summary>
     private void InitStateVariables()
     {
-        isMakingRequest = true;
-        errorMessage = string.Empty;
+        _isMakingRequest = true;
+        _errorMessage = string.Empty;
     }
 
     private void EditContext_OnFieldChanged(object sender, FieldChangedEventArgs e)
     {
-        var validate = EC!.Validate();
-        var numberOfWrongFields = EC.GetValidationMessages();
+        var validate = Ec!.Validate();
+        var numberOfWrongFields = Ec.GetValidationMessages();
         if (numberOfWrongFields.Count() == 3)
         {
-            firstFormValid = true;
+            _firstFormValid = true;
         }
     }
     private void ValidateAndPlayAnimation()
     {
-        var validate = EC!.Validate();
-        var numberOfWrongFields = EC.GetValidationMessages();
+        var validate = Ec!.Validate();
+        var numberOfWrongFields = Ec.GetValidationMessages();
         if (numberOfWrongFields.Count() == 3)
         {
-            firstFormValid = true;
+            _firstFormValid = true;
         }
-        if (firstFormValid)
+        if (_firstFormValid)
         {
-            displaySecondForm = true;
-            secondFormFadeIn?.Run();
-            displayFirstForm = false;
+            _displaySecondForm = true;
+            _secondFormFadeIn?.Run();
+            _displayFirstForm = false;
         }
     }
 
     private void GoBackToFirstForm()
     {
-        displayFirstForm = true;
-        firstFormAnimation?.Run();
-        displaySecondForm = false;
-        displayFinalForm = false;
+        _displayFirstForm = true;
+        _firstFormAnimation?.Run();
+        _displaySecondForm = false;
+        _displayFinalForm = false;
     }
 
     private void GoBackToSecondForm()
     {
-        displaySecondForm = true;
-        secondFormFadeIn?.Run();
-        displayFinalForm = false;
+        _displaySecondForm = true;
+        _secondFormFadeIn?.Run();
+        _displayFinalForm = false;
     }
 }

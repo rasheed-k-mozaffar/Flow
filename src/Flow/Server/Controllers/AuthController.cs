@@ -95,7 +95,8 @@ public class AuthController : ControllerBase
 
                 return BadRequest(new ApiErrorResponse
                 {
-                    ErrorMessage = registerResult.Message
+                    ErrorMessage = registerResult.Message,
+                    Errors = registerResult.Errors
                 });
             }
             catch (UserCreationFailedException ex)

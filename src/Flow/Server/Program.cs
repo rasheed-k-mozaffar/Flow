@@ -41,7 +41,12 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
 {
-    // configure the password 
+    // configure the password
+    options.Password.RequireDigit = true;
+    options.Password.RequiredLength = 6;
+    options.Password.RequireUppercase = false;
+    options.Password.RequireLowercase = true;
+    options.Password.RequireNonAlphanumeric = true;
 
     // configure lockout settings
     options.Lockout.AllowedForNewUsers = true;
@@ -96,6 +101,7 @@ builder.Services.AddAuthentication(options =>
         RequireExpirationTime = jwtOptions.RequiresExpirationTime,
         ValidIssuer = jwtOptions.Issuer,
         ValidAudience = jwtOptions.Audience,
+        ClockSkew = TimeSpan.Zero
     };
 });
 

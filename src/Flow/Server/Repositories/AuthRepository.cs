@@ -1,4 +1,5 @@
-﻿using System.IdentityModel.Tokens.Jwt;
+﻿using System.Globalization;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Identity;
@@ -118,6 +119,19 @@ public class AuthRepository : IAuthRepository
 
         var userCreationResult = await _userManager.CreateAsync(newUser, request.Password!);
 
+        if (userCreationResult.Errors.Any())
+        {
+            return new UserManagerResponse()
+            {
+                Message = "Failed to create your account",
+                Token = null,
+                Errors = userCreationResult
+                    .Errors
+                    .Select(e => e.Description.ToString())
+                    .ToList()
+            };
+        }
+
         // if the registration succeeded, give the user an access token directly
         if (userCreationResult.Succeeded)
         {
@@ -169,6 +183,7 @@ public class AuthRepository : IAuthRepository
             new Claim(ClaimTypes.Name, $"{user.FirstName} {user.LastName}"),
             new Claim(ClaimTypes.GivenName, user.FirstName),
             new Claim(ClaimTypes.Surname, user.LastName),
+            new Claim(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString()),
             new Claim(JwtRegisteredClaimNames.Iss, _jwtSettings.Issuer),
             new Claim(JwtRegisteredClaimNames.Aud, _jwtSettings.Audience),
             new Claim(JwtRegisteredClaimNames.Exp, expiresIn.ToString()),
