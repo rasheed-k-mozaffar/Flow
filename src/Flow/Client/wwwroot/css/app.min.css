@@ -1418,9 +1418,19 @@ input:checked + .toggle-bg {
   margin-right: auto;
 }
 
+.my-1 {
+  margin-top: 0.25rem;
+  margin-bottom: 0.25rem;
+}
+
 .my-2 {
   margin-top: 0.5rem;
   margin-bottom: 0.5rem;
+}
+
+.my-3 {
+  margin-top: 0.75rem;
+  margin-bottom: 0.75rem;
 }
 
 .mb-1 {
@@ -1861,6 +1871,10 @@ input:checked + .toggle-bg {
 
 .resize {
   resize: both;
+}
+
+.list-disc {
+  list-style-type: disc;
 }
 
 .grid-cols-4 {
@@ -2410,6 +2424,10 @@ input:checked + .toggle-bg {
 
 .ps-10 {
   padding-inline-start: 2.5rem;
+}
+
+.ps-2 {
+  padding-inline-start: 0.5rem;
 }
 
 .ps-3 {
