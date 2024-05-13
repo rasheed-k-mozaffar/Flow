@@ -6,4 +6,5 @@ public class UserManagerResponse
     public string? Token { get; set; }
     public bool Succeeded { get; set; }
     public bool IsLockedOut { get; set; }
+    public List<string>? Errors { get; set; }
 }

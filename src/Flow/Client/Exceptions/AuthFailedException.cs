@@ -2,10 +2,11 @@
 {
     public class AuthFailedException : Exception
     {
-        public AuthFailedException(string message)
-                    : base(message) 
+        public List<string>? Errors { get; private set; }
+        public AuthFailedException(string message, List<string>? errors = null)
+                    : base(message)
         {
-            
+            Errors = errors;
         }
     }
 }

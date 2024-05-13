@@ -18,7 +18,7 @@ namespace Flow.Client.Services
             if (!response.IsSuccessStatusCode)
             {
                 var error = await response.Content.ReadFromJsonAsync<ApiErrorResponse>();
-                throw new AuthFailedException(message: error!.ErrorMessage!);
+                throw new AuthFailedException(message: error!.ErrorMessage!, errors: error.Errors);
             }
 
             var result = await response.Content.ReadFromJsonAsync<ApiResponse<string>>();
