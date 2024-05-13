@@ -1,6 +1,8 @@
 ﻿@inject ISettingsService SettingsService
 @inject ApplicationState AppState
 @inject AuthenticationStateProvider AuthStateProvider
+@inject IJwtsManager JwtsManager
+@inject NavigationManager Nav
 <div
     class="fixed z-[10000] bg-white dark:bg-gray-800 h-screen w-screen flex justify-center items-center space-y-4 flex-col">
     <div>
@@ -18,11 +20,25 @@
 
 @code {
     [Parameter] public EventCallback OnSettingsLoaded { get; set; }
-    private AuthenticationState? authState;
+    private AuthenticationState? _authState;
 
     private string _errorMessage = string.Empty;
     protected override async Task OnInitializedAsync()
     {
+        string? jwtString = await JwtsManager.GetJwtAsync();
+
+        if (!string.IsNullOrEmpty(jwtString))
+        {
+            bool isUserTokenValid = JwtsManager.JwtIsStillValid(jwtString);
+
+            if (!isUserTokenValid)
+            {
+                await JwtsManager.RemoveJwtAsync();
+                Nav.NavigateTo("/auth/signin", forceLoad: true);
+                return;
+            }
+        }
+
         var settingsTask = LoadUserSettingsAsync();
         var colorSchemeTask = LoadColorSchemesAsync();
         var authStateTask = AuthStateProvider.GetAuthenticationStateAsync();
@@ -30,9 +46,9 @@
         await Task.WhenAll(authStateTask, settingsTask, colorSchemeTask);
 
         // * Set the current USER ID in App State
-        if (AppState.Threads is not null && AppState.Threads.Any())
+        if (AppState.Threads.Any())
         {
-            AppState.CurrentUserId = authState?.User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
+            AppState.CurrentUserId = _authState?.User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
         }
         await OnSettingsLoaded.InvokeAsync();
     }
