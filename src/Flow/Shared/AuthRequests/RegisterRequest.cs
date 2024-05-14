@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.RegularExpressions;
 
 namespace Flow.Shared.AuthRequests;
 
@@ -35,4 +36,43 @@ public class RegisterRequest
     public string? Bio { get; set; }
 
     public string? ProfilePictureUrl { get; set; }
+
+    public PasswordValidationResult IsPasswordValid()
+    {
+        if (!string.IsNullOrEmpty(Password))
+        {
+            if (!Regex.IsMatch(Password, @"\d"))
+            {
+                return new PasswordValidationResult()
+                {
+                    ValidationMessage = "Password must contain at least one digit",
+                    IsValid = false
+                };
+            }
+
+            if (!Regex.IsMatch(Password, @"[a-z]"))
+            {
+                return new PasswordValidationResult()
+                {
+                    ValidationMessage = "Password must contain at least one letter",
+                    IsValid = false
+                };
+            }
+
+            if (!Regex.IsMatch(Password, @"[^a-zA-Z\d]"))
+            {
+                return new PasswordValidationResult()
+                {
+                    ValidationMessage = "Password must contain at least one non-alphanumeric character",
+                    IsValid = false
+                };
+            }
+        }
+
+        return new PasswordValidationResult()
+        {
+            ValidationMessage = "Valid password",
+            IsValid = true
+        };
+    }
 }

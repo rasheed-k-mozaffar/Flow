@@ -13,6 +13,7 @@ public partial class SignUp : ComponentBase
     private static readonly string[] AllowedExtensions = { ".jpeg", ".png", ".webp", ".jpg" };
     private bool _isMakingRequest = false;
     private string _errorMessage = string.Empty;
+    private string _passwordValidationMessage = string.Empty;
     private List<string>? _errors;
 
     private Animate? _firstFormAnimation;
@@ -57,11 +58,29 @@ public partial class SignUp : ComponentBase
         base.OnInitialized();
     }
 
+    private void ValidatePassword()
+    {
+        var passwordValidationResult = _requestModel.IsPasswordValid();
+        if (string.IsNullOrEmpty(_requestModel.Password))
+        {
+            _passwordValidationMessage = string.Empty;
+            return;
+        }
+
+        if (!(passwordValidationResult.IsValid))
+        {
+            _passwordValidationMessage = passwordValidationResult.ValidationMessage!;
+        }
+    }
+
     private void MoveToFinalForm()
     {
-        _displayFinalForm = true;
-        _finalFormAnimation?.Run();
-        _displaySecondForm = false;
+        if (_requestModel.IsPasswordValid().IsValid)
+        {
+            _displayFinalForm = true;
+            _finalFormAnimation?.Run();
+            _displaySecondForm = false;
+        }
     }
 
     private async Task HandleUserRegistrationAsync()

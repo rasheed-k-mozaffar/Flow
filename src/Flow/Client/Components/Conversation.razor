@@ -120,8 +120,8 @@
             {
                 var date = new DateTime(messageGroup.Key.Year, messageGroup.Key.Month, messageGroup.Key.Day);
                 <div class="w-full flex items-center justify-center h-fit">
-                    <div class="w-fit rounded-xl py-2 px-3 bg-gray-100 text-gray-500 font-light text-sm">
-                        @date.ToString("dd MMMM")</div>
+                    <div class="w-fit rounded-full py-2 px-3 bg-yellow-100 dark:bg-yellow-200/90 font-light text-sm">
+                        @date.ToString("yyyy-M-d dddd")</div>
                 </div>
 
                 _groupedMessages = new List<List<MessageDto>>();
