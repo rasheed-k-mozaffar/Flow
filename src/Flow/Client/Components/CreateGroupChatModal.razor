@@ -43,7 +43,7 @@
                             <div class="relative">
                                 <img src="@(string.IsNullOrEmpty(_groupPictureTempUrl) ? "/images/avatar.png" : _groupPictureTempUrl)"
                                      class="w-[150px] h-[150px] max-w-[150px] max-h-[150px] rounded-full object-cover" alt="group image"/>
-                                
+
                                 <div class="absolute top-0 right-0">
                                     <label class="p-2 bg-white rounded-full flex items-center justify-center border border-gray-300 hover:bg-gray-100 dark:bg-gray-600 dark:border-gray-500 dark:hover:bg-gray-700">
                                         <InputFile class="hidden" OnChange="SelectGroupPicture"/>
@@ -53,7 +53,7 @@
                                         </svg>
                                     </label>
                                 </div>
-                                
+
                                 @if (!string.IsNullOrEmpty(_groupPictureTempUrl))
                                 {
                                     <div class="absolute top-0 left-0">
@@ -97,8 +97,9 @@
                                     </svg>
                                 </div>
                                 <input @oninput="OnSearchValueChanged"
-                                    class="w-[250px] bg-gray-100 rounded-md ps-10 focus:ring-2 focus:ring-gray-300 p-2 text-sm text-gray-600 focus:outline-none"
-                                    placeholder="Search contacts" />
+                                       class="w-[250px] bg-gray-100 rounded-md ps-10 focus:ring-2 focus:ring-gray-300 p-2 text-sm
+                                       text-gray-600 focus:outline-none dark:bg-gray-500 dark:text-gray-200 dark:focus:ring-gray-400 dark:placeholder:text-gray-300"
+                                       placeholder="Search contacts" />
                             </div>
                         </div>
 
@@ -126,10 +127,10 @@
                                                 <div>
                                                     @if (_selectedContacts.Contains(c.UserId!))
                                                     {
-                                                        <svg class="w-[25px] h-[25px] text-blue-600 dark:text-white" aria-hidden="true" 
-                                                            xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" 
+                                                        <svg class="w-[25px] h-[25px] text-blue-600 dark:text-white" aria-hidden="true"
+                                                            xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor"
                                                             viewBox="0 0 24 24">
-                                                            <path fill-rule="evenodd" 
+                                                            <path fill-rule="evenodd"
                                                             d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm13.707-1.293a1 1 0 0 0-1.414-1.414L11 12.586l-1.793-1.793a1 1 0 0 0-1.414 1.414l2.5 2.5a1 1 0 0 0 1.414 0l4-4Z" clip-rule="evenodd"/>
                                                         </svg>
                                                     }
@@ -183,11 +184,11 @@
                     @* MODAL FOOTER *@
 
                     <hr class="h-[1px] bg-gray-300 dark:bg-gray-500" />
-                    
+
                     <div class="mt-5">
                         <button disabled="@_isMakingApiCall" type="submit"
                         class="w-full py-2 rounded-md flex items-center justify-center gap-2
-                        @AppState.UserSettings?.ColorScheme?.AccentsColor.BgColor 
+                        @AppState.UserSettings?.ColorScheme?.AccentsColor.BgColor
                         text-white text-sm font-medium disabled:bg-gray-200 disabled:text-gray-500">
                             Create Group
 

@@ -89,9 +89,13 @@
                     <div class="mb-5">
                         <label class="label">
                             Password</label>
-                        <InputText @bind-Value="_requestModel.Password" type="password" id="password" class="input-field"
+                        <InputText @bind-Value="_requestModel.Password"  @onblur="ValidatePassword" type="password" id="password" class="input-field"
                             required />
                         <ValidationMessage For="(() => _requestModel.Password)" class="validation-message" />
+                        @if (!string.IsNullOrEmpty(_passwordValidationMessage))
+                        {
+                            <p class="validation-message">@_passwordValidationMessage</p>
+                        }
                     </div>
                     <div class="mb-5">
                         <label class="label">Repeat password</label>
